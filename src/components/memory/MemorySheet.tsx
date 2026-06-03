@@ -359,7 +359,7 @@ function MemoryDetailView({ memory }: { memory: MemoryWithDetails }) {
     <div>
       {/* Photo carousel */}
       {photos.length > 0 && (
-        <div className="relative mb-5 -mx-5 rounded-none overflow-hidden" style={{ height: 240 }}>
+        <div className="relative mb-5 -mx-5 rounded-none overflow-hidden" style={{ height: 200 }}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
             <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
@@ -467,7 +467,7 @@ function MemoryDetailView({ memory }: { memory: MemoryWithDetails }) {
           className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
           style={{ background: '#f5f2ed', color: '#0D4F57' }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-          Maps
+          Details
         </a>
       </div>
     </div>
@@ -502,5 +502,5 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
       .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
   }, [storagePath])
   if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
-  return <img src={url} className="w-full h-full object-cover" />
+  return <img src={url} className="w-full h-full" style={{ objectFit: "contain", background: "#1a1a1a" }} />
 }
