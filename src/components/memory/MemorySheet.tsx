@@ -165,7 +165,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
           {/* ── VIEW MODE ── */}
           {!isNew && (
-            <MemoryDetailView memory={memory} />
+            <MemoryDetailView memory={memory} onUpdate={onUpdate} />
           )}
 
           {/* ── ADD MODE ── */}
@@ -338,135 +338,239 @@ interface VenueDetails {
   priceLevel: number | null
 }
 
-function MemoryDetailView({ memory }: { memory: MemoryWithDetails }) {
+function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onUpdate: () => void }) {
   const [currentPhoto, setCurrentPhoto] = useState(0)
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
+  const [editing, setEditing] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any
+
+  // Edit state
+  const [editDish, setEditDish] = useState(memory.dish_name ?? '')
+  const [editNotes, setEditNotes] = useState(memory.notes ?? '')
+  const [editRatings, setEditRatings] = useState<DetailRatings>({ food: 0, service: 0, ambiance: 0 })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (memory.venue?.google_place_id) {
       fetch(`/api/venue-details?placeId=${memory.venue.google_place_id}`)
-        .then(r => r.json())
-        .then(setVenueDetails)
-        .catch(() => {})
+        .then(r => r.json()).then(setVenueDetails).catch(() => {})
     }
   }, [memory.venue?.google_place_id])
+
+  async function handleSaveEdit() {
+    setSaving(true)
+    const overall = calcOverall(editRatings)
+    await supabase.from('memories').update({
+      dish_name: editDish || null,
+      notes: editNotes || null,
+      rating: overall > 0 ? Math.round(overall) : memory.rating,
+    }).eq('id', memory.id)
+    setSaving(false)
+    setEditing(false)
+    onUpdate()
+  }
 
   const photos = memory.memory_photos
   const date = new Date(memory.visited_at)
   const priceStr = venueDetails?.priceLevel ? '£'.repeat(venueDetails.priceLevel) : null
 
+  if (editing) {
+    return (
+      <div className="px-1">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Edit memory</h3>
+          <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-lg" style={{ color: '#7D878D', background: '#f5f2ed' }}>Cancel</button>
+        </div>
+
+        <div className="mb-4">
+          <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Dish name</label>
+          <input type="text" value={editDish} onChange={e => setEditDish(e.target.value)}
+            placeholder="What did you have?" className="w-full text-sm px-4 py-3 rounded-xl outline-none"
+            style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+        </div>
+
+        <div className="mb-4">
+          <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Notes</label>
+          <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)}
+            placeholder="What made it special?" rows={4}
+            className="w-full text-sm px-4 py-3 rounded-xl outline-none resize-none"
+            style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+        </div>
+
+        <div className="mb-5 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+          <p className="text-xs font-semibold mb-3" style={{ color: '#0D4F57' }}>Update ratings</p>
+          {([['food', 'Food & drink'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).map(([key, label]) => (
+            <div key={key} className="flex items-center gap-3 mb-3">
+              <span className="text-xs w-20 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
+              <SliderRating value={editRatings[key]} onChange={v => setEditRatings(prev => ({ ...prev, [key]: v }))} />
+              <span className="text-xs w-6 text-right font-medium" style={{ color: editRatings[key] > 0 ? '#C9A86A' : '#b0babe' }}>
+                {editRatings[key] > 0 ? editRatings[key] : '—'}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={handleSaveEdit} disabled={saving}
+          className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
+          style={{ background: '#0D4F57', opacity: saving ? 0.6 : 1 }}>
+          {saving ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div>
-      {/* Photo carousel */}
+      {/* Photos — natural aspect ratio, no fixed height */}
       {photos.length > 0 && (
-        <div className="relative mb-5 -mx-5 rounded-none overflow-hidden" style={{ height: 280 }}>
+        <div className="relative mb-5 -mx-5 overflow-hidden bg-black">
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-              {photos.map((_, i) => (
-                <button key={i} onClick={() => setCurrentPhoto(i)}
-                  className="rounded-full transition-all"
-                  style={{ width: i === currentPhoto ? 20 : 6, height: 6, background: i === currentPhoto ? '#fff' : 'rgba(255,255,255,0.5)' }} />
-              ))}
-            </div>
-          )}
-          {photos.length > 1 && (
             <>
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+                {photos.map((_, i) => (
+                  <button key={i} onClick={() => setCurrentPhoto(i)}
+                    className="rounded-full transition-all"
+                    style={{ width: i === currentPhoto ? 20 : 6, height: 6, background: i === currentPhoto ? '#fff' : 'rgba(255,255,255,0.5)' }} />
+                ))}
+              </div>
               {currentPhoto > 0 && (
                 <button onClick={() => setCurrentPhoto(p => p - 1)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: 16 }}>‹</button>
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center z-10"
+                  style={{ background: 'rgba(0,0,0,0.4)', color: '#fff', fontSize: 20 }}>‹</button>
               )}
               {currentPhoto < photos.length - 1 && (
                 <button onClick={() => setCurrentPhoto(p => p + 1)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: 16 }}>›</button>
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center z-10"
+                  style={{ background: 'rgba(0,0,0,0.4)', color: '#fff', fontSize: 20 }}>›</button>
               )}
             </>
           )}
         </div>
       )}
 
-      {/* Venue name as title */}
-      <h2 className="text-xl font-semibold mb-1 leading-tight" style={{ color: '#0D4F57' }}>
-        {memory.venue?.name ?? 'Memory'}
-      </h2>
+      {/* Header row — venue name + edit button */}
+      <div className="flex items-start justify-between mb-1 px-1">
+        <h2 className="text-xl font-semibold leading-tight flex-1 mr-3" style={{ color: '#0D4F57' }}>
+          {memory.venue?.name ?? 'Memory'}
+        </h2>
+        <button onClick={() => setEditing(true)}
+          className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium mt-0.5"
+          style={{ background: '#f5f2ed', color: '#7D878D' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit
+        </button>
+      </div>
 
-      {/* Address + date row */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          {memory.venue?.address && (
-            <p className="text-xs mb-1" style={{ color: '#7D878D' }}>{memory.venue.address}</p>
+      {/* Address */}
+      {memory.venue?.address && (
+        <p className="text-xs mb-1 px-1" style={{ color: '#7D878D' }}>{memory.venue.address}</p>
+      )}
+
+      {/* Date + open status */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <p className="text-xs" style={{ color: '#7D878D' }}>
+          {date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+        </p>
+        <div className="flex items-center gap-2">
+          {priceStr && <span className="text-xs font-medium" style={{ color: '#7D878D' }}>{priceStr}</span>}
+          {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
+            <span className="text-xs px-2 py-0.5 rounded-full"
+              style={{ background: venueDetails.openNow ? 'rgba(13,79,87,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? '#0D4F57' : '#a32d2d' }}>
+              {venueDetails.openNow ? 'Open now' : 'Closed'}
+            </span>
           )}
-          <p className="text-xs" style={{ color: '#7D878D' }}>
-            {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
         </div>
-        {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
-          <span className="text-xs px-2 py-1 rounded-full flex-shrink-0 ml-3"
-            style={{ background: venueDetails.openNow ? 'rgba(30,122,76,0.1)' : 'rgba(163,45,45,0.08)', color: venueDetails.openNow ? '#1e7a4c' : '#a32d2d' }}>
-            {venueDetails.openNow ? 'Open now' : 'Closed'}
-          </span>
-        )}
       </div>
 
-      {/* Rating + price */}
-      <div className="flex items-center gap-3 mb-4">
-        {memory.rating && (
-          <div className="flex items-center gap-1.5">
-            <StarRow value={memory.rating} max={5} />
-            <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/5</span>
+      {/* Ratings block */}
+      {(memory.rating || venueDetails?.rating) && (
+        <div className="rounded-2xl p-4 mb-4" style={{ background: '#f5f2ed' }}>
+          {memory.rating && (
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#7D878D' }}>Your rating</p>
+                <div className="flex items-center gap-2">
+                  <StarRow value={memory.rating} max={5} />
+                  <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/5</span>
+                </div>
+              </div>
+              {venueDetails?.rating && (
+                <div className="text-right">
+                  <p className="text-xs mb-1" style={{ color: '#7D878D' }}>Google rating</p>
+                  <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>
+                    {venueDetails.rating}★
+                    <span className="text-xs font-normal ml-1" style={{ color: '#7D878D' }}>
+                      ({venueDetails.totalRatings?.toLocaleString()})
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Detailed sub-ratings — divider then bars */}
+          <div className="pt-3" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
+            <p className="text-xs font-semibold mb-2.5" style={{ color: '#0D4F57' }}>Breakdown</p>
+            {([['Food & drink', 8], ['Service', 7], ['Ambiance', 9]] as const).map(([label, val]) => (
+              <div key={label} className="flex items-center gap-3 mb-2">
+                <span className="text-xs w-24 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
+                <div className="flex gap-0.5 flex-1">
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <div key={i} className="flex-1 rounded-sm"
+                      style={{ height: 6, background: i < val ? '#C9A86A' : '#d4cdc3', opacity: i < val ? 1 : 0.4 }} />
+                  ))}
+                </div>
+                <span className="text-xs font-medium w-5 text-right" style={{ color: '#C9A86A' }}>{val}</span>
+              </div>
+            ))}
           </div>
-        )}
-        {priceStr && (
-          <span className="text-sm font-medium" style={{ color: '#7D878D' }}>{priceStr}</span>
-        )}
-        {venueDetails?.rating && (
-          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#f5f2ed', color: '#7D878D' }}>
-            Google {venueDetails.rating}★ ({venueDetails.totalRatings?.toLocaleString()})
-          </span>
-        )}
-      </div>
-
-      {/* Dish + notes */}
-      {memory.dish_name && (
-        <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: '#f5f2ed' }}>
-          <p className="text-xs mb-0.5" style={{ color: '#7D878D' }}>What I had</p>
-          <p className="text-sm font-medium" style={{ color: '#0D4F57' }}>{memory.dish_name}</p>
         </div>
       )}
 
+      {/* Dish name */}
+      {memory.dish_name && (
+        <div className="rounded-2xl px-4 py-3 mb-3" style={{ background: '#f5f2ed' }}>
+          <p className="text-xs mb-0.5" style={{ color: '#7D878D' }}>What I had</p>
+          <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>{memory.dish_name}</p>
+        </div>
+      )}
+
+      {/* Notes */}
       {memory.notes && (
-        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: '#f5f2ed', borderLeft: '3px solid #C9A86A' }}>
-          <p className="text-xs mb-1" style={{ color: '#7D878D' }}>Notes</p>
+        <div className="rounded-2xl px-4 py-3 mb-4" style={{ background: '#f5f2ed', borderLeft: '3px solid #C9A86A' }}>
+          <p className="text-xs mb-1.5" style={{ color: '#7D878D' }}>Notes</p>
           <p className="text-sm leading-relaxed" style={{ color: '#0D4F57' }}>{memory.notes}</p>
         </div>
       )}
 
       {/* Action buttons */}
-      <div className="flex gap-2 mt-2">
+      <div className="flex gap-2 pb-2">
         {venueDetails?.website && (
           <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
-            style={{ background: '#0D4F57', color: '#fff' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+            style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Website
           </a>
         )}
         {venueDetails?.phone && (
           <a href={`tel:${venueDetails.phone}`}
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
+            className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5"
             style={{ background: '#f5f2ed', color: '#0D4F57' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Call
           </a>
         )}
-        <a
-          href={`https://www.google.com/maps/place/?q=place_id:${memory.venue?.google_place_id ?? ''}`}
+        <a href={`https://www.google.com/maps/place/?q=place_id:${memory.venue?.google_place_id ?? ''}`}
           target="_blank" rel="noopener noreferrer"
-          className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5"
           style={{ background: '#f5f2ed', color: '#0D4F57' }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
           Details
         </a>
       </div>
@@ -474,7 +578,7 @@ function MemoryDetailView({ memory }: { memory: MemoryWithDetails }) {
   )
 }
 
-// Photo carousel — shows one photo at a time, full width
+// Photo carousel — natural height, no cropping
 function PhotoCarousel({ photos, current, onChange }: {
   photos: MemoryWithDetails['memory_photos']
   current: number
@@ -482,10 +586,10 @@ function PhotoCarousel({ photos, current, onChange }: {
 }) {
   void onChange
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full">
       {photos.map((p, i) => (
-        <div key={p.id} className="absolute inset-0 transition-opacity duration-300"
-          style={{ opacity: i === current ? 1 : 0, pointerEvents: i === current ? 'auto' : 'none' }}>
+        <div key={p.id}
+          style={{ display: i === current ? 'block' : 'none' }}>
           <CarouselPhoto storagePath={p.storage_path} />
         </div>
       ))}
@@ -499,8 +603,23 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
   const supabase = createClient() as any
   useEffect(() => {
     supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
-      .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
+      .then(({ data }: { data: { signedUrl: string } | null }) => {
+        if (data?.signedUrl) setUrl(data.signedUrl)
+      })
   }, [storagePath])
-  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
-  return <img src={url} className="w-full h-full" style={{ objectFit: "cover" }} />
+  if (!url) return <div className="w-full animate-pulse" style={{ height: 240, background: '#EAE5DD' }} />
+  return (
+    <img
+      src={url}
+      alt="Memory"
+      style={{
+        width: '100%',
+        height: 'auto',
+        maxHeight: '60vh',
+        objectFit: 'contain',
+        background: '#111',
+        display: 'block',
+      }}
+    />
+  )
 }
