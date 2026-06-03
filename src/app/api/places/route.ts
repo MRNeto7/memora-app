@@ -6,44 +6,44 @@ export async function GET(req: NextRequest) {
   const lat = searchParams.get('lat')
   const lng = searchParams.get('lng')
 
-  if (!query) return NextResponse.json({ places: [] })
+  if (!query || query.length < 2) return NextResponse.json({ places: [] })
 
   const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
-  // Build location bias if we have coords
-  const locationBias = lat && lng
-    ? `&locationbias=circle:5000@${lat},${lng}`
+  // Use Text Search API — searches for food/drink establishments specifically
+  const locationBias = lat && lng && lat !== '' && lng !== ''
+    ? `&location=${lat},${lng}&radius=5000`
     : ''
 
-  const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=establishment&key=${key}${locationBias}`
+  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&type=restaurant|bar|cafe|food|bakery|meal_takeaway&key=${key}${locationBias}`
 
   try {
     const res = await fetch(url)
     const data = await res.json()
 
-    if (!data.predictions) return NextResponse.json({ places: [] })
+    if (!data.results || data.results.length === 0) {
+      return NextResponse.json({ places: [] })
+    }
 
-    // Get details for each prediction to get lat/lng
-    const places = await Promise.all(
-      data.predictions.slice(0, 5).map(async (p: { place_id: string; description: string; structured_formatting: { main_text: string; secondary_text: string } }) => {
-        const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${p.place_id}&fields=geometry,name,formatted_address&key=${key}`
-        const detailRes = await fetch(detailUrl)
-        const detail = await detailRes.json()
-        const loc = detail.result?.geometry?.location
-
-        return {
-          placeId: p.place_id,
-          name: p.structured_formatting.main_text,
-          address: p.structured_formatting.secondary_text,
-          lat: loc?.lat ?? null,
-          lng: loc?.lng ?? null,
-        }
-      })
-    )
+    const places = data.results.slice(0, 6).map((p: {
+      place_id: string
+      name: string
+      formatted_address: string
+      geometry: { location: { lat: number; lng: number } }
+      types?: string[]
+      rating?: number
+    }) => ({
+      placeId: p.place_id,
+      name: p.name,
+      address: p.formatted_address,
+      lat: p.geometry.location.lat,
+      lng: p.geometry.location.lng,
+      rating: p.rating ?? null,
+    }))
 
     return NextResponse.json({ places })
   } catch (err) {
     console.error('Places API error:', err)
-    return NextResponse.json({ places: [] })
+    return NextResponse.json({ places: [] }, { status: 500 })
   }
 }
