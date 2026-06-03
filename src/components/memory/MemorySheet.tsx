@@ -28,6 +28,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [detectedLng, setDetectedLng] = useState<number | null>(null)
   const [detectedDate, setDetectedDate] = useState<Date | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -57,35 +58,52 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       const data = await res.json()
       if (data.name) setLocationName(data.name)
     } catch {
-      // Silent fail — user can type manually
+      // Silent fail — user types manually
     }
   }
 
   async function handleSave() {
-    if (!locationName && !detectedLat) return
+    setSaveError(null)
+
+    if (!locationName.trim()) {
+      setSaveError('Please add a location before saving.')
+      return
+    }
+
     setSaving(true)
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+
+      if (!user) {
+        setSaveError('You need to be signed in to save memories. Auth coming soon!')
+        setSaving(false)
+        return
+      }
 
       // Insert venue
       let venueId: string | null = null
-      if (locationName || (detectedLat && detectedLng)) {
-        const { data: venue } = await supabase
-          .from('venues')
-          .insert({
-            name: locationName || 'Unknown location',
-            lat: detectedLat ?? 0,
-            lng: detectedLng ?? 0,
-          })
-          .select('id')
-          .single()
-        venueId = venue?.id ?? null
+      const { data: venue, error: venueError } = await supabase
+        .from('venues')
+        .insert({
+          name: locationName.trim(),
+          lat: detectedLat ?? 0,
+          lng: detectedLng ?? 0,
+        })
+        .select('id')
+        .single()
+
+      if (venueError) {
+        console.error('Venue error:', venueError)
+        setSaveError(`Venue error: ${venueError.message}`)
+        setSaving(false)
+        return
       }
 
+      venueId = venue?.id ?? null
+
       // Insert memory
-      const { data: newMemory, error } = await supabase
+      const { data: newMemory, error: memoryError } = await supabase
         .from('memories')
         .insert({
           user_id: user.id,
@@ -99,37 +117,48 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         .select()
         .single()
 
-      if (error || !newMemory) throw error
+      if (memoryError) {
+        console.error('Memory error:', memoryError)
+        setSaveError(`Memory error: ${memoryError.message}`)
+        setSaving(false)
+        return
+      }
 
       // Upload photo
       if (photoFile && newMemory) {
         const ext = photoFile.name.split('.').pop()
         const path = `${user.id}/${newMemory.id}.${ext}`
 
-        await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('memory-photos')
           .upload(path, photoFile, { upsert: true })
 
-        await supabase
-          .from('memory_photos')
-          .insert({
-            memory_id: newMemory.id,
-            storage_path: path,
-            lat: detectedLat,
-            lng: detectedLng,
-            taken_at: detectedDate?.toISOString() ?? null,
-          })
+        if (uploadError) {
+          console.error('Upload error:', uploadError)
+        } else {
+          await supabase
+            .from('memory_photos')
+            .insert({
+              memory_id: newMemory.id,
+              storage_path: path,
+              lat: detectedLat,
+              lng: detectedLng,
+              taken_at: detectedDate?.toISOString() ?? null,
+            })
+        }
       }
 
       onUpdate()
     } catch (err) {
-      console.error('Save failed:', err)
+      console.error('Unexpected save error:', err)
+      setSaveError('Something went wrong. Check the console for details.')
     } finally {
       setSaving(false)
     }
   }
 
   const displayDate = detectedDate ?? (memory?.visited_at ? new Date(memory.visited_at) : new Date())
+  const canSave = locationName.trim().length > 0
 
   return (
     <>
@@ -182,7 +211,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             onChange={handlePhotoSelect}
           />
 
-          {/* EXIF warning message */}
+          {/* EXIF warning */}
           {exifMessage && (
             <div
               className="rounded-xl px-4 py-3 mb-4 text-sm leading-relaxed"
@@ -194,13 +223,13 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
           {/* Auto-filled pills */}
           <div className="flex gap-2 mb-4 flex-wrap">
-            {locationName && (
+            {locationName && detectedLat && (
               <span
                 className="text-xs px-3 py-1 rounded-full flex items-center gap-1"
                 style={{ background: '#f0faf4', color: '#1e7a4c', border: '1px solid #bbe5cc' }}
               >
                 📍 {locationName}
-                {detectedLat && <span className="ml-1 opacity-60 text-xs">auto</span>}
+                <span className="ml-1 opacity-60 text-xs">auto</span>
               </span>
             )}
             <span
@@ -212,20 +241,20 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             </span>
           </div>
 
-          {/* Manual location */}
-          {!detectedLat && (
-            <div className="mb-3">
-              <label className="text-xs text-gray-400 mb-1 block">Location</label>
-              <input
-                type="text"
-                placeholder="e.g. Franco Manca, Brixton"
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                className="w-full text-sm px-3 py-2 rounded-xl outline-none"
-                style={{ border: '1px solid #e0e0e0', background: '#fafafa' }}
-              />
-            </div>
-          )}
+          {/* Location — always visible */}
+          <div className="mb-3">
+            <label className="text-xs text-gray-400 mb-1 block">
+              Location {detectedLat && <span className="text-green-600">(auto-detected ✓)</span>}
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Franco Manca, Brixton"
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              className="w-full text-sm px-3 py-2 rounded-xl outline-none"
+              style={{ border: '1px solid #e0e0e0', background: '#fafafa' }}
+            />
+          </div>
 
           {/* Dish name */}
           <div className="mb-3">
@@ -261,7 +290,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           </div>
 
           {/* Notes */}
-          <div className="mb-5">
+          <div className="mb-4">
             <label className="text-xs text-gray-400 mb-1 block">
               Thoughts <span className="opacity-50">(optional)</span>
             </label>
@@ -275,19 +304,34 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             />
           </div>
 
-          {/* Save button */}
+          {/* Error message */}
+          {saveError && (
+            <div
+              className="rounded-xl px-4 py-3 mb-4 text-sm"
+              style={{ background: '#fff0f0', color: '#a32d2d', borderLeft: '3px solid #e24b4a' }}
+            >
+              {saveError}
+            </div>
+          )}
+
+          {/* Save button — always enabled once location is filled */}
           {isNew && (
             <button
               onClick={handleSave}
-              disabled={saving || (!locationName && !detectedLat)}
+              disabled={saving || !canSave}
               className="w-full py-3 rounded-2xl text-white font-semibold text-sm transition-opacity"
               style={{
                 background: '#1e7a4c',
-                opacity: saving || (!locationName && !detectedLat) ? 0.5 : 1,
+                opacity: saving || !canSave ? 0.5 : 1,
+                cursor: !canSave ? 'not-allowed' : 'pointer',
               }}
             >
               {saving ? 'Saving…' : '✓ Save memory'}
             </button>
+          )}
+
+          {!canSave && (
+            <p className="text-center text-xs text-gray-400 mt-2">Add a location to save</p>
           )}
         </div>
       </div>
