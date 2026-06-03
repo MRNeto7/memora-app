@@ -110,7 +110,8 @@ function ClusteredMarkers({
 }) {
   const map = useMap()
   const clusterer = useRef<MarkerClusterer | null>(null)
-  const markerRefs = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map())
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markerRefs = useRef<Map<string, any>>(new Map())
 
   useEffect(() => {
     if (!map) return
