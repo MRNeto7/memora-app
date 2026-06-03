@@ -2,151 +2,223 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 export default function AuthPage() {
   const supabase = createClient()
+  const router = useRouter()
+
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
-  async function handleMagicLink(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+    setSuccess(null)
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-    } else {
-      setSent(true)
+    if (!email || !password) {
+      setError('Please enter your email and password.')
+      return
     }
-    setLoading(false)
-  }
 
-  async function handleGoogle() {
+    if (mode === 'signup') {
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters.')
+        return
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.')
+        return
+      }
+    }
+
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) setError(error.message)
+
+    if (mode === 'signup') {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        setError(error.message)
+      } else {
+        setSuccess('Account created! Check your email to confirm, then sign in.')
+        setMode('signin')
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setError(error.message === 'Invalid login credentials'
+          ? 'Incorrect email or password.'
+          : error.message)
+      } else {
+        router.push('/')
+        router.refresh()
+      }
+    }
+
     setLoading(false)
   }
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: '#f8faf9' }}
+      className="min-h-screen flex flex-col items-center justify-center px-5"
+      style={{ background: '#0D4F57' }}
     >
       {/* Logo */}
-      <div className="flex flex-col items-center mb-10">
-        <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-          style={{ background: '#1e7a4c' }}
-        >
-          <span style={{ fontSize: 32 }}>📍</span>
+      <div className="flex flex-col items-center mb-8">
+        <div className="mb-4 rounded-3xl overflow-hidden" style={{ width: 96, height: 96, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+          <Image src="/logo.png" alt="Memora" width={96} height={96} className="w-full h-full object-cover" priority />
         </div>
-        <h1 className="text-2xl font-semibold" style={{ color: '#1a2e23' }}>Memora</h1>
-        <p className="text-sm mt-1" style={{ color: '#6b7c74' }}>Pin your food memories to the map</p>
+        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: '#EAE5DD' }}>Memora</h1>
+        <p className="text-sm mt-1.5" style={{ color: 'rgba(234,229,221,0.55)' }}>Pin your food memories to the map</p>
       </div>
 
-      <div
-        className="w-full max-w-sm bg-white rounded-3xl p-8"
-        style={{ border: '1px solid #e8f0eb' }}
-      >
-        {sent ? (
-          <div className="text-center">
-            <div className="text-4xl mb-4">✉️</div>
-            <h2 className="font-semibold text-base mb-2" style={{ color: '#1a2e23' }}>Check your email</h2>
-            <p className="text-sm" style={{ color: '#6b7c74' }}>
-              We sent a magic link to <strong>{email}</strong>. Click it to sign in — no password needed.
-            </p>
-            <button
-              onClick={() => setSent(false)}
-              className="mt-6 text-sm"
-              style={{ color: '#1e7a4c' }}
-            >
-              Use a different email
-            </button>
-          </div>
-        ) : (
-          <>
-            <h2 className="font-semibold text-base mb-6" style={{ color: '#1a2e23' }}>Sign in to Memora</h2>
+      {/* Card */}
+      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: '#EAE5DD' }}>
 
-            {/* Google OAuth */}
+        {/* Tab toggle */}
+        <div className="flex rounded-2xl p-1 mb-6" style={{ background: 'rgba(13,79,87,0.08)' }}>
+          {(['signin', 'signup'] as const).map((m) => (
             <button
-              onClick={handleGoogle}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-3 py-3 rounded-2xl mb-4 text-sm font-medium transition-opacity"
+              key={m}
+              onClick={() => { setMode(m); setError(null); setSuccess(null) }}
+              className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
               style={{
-                border: '1px solid #e0e0e0',
-                background: '#fff',
-                color: '#1a2e23',
-                opacity: loading ? 0.6 : 1,
+                background: mode === m ? '#0D4F57' : 'transparent',
+                color: mode === m ? '#EAE5DD' : '#7D878D',
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              Continue with Google
+              {m === 'signin' ? 'Sign in' : 'Create account'}
             </button>
+          ))}
+        </div>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px" style={{ background: '#e8f0eb' }} />
-              <span className="text-xs" style={{ color: '#9eb3a4' }}>or</span>
-              <div className="flex-1 h-px" style={{ background: '#e8f0eb' }} />
-            </div>
+        <form onSubmit={handleSubmit}>
+          {/* Email */}
+          <div className="mb-3">
+            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="w-full text-sm px-4 py-3 rounded-xl outline-none"
+              style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: '#0D4F57' }}
+            />
+          </div>
 
-            {/* Magic link */}
-            <form onSubmit={handleMagicLink}>
-              <div className="mb-3">
-                <label className="text-xs mb-1 block" style={{ color: '#6b7c74' }}>Email address</label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-                  style={{ border: '1px solid #e0e0e0', background: '#fafafa' }}
-                />
-              </div>
-
-              {error && (
-                <p className="text-xs mb-3" style={{ color: '#a32d2d' }}>{error}</p>
-              )}
-
+          {/* Password */}
+          <div className="mb-3">
+            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                className="w-full text-sm px-4 py-3 rounded-xl outline-none pr-12"
+                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: '#0D4F57' }}
+              />
               <button
-                type="submit"
-                disabled={loading || !email}
-                className="w-full py-3 rounded-2xl text-white font-semibold text-sm"
-                style={{
-                  background: '#1e7a4c',
-                  opacity: loading || !email ? 0.5 : 1,
-                }}
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                style={{ color: '#7D878D' }}
               >
-                {loading ? 'Sending…' : 'Send magic link'}
+                {showPassword ? 'Hide' : 'Show'}
               </button>
-            </form>
+            </div>
+          </div>
 
-            <p className="text-xs text-center mt-4" style={{ color: '#9eb3a4' }}>
-              No password needed — we email you a secure link
-            </p>
-          </>
-        )}
+          {/* Confirm password (signup only) */}
+          {mode === 'signup' && (
+            <div className="mb-3">
+              <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Confirm password</label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+                className="w-full text-sm px-4 py-3 rounded-xl outline-none"
+                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: '#0D4F57' }}
+              />
+            </div>
+          )}
+
+          {/* Forgot password */}
+          {mode === 'signin' && (
+            <div className="text-right mb-4">
+              <button
+                type="button"
+                onClick={() => handleForgotPassword(email, supabase, setSuccess, setError)}
+                className="text-xs"
+                style={{ color: '#7D878D' }}
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
+
+          {/* Error / success */}
+          {error && (
+            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d', borderLeft: '3px solid #a32d2d' }}>
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(13,79,87,0.08)', color: '#0D4F57', borderLeft: '3px solid #0D4F57' }}>
+              {success}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-opacity"
+            style={{
+              background: '#0D4F57',
+              color: '#EAE5DD',
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? '…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+          </button>
+        </form>
+
+        <p className="text-xs text-center mt-5" style={{ color: '#7D878D' }}>
+          By continuing you agree to Memora's terms and privacy policy.
+        </p>
       </div>
     </div>
   )
+}
+
+async function handleForgotPassword(
+  email: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  setSuccess: (s: string) => void,
+  setError: (s: string) => void
+) {
+  if (!email) {
+    setError('Enter your email above first.')
+    return
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/auth/reset`,
+  })
+  if (error) setError(error.message)
+  else setSuccess('Password reset link sent to your email.')
 }

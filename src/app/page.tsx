@@ -38,16 +38,14 @@ export default function MapPage() {
         {/* Header pill */}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
           <div
-            className="flex items-center gap-2.5 px-4 py-2 rounded-2xl pointer-events-auto"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl pointer-events-auto"
             style={{
               background: 'rgba(234,229,221,0.96)',
               backdropFilter: 'blur(12px)',
               border: '0.5px solid rgba(13,79,87,0.12)',
             }}
           >
-            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#0D4F57' }}>
-              <span className="text-white font-bold" style={{ fontSize: 11 }}>M</span>
-            </div>
+            <img src="/logo.png" alt="Memora" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
             <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Memora</span>
             <span className="text-xs" style={{ color: '#7D878D' }}>
               · {memories.length} {memories.length === 1 ? 'memory' : 'memories'}
