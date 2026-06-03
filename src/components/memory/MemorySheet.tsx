@@ -359,7 +359,7 @@ function MemoryDetailView({ memory }: { memory: MemoryWithDetails }) {
     <div>
       {/* Photo carousel */}
       {photos.length > 0 && (
-        <div className="relative mb-5 -mx-5 rounded-none overflow-hidden" style={{ height: 200 }}>
+        <div className="relative mb-5 -mx-5 rounded-none overflow-hidden" style={{ height: 280 }}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
             <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
@@ -502,5 +502,5 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
       .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
   }, [storagePath])
   if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
-  return <img src={url} className="w-full h-full" style={{ objectFit: "contain", background: "#1a1a1a" }} />
+  return <img src={url} className="w-full h-full" style={{ objectFit: "cover" }} />
 }
