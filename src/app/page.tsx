@@ -111,7 +111,7 @@ function ClusteredMarkers({
   const map = useMap()
   const clusterer = useRef<MarkerClusterer | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markerRefs = useRef<Map<string, any>>(new Map())
+  const markerRefs = useRef<Record<string, any>>({})
 
   useEffect(() => {
     if (!map) return
@@ -140,7 +140,7 @@ function ClusteredMarkers({
   useEffect(() => {
     if (!clusterer.current) return
     clusterer.current.clearMarkers()
-    markerRefs.current.clear()
+    markerRefs.current = {}
   }, [memories])
 
   return (
@@ -154,7 +154,7 @@ function ClusteredMarkers({
             onClick={() => onSelect(memory)}
             ref={(marker) => {
               if (marker && clusterer.current) {
-                markerRefs.current.set(memory.id, marker)
+                markerRefs.current[memory.id] = marker
                 clusterer.current.addMarker(marker as unknown as google.maps.Marker)
               }
             }}
