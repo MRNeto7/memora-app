@@ -51,16 +51,26 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
   const overall = calcOverall(detailRatings)
 
+  const [searching, setSearching] = useState(false)
+
   useEffect(() => {
-    if (locationQuery.length < 2 || selectedPlace) { setSuggestions([]); return }
+    if (selectedPlace) { setSuggestions([]); return }
+    if (locationQuery.length < 2) { setSuggestions([]); setShowSuggestions(false); return }
     if (debounceRef.current) clearTimeout(debounceRef.current)
+    setSearching(true)
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/places?q=${encodeURIComponent(locationQuery)}&lat=${detectedLat ?? ''}&lng=${detectedLng ?? ''}`)
         const data = await res.json()
+        console.log('Places response:', data)
         setSuggestions(data.places ?? [])
-        setShowSuggestions(true)
-      } catch { setSuggestions([]) }
+        setShowSuggestions((data.places ?? []).length > 0)
+      } catch (err) {
+        console.error('Places fetch error:', err)
+        setSuggestions([])
+      } finally {
+        setSearching(false)
+      }
     }, 400)
   }, [locationQuery, selectedPlace, detectedLat, detectedLng])
 
@@ -220,6 +230,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 <label className="text-xs mb-1 block font-medium" style={{ color: '#7D878D' }}>
                   Restaurant or bar
                   {selectedPlace && <span className="ml-2" style={{ color: '#0D4F57' }}>✓ linked to Google Maps</span>}
+                  {searching && <span className="ml-2" style={{ color: '#7D878D' }}>Searching…</span>}
                 </label>
                 <input
                   type="text"

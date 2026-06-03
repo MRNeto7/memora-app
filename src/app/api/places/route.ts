@@ -10,16 +10,32 @@ export async function GET(req: NextRequest) {
 
   const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
-  // Use Text Search API — searches for food/drink establishments specifically
+  if (!key) {
+    console.error('Google Maps API key missing')
+    return NextResponse.json({ places: [], error: 'API key missing' })
+  }
+
+  // Location bias — bias results toward where the photo was taken
   const locationBias = lat && lng && lat !== '' && lng !== ''
-    ? `&location=${lat},${lng}&radius=5000`
+    ? `&location=${lat},${lng}&radius=10000`
     : ''
 
-  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&type=restaurant|bar|cafe|food|bakery|meal_takeaway&key=${key}${locationBias}`
+  // Text Search — type must be a single type, not pipe-separated
+  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&type=restaurant&key=${key}${locationBias}`
+
+  console.log('Places API request:', url.replace(key, 'REDACTED'))
 
   try {
-    const res = await fetch(url)
+    const res = await fetch(url, { cache: 'no-store' })
     const data = await res.json()
+
+    console.log('Places API status:', data.status)
+    console.log('Places results count:', data.results?.length ?? 0)
+
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      console.error('Places API error status:', data.status, data.error_message)
+      return NextResponse.json({ places: [], error: data.status })
+    }
 
     if (!data.results || data.results.length === 0) {
       return NextResponse.json({ places: [] })
@@ -30,7 +46,6 @@ export async function GET(req: NextRequest) {
       name: string
       formatted_address: string
       geometry: { location: { lat: number; lng: number } }
-      types?: string[]
       rating?: number
     }) => ({
       placeId: p.place_id,
@@ -43,7 +58,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ places })
   } catch (err) {
-    console.error('Places API error:', err)
-    return NextResponse.json({ places: [] }, { status: 500 })
+    console.error('Places API fetch error:', err)
+    return NextResponse.json({ places: [], error: 'fetch failed' }, { status: 500 })
   }
 }
