@@ -13,10 +13,11 @@ const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
 const DEFAULT_CENTER = { lat: 51.505, lng: -0.09 }
 
 // Hide all POIs except food/drink, remove transit clutter
+// poi.food_and_drink is not a valid featureType in the legacy style API
+// use poi.business or just hide all poi and keep food via Map ID cloud styling
 const MAP_STYLES = [
   { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi.food_and_drink', elementType: 'all', stylers: [{ visibility: 'simplified' }] },
-  { featureType: 'poi.food_and_drink', elementType: 'labels', stylers: [{ visibility: 'on' }] },
+  { featureType: 'poi.business', elementType: 'all', stylers: [{ visibility: 'on' }] },
   { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
   { featureType: 'road', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
 ]
@@ -71,9 +72,9 @@ export default function MapPage() {
             latLngBounds: { north: 85, south: -85, west: -180, east: 180 },
             strictBounds: true,
           }}
+          mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID'}
           disableDefaultUI={true}
           gestureHandling="greedy"
-          styles={MAP_STYLES}
           style={{ width: '100%', height: '100%' }}
         >
           <ClusteredMarkers
