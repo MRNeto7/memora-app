@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import PlacesSearch from './PlacesSearch'
 
 interface PlaceSuggestion {
   placeId: string; name: string; address: string; lat: number; lng: number; rating?: number
@@ -42,6 +43,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
   const [selectedPlace, setSelectedPlace] = useState<PlaceSuggestion | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  // suppress unused warning — kept for save logic compatibility
+  void suggestions; void showSuggestions
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
   const [detectedLat, setDetectedLat] = useState<number | null>(null)
   const [detectedLng, setDetectedLng] = useState<number | null>(null)
@@ -225,36 +228,20 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 </Pill>
               </div>
 
-              {/* Location search */}
-              <div className="mb-3 relative">
-                <label className="text-xs mb-1 block font-medium" style={{ color: '#7D878D' }}>
-                  Restaurant or bar
-                  {selectedPlace && <span className="ml-2" style={{ color: '#0D4F57' }}>✓ linked to Google Maps</span>}
-                  {searching && <span className="ml-2" style={{ color: '#7D878D' }}>Searching…</span>}
-                </label>
-                <input
-                  type="text"
-                  placeholder="Search restaurants, bars, cafes…"
+              {/* Location search — Google Places Autocomplete (browser-side) */}
+              <div className="mb-3">
+                <PlacesSearch
                   value={locationQuery}
-                  onChange={(e) => { setLocationQuery(e.target.value); setLocationName(e.target.value); setSelectedPlace(null) }}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                  className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-                  style={{ border: `1.5px solid ${selectedPlace ? '#0D4F57' : '#EAE5DD'}`, background: '#fafaf9' }}
+                  onChange={(v) => { setLocationQuery(v); setLocationName(v); setSelectedPlace(null) }}
+                  onSelect={(place) => {
+                    setSelectedPlace(place)
+                    setLocationName(place.name)
+                    setLocationQuery(place.name)
+                    setDetectedLat(place.lat)
+                    setDetectedLng(place.lng)
+                  }}
+                  selectedPlace={selectedPlace}
                 />
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute left-0 right-0 bg-white rounded-2xl z-50 overflow-hidden" style={{ top: '100%', marginTop: 4, border: '1px solid #EAE5DD', boxShadow: '0 8px 32px rgba(13,79,87,0.12)' }}>
-                    {suggestions.map((s) => (
-                      <button key={s.placeId} onClick={() => selectPlace(s)}
-                        className="w-full text-left px-4 py-3 transition-colors hover:bg-gray-50"
-                        style={{ borderBottom: '0.5px solid #f0ede8' }}>
-                        <div className="text-sm font-medium" style={{ color: '#0D4F57' }}>📍 {s.name}</div>
-                        <div className="text-xs mt-0.5" style={{ color: '#7D878D' }}>{s.address}</div>
-                        {s.rating && <div className="text-xs mt-0.5" style={{ color: '#C9A86A' }}>Google rating: {s.rating} ⭐</div>}
-                      </button>
-                    ))}
-                    <button onClick={() => setShowSuggestions(false)} className="w-full text-center py-2 text-xs" style={{ color: '#b0babe' }}>Type manually instead</button>
-                  </div>
-                )}
               </div>
 
               {/* Dish name */}

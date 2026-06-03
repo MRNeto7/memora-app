@@ -33,7 +33,7 @@ export default function MapPage() {
 
   return (
     <div style={{ height: 'calc(100vh - 80px)', position: 'relative' }}>
-      <APIProvider apiKey={MAPS_KEY}>
+      <APIProvider apiKey={MAPS_KEY} libraries={['places']}>
 
         {/* Header pill */}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
