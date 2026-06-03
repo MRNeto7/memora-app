@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Memora brand — Royal Green */
+  --memora-green-50:  #f0faf4;
+  --memora-green-100: #dcf2e5;
+  --memora-green-200: #bbe5cc;
+  --memora-green-300: #88d0aa;
+  --memora-green-400: #4fb37f;
+  --memora-green-500: #2d9660;
+  --memora-green-600: #1e7a4c;
+  --memora-green-700: #1a6341;
+  --memora-green-800: #174f35;
+  --memora-green-900: #13412c;
+
+  --brand: var(--memora-green-600);
+  --brand-dark: var(--memora-green-700);
+  --brand-light: var(--memora-green-50);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f8faf9;
+  color: #1a2e23;
+  margin: 0;
+}
+
+.map-container {
+  width: 100%;
+  height: 100vh;
 }
