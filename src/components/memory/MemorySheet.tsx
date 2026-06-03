@@ -158,36 +158,14 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
         <div className="px-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>
-              {isNew ? 'Save a memory' : (memory.venue?.name ?? 'Memory')}
-            </h2>
+            {isNew && <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Save a memory</h2>}
+            {!isNew && <div />}
             <button onClick={onClose} style={{ color: '#7D878D', fontSize: 18, lineHeight: 1 }}>✕</button>
           </div>
 
           {/* ── VIEW MODE ── */}
           {!isNew && (
-            <div>
-              {memory.memory_photos.length > 0 && (
-                <div className="flex gap-2 mb-4 overflow-x-auto pb-1 -mx-1 px-1">
-                  {memory.memory_photos.map((p) => <SignedPhoto key={p.id} storagePath={p.storage_path} />)}
-                </div>
-              )}
-              <div className="flex gap-2 mb-3 flex-wrap">
-                {memory.venue && <Pill icon="📍">{memory.venue.name}</Pill>}
-                {memory.venue?.address && <Pill icon="">{memory.venue.address}</Pill>}
-                <Pill icon="🕐">{new Date(memory.visited_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</Pill>
-              </div>
-              {memory.rating && (
-                <div className="flex items-center gap-2 mb-3">
-                  <StarRow value={memory.rating} max={5} />
-                  <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/5</span>
-                </div>
-              )}
-              {memory.dish_name && <p className="font-medium text-sm mb-2" style={{ color: '#0D4F57' }}>{memory.dish_name}</p>}
-              {memory.notes && (
-                <p className="text-sm leading-relaxed pl-3" style={{ color: '#7D878D', borderLeft: '2px solid #C9A86A' }}>{memory.notes}</p>
-              )}
-            </div>
+            <MemoryDetailView memory={memory} />
           )}
 
           {/* ── ADD MODE ── */}
@@ -347,4 +325,182 @@ function SignedPhoto({ storagePath }: { storagePath: string }) {
   }, [storagePath])
   if (!url) return <div className="flex-shrink-0 rounded-2xl bg-gray-100 animate-pulse" style={{ width: 140, height: 140 }} />
   return <img src={url} className="flex-shrink-0 rounded-2xl object-cover" style={{ width: 140, height: 140 }} />
+}
+
+
+// ── Rich memory detail view ──
+interface VenueDetails {
+  website: string | null
+  phone: string | null
+  openNow: boolean | null
+  rating: number | null
+  totalRatings: number | null
+  priceLevel: number | null
+}
+
+function MemoryDetailView({ memory }: { memory: MemoryWithDetails }) {
+  const [currentPhoto, setCurrentPhoto] = useState(0)
+  const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
+
+  useEffect(() => {
+    if (memory.venue?.google_place_id) {
+      fetch(`/api/venue-details?placeId=${memory.venue.google_place_id}`)
+        .then(r => r.json())
+        .then(setVenueDetails)
+        .catch(() => {})
+    }
+  }, [memory.venue?.google_place_id])
+
+  const photos = memory.memory_photos
+  const date = new Date(memory.visited_at)
+  const priceStr = venueDetails?.priceLevel ? '£'.repeat(venueDetails.priceLevel) : null
+
+  return (
+    <div>
+      {/* Photo carousel */}
+      {photos.length > 0 && (
+        <div className="relative mb-5 -mx-5 rounded-none overflow-hidden" style={{ height: 240 }}>
+          <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
+          {photos.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+              {photos.map((_, i) => (
+                <button key={i} onClick={() => setCurrentPhoto(i)}
+                  className="rounded-full transition-all"
+                  style={{ width: i === currentPhoto ? 20 : 6, height: 6, background: i === currentPhoto ? '#fff' : 'rgba(255,255,255,0.5)' }} />
+              ))}
+            </div>
+          )}
+          {photos.length > 1 && (
+            <>
+              {currentPhoto > 0 && (
+                <button onClick={() => setCurrentPhoto(p => p - 1)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: 16 }}>‹</button>
+              )}
+              {currentPhoto < photos.length - 1 && (
+                <button onClick={() => setCurrentPhoto(p => p + 1)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: 16 }}>›</button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Venue name as title */}
+      <h2 className="text-xl font-semibold mb-1 leading-tight" style={{ color: '#0D4F57' }}>
+        {memory.venue?.name ?? 'Memory'}
+      </h2>
+
+      {/* Address + date row */}
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          {memory.venue?.address && (
+            <p className="text-xs mb-1" style={{ color: '#7D878D' }}>{memory.venue.address}</p>
+          )}
+          <p className="text-xs" style={{ color: '#7D878D' }}>
+            {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+        {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
+          <span className="text-xs px-2 py-1 rounded-full flex-shrink-0 ml-3"
+            style={{ background: venueDetails.openNow ? 'rgba(30,122,76,0.1)' : 'rgba(163,45,45,0.08)', color: venueDetails.openNow ? '#1e7a4c' : '#a32d2d' }}>
+            {venueDetails.openNow ? 'Open now' : 'Closed'}
+          </span>
+        )}
+      </div>
+
+      {/* Rating + price */}
+      <div className="flex items-center gap-3 mb-4">
+        {memory.rating && (
+          <div className="flex items-center gap-1.5">
+            <StarRow value={memory.rating} max={5} />
+            <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/5</span>
+          </div>
+        )}
+        {priceStr && (
+          <span className="text-sm font-medium" style={{ color: '#7D878D' }}>{priceStr}</span>
+        )}
+        {venueDetails?.rating && (
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+            Google {venueDetails.rating}★ ({venueDetails.totalRatings?.toLocaleString()})
+          </span>
+        )}
+      </div>
+
+      {/* Dish + notes */}
+      {memory.dish_name && (
+        <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: '#f5f2ed' }}>
+          <p className="text-xs mb-0.5" style={{ color: '#7D878D' }}>What I had</p>
+          <p className="text-sm font-medium" style={{ color: '#0D4F57' }}>{memory.dish_name}</p>
+        </div>
+      )}
+
+      {memory.notes && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: '#f5f2ed', borderLeft: '3px solid #C9A86A' }}>
+          <p className="text-xs mb-1" style={{ color: '#7D878D' }}>Notes</p>
+          <p className="text-sm leading-relaxed" style={{ color: '#0D4F57' }}>{memory.notes}</p>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex gap-2 mt-2">
+        {venueDetails?.website && (
+          <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
+            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
+            style={{ background: '#0D4F57', color: '#fff' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Website
+          </a>
+        )}
+        {venueDetails?.phone && (
+          <a href={`tel:${venueDetails.phone}`}
+            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
+            style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call
+          </a>
+        )}
+        <a
+          href={`https://www.google.com/maps/place/?q=place_id:${memory.venue?.google_place_id ?? ''}`}
+          target="_blank" rel="noopener noreferrer"
+          className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5"
+          style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          Maps
+        </a>
+      </div>
+    </div>
+  )
+}
+
+// Photo carousel — shows one photo at a time, full width
+function PhotoCarousel({ photos, current, onChange }: {
+  photos: MemoryWithDetails['memory_photos']
+  current: number
+  onChange: (i: number) => void
+}) {
+  void onChange
+  return (
+    <div className="relative w-full h-full">
+      {photos.map((p, i) => (
+        <div key={p.id} className="absolute inset-0 transition-opacity duration-300"
+          style={{ opacity: i === current ? 1 : 0, pointerEvents: i === current ? 'auto' : 'none' }}>
+          <CarouselPhoto storagePath={p.storage_path} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CarouselPhoto({ storagePath }: { storagePath: string }) {
+  const [url, setUrl] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any
+  useEffect(() => {
+    supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
+      .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
+  }, [storagePath])
+  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
+  return <img src={url} className="w-full h-full object-cover" />
 }
