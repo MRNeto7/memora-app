@@ -1,35 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  /* Memora brand — Royal Green */
-  --memora-green-50:  #f0faf4;
-  --memora-green-100: #dcf2e5;
-  --memora-green-200: #bbe5cc;
-  --memora-green-300: #88d0aa;
-  --memora-green-400: #4fb37f;
-  --memora-green-500: #2d9660;
-  --memora-green-600: #1e7a4c;
-  --memora-green-700: #1a6341;
-  --memora-green-800: #174f35;
-  --memora-green-900: #13412c;
+  /* Memora — London Summer palette */
+  --teal:       #0D4F57;
+  --teal-light: #1a6b75;
+  --teal-pale:  #e8f2f3;
+  --stone:      #EAE5DD;
+  --stone-dark: #d4cdc3;
+  --gold:       #C9A86A;
+  --gold-light: #e8d5a8;
+  --gold-dark:  #a8863e;
+  --slate:      #7D878D;
+  --slate-light:#b0babe;
+  --slate-pale: #f4f5f5;
 
-  --brand: var(--memora-green-600);
-  --brand-dark: var(--memora-green-700);
-  --brand-light: var(--memora-green-50);
+  --brand:      var(--teal);
+  --brand-dark: #0a3d44;
+  --brand-light: var(--teal-pale);
+  --accent:     var(--gold);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f8faf9;
-  color: #1a2e23;
+  background: var(--stone);
+  color: var(--teal);
   margin: 0;
 }
 
 .map-container {
   width: 100%;
-  height: 100vh;
+  height: 100%;
 }
