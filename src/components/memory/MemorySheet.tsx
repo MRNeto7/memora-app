@@ -6,14 +6,15 @@ import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage } from '@/lib/exif'
 
 interface MemorySheetProps {
-  memory: MemoryWithDetails | null // null = new memory
+  memory: MemoryWithDetails | null
   onClose: () => void
   onUpdate: () => void
 }
 
 export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetProps) {
   const isNew = !memory
-  const supabase = createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [dishName, setDishName] = useState(memory?.dish_name ?? '')
@@ -35,7 +36,6 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
     setPhotoFile(file)
     setPhotoPreview(URL.createObjectURL(file))
 
-    // Read EXIF data
     const exif = await readPhotoExif(file)
     const msg = getExifMessage(exif)
     setExifMessage(msg)
@@ -43,7 +43,6 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
     if (exif.lat && exif.lng) {
       setDetectedLat(exif.lat)
       setDetectedLng(exif.lng)
-      // Reverse geocode to get venue name
       await reverseGeocode(exif.lat, exif.lng)
     }
 
@@ -70,17 +69,17 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Upsert venue
+      // Insert venue
       let venueId: string | null = null
       if (locationName || (detectedLat && detectedLng)) {
         const { data: venue } = await supabase
           .from('venues')
-          .upsert({
+          .insert({
             name: locationName || 'Unknown location',
             lat: detectedLat ?? 0,
             lng: detectedLng ?? 0,
-          }, { onConflict: 'google_place_id' })
-          .select()
+          })
+          .select('id')
           .single()
         venueId = venue?.id ?? null
       }
@@ -102,7 +101,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
       if (error || !newMemory) throw error
 
-      // Upload photo if selected
+      // Upload photo
       if (photoFile && newMemory) {
         const ext = photoFile.name.split('.').pop()
         const path = `${user.id}/${newMemory.id}.${ext}`
@@ -183,7 +182,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             onChange={handlePhotoSelect}
           />
 
-          {/* EXIF message */}
+          {/* EXIF warning message */}
           {exifMessage && (
             <div
               className="rounded-xl px-4 py-3 mb-4 text-sm leading-relaxed"
@@ -193,7 +192,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             </div>
           )}
 
-          {/* Auto-filled meta */}
+          {/* Auto-filled pills */}
           <div className="flex gap-2 mb-4 flex-wrap">
             {locationName && (
               <span
@@ -201,7 +200,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 style={{ background: '#f0faf4', color: '#1e7a4c', border: '1px solid #bbe5cc' }}
               >
                 📍 {locationName}
-                <span className="ml-1 opacity-60 text-xs">auto</span>
+                {detectedLat && <span className="ml-1 opacity-60 text-xs">auto</span>}
               </span>
             )}
             <span
@@ -213,7 +212,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             </span>
           </div>
 
-          {/* Location (if not auto-detected) */}
+          {/* Manual location */}
           {!detectedLat && (
             <div className="mb-3">
               <label className="text-xs text-gray-400 mb-1 block">Location</label>
@@ -230,7 +229,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
           {/* Dish name */}
           <div className="mb-3">
-            <label className="text-xs text-gray-400 mb-1 block">Dish name <span className="opacity-50">(optional)</span></label>
+            <label className="text-xs text-gray-400 mb-1 block">
+              Dish name <span className="opacity-50">(optional)</span>
+            </label>
             <input
               type="text"
               placeholder="e.g. Truffle pasta"
@@ -243,7 +244,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
           {/* Rating */}
           <div className="mb-3">
-            <label className="text-xs text-gray-400 mb-2 block">Rating <span className="opacity-50">(optional)</span></label>
+            <label className="text-xs text-gray-400 mb-2 block">
+              Rating <span className="opacity-50">(optional)</span>
+            </label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -259,7 +262,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
           {/* Notes */}
           <div className="mb-5">
-            <label className="text-xs text-gray-400 mb-1 block">Thoughts <span className="opacity-50">(optional)</span></label>
+            <label className="text-xs text-gray-400 mb-1 block">
+              Thoughts <span className="opacity-50">(optional)</span>
+            </label>
             <textarea
               placeholder="What made it special?"
               value={notes}
