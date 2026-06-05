@@ -69,13 +69,13 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto">
 
-          {/* Photo hero */}
-          <div className="overflow-hidden flex-shrink-0" style={{ height: 180 }}>
+          {/* Photo hero — natural aspect ratio, no crop */}
+          <div className="overflow-hidden flex-shrink-0" style={{ background: '#f5f2ed' }}>
             <PlacePhoto
               placeId={item.venue.google_place_id}
               width={600}
               fallbackInitials={item.venue.name.slice(0, 2).toUpperCase()}
-              style={{ width: '100%', height: '100%' }}
+              style={{ width: '100%', height: 'auto', maxHeight: '40vh', objectFit: 'contain', display: 'block' }}
             />
           </div>
 

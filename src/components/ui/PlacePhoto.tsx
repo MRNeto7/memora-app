@@ -73,7 +73,7 @@ export default function PlacePhoto({ placeId, width = 400, style, fallbackInitia
     <img
       src={url}
       alt="Restaurant"
-      style={{ ...style, objectFit: 'cover', display: 'block' }}
+      style={{ ...style, display: 'block' }}
       onError={() => { setUrl(null); setTried(true) }}
     />
   )

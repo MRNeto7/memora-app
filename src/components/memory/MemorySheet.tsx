@@ -313,23 +313,25 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
     <div>
       {/* Photos — square crop, natural and clean */}
       {photos.length > 0 && (
-        <div className="relative overflow-hidden" style={{ height: 220 }}>
+        <div className="relative overflow-hidden" style={{ background: '#f5f2ed' }}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
-            <>
-              <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5 z-10">
-                {photos.map((_, i) => (
-                  <button key={i} onClick={() => setCurrentPhoto(i)} className="rounded-full"
-                    style={{ width: i === currentPhoto ? 18 : 6, height: 6, background: i === currentPhoto ? '#fff' : 'rgba(255,255,255,0.5)' }} />
-                ))}
-              </div>
-              {currentPhoto > 0 && <button onClick={() => setCurrentPhoto(p => p - 1)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center z-10"
-                style={{ background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: 18 }}>‹</button>}
-              {currentPhoto < photos.length - 1 && <button onClick={() => setCurrentPhoto(p => p + 1)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center z-10"
-                style={{ background: 'rgba(0,0,0,0.35)', color: '#fff', fontSize: 18 }}>›</button>}
-            </>
+            <div className="flex items-center justify-center gap-2 py-2" style={{ background: '#f5f2ed' }}>
+              {currentPhoto > 0 && (
+                <button onClick={() => setCurrentPhoto(p => p - 1)}
+                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>‹</button>
+              )}
+              {photos.map((_, i) => (
+                <button key={i} onClick={() => setCurrentPhoto(i)} className="rounded-full transition-all"
+                  style={{ width: i === currentPhoto ? 18 : 6, height: 6, background: i === currentPhoto ? '#0D4F57' : '#b0babe' }} />
+              ))}
+              {currentPhoto < photos.length - 1 && (
+                <button onClick={() => setCurrentPhoto(p => p + 1)}
+                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>›</button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -432,9 +434,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
 function PhotoCarousel({ photos, current, onChange }: { photos: MemoryWithDetails['memory_photos']; current: number; onChange: (i: number) => void }) {
   void onChange
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full">
       {photos.map((p, i) => (
-        <div key={p.id} className="absolute inset-0" style={{ opacity: i === current ? 1 : 0, transition: 'opacity 0.25s' }}>
+        <div key={p.id} style={{ display: i === current ? 'block' : 'none' }}>
           <CarouselPhoto storagePath={p.storage_path} />
         </div>
       ))}
@@ -450,6 +452,20 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
     supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
       .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
   }, [storagePath])
-  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
-  return <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+  if (!url) return <div className="animate-pulse" style={{ height: 200, background: '#EAE5DD' }} />
+  // Natural aspect ratio — image dictates its own height, capped at 50vh
+  return (
+    <img
+      src={url}
+      alt=""
+      style={{
+        width: '100%',
+        height: 'auto',
+        maxHeight: '50vh',
+        objectFit: 'contain',
+        background: '#f5f2ed',
+        display: 'block',
+      }}
+    />
+  )
 }
