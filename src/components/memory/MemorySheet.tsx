@@ -383,6 +383,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           </button>
         </div>
 
+        {/* Public / Private toggle */}
+        <PublicToggle memoryId={memory.id} initialValue={memory.is_public} onUpdate={onUpdate} />
+
         {/* Meta */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {memory.venue?.address && <p className="text-xs" style={{ color: '#7D878D' }}>{memory.venue.address}</p>}
@@ -439,7 +442,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         )}
 
         {/* Action buttons */}
-        <div className="flex gap-2">
+        <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
           {venueDetails?.website && (
             <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
               className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1"
@@ -512,5 +515,31 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
       alt=""
       style={{ width: '100%', height: 'auto', maxHeight: '45vh', objectFit: 'contain', background: '#f5f2ed', display: 'block' }}
     />
+  )
+}
+
+// Public/private toggle for a memory
+function PublicToggle({ memoryId, initialValue, onUpdate }: { memoryId: string; initialValue: boolean; onUpdate: () => void }) {
+  const [isPublic, setIsPublic] = useState(initialValue)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any
+
+  async function toggle() {
+    const newVal = !isPublic
+    setIsPublic(newVal)
+    await supabase.from('memories').update({ is_public: newVal }).eq('id', memoryId)
+    onUpdate()
+  }
+
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <button onClick={toggle}
+        style={{ width: 36, height: 20, borderRadius: 10, background: isPublic ? '#0D4F57' : '#d4cdc3', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+        <div style={{ position: 'absolute', top: 2, left: isPublic ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+      </button>
+      <span className="text-xs" style={{ color: isPublic ? '#0D4F57' : '#7D878D' }}>
+        {isPublic ? 'Public — visible to friends' : 'Private — only you can see this'}
+      </span>
+    </div>
   )
 }

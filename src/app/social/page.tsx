@@ -130,7 +130,7 @@ export default function SocialPage() {
             <button key={t} onClick={() => setTab(t)}
               className="px-4 py-2.5 text-sm font-medium rounded-t-xl capitalize transition-all"
               style={{ background: tab === t ? '#EAE5DD' : 'transparent', color: tab === t ? '#0D4F57' : 'rgba(255,255,255,0.6)' }}>
-              {t === 'requests' && requests.length > 0 ? `Requests (${requests.length})` : t === 'friends' ? `Friends (${friends.length})` : 'Find'}
+              {t === 'requests' ? (requests.length > 0 ? `Requests (${requests.length})` : 'Requests') : t === 'friends' ? `Friends (${friends.length})` : 'Find friends'}
             </button>
           ))}
         </div>
