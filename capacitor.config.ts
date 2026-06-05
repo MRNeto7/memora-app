@@ -1,10 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.mimora.ios',
+  appId: 'app.memora.ios',
   appName: 'Mimora',
-  // Load live from Vercel — no static bundle needed
-  // Updates go live instantly when you push to Vercel
   server: {
     url: 'https://memora-app-one.vercel.app',
     cleartext: false,
@@ -12,12 +10,18 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     scrollEnabled: false,
+    backgroundColor: '#0D4F57',
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1500,
+      launchShowDuration: 2000,
+      launchAutoHide: true,
       backgroundColor: '#0D4F57',
+      iosSpinnerStyle: 'small',
+      spinnerColor: '#C9A86A',
       showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
     },
   },
 };
