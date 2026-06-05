@@ -1,6 +1,6 @@
 'use client'
 
-import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps'
+import { Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps'
 import { useState, useEffect, useRef } from 'react'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
@@ -13,7 +13,7 @@ interface WishlistVenue {
   id: string; name: string; lat: number; lng: number; address: string | null
 }
 
-const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
+
 const DEFAULT_CENTER = { lat: 51.505, lng: -0.09 }
 
 
@@ -46,9 +46,7 @@ export default function MapPage() {
 
   return (
     <div style={{ height: 'calc(100vh - 80px)', position: 'relative' }}>
-      <APIProvider apiKey={MAPS_KEY} libraries={['places']}>
-
-        {/* Header pill */}
+      {/* Header pill */}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
           <div
             className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl pointer-events-auto"
@@ -91,7 +89,6 @@ export default function MapPage() {
             onSelect={(m) => { setSelected(m); setShowAddSheet(false) }}
           />
         </Map>
-      </APIProvider>
 
       {/* Map toggle */}
       <div className="absolute top-4 right-4 z-10 flex gap-1.5">

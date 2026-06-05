@@ -102,15 +102,15 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Saved places (wishlist) */}
+        {/* Wishlist */}
         <div className="rounded-2xl overflow-hidden mb-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
-            <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>Saved places</p>
+            <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>Wishlist</p>
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#f5f2ed', color: '#7D878D' }}>{favourites.length}</span>
           </div>
           {favourites.length === 0 ? (
             <div className="px-4 pb-4">
-              <p className="text-sm" style={{ color: '#7D878D' }}>Heart a restaurant from the map to save it here.</p>
+              <p className="text-sm" style={{ color: '#7D878D' }}>Add restaurants to your wishlist from the Places tab.</p>
             </div>
           ) : (
             favourites.map((venue) => (

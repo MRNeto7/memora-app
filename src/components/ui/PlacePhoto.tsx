@@ -22,13 +22,14 @@ export default function PlacePhoto({ placeId, width = 400, style, fallbackInitia
         setTimeout(tryLoad, 300)
         return
       }
+      if (!placeId) { setTried(true); return }
 
       try {
         // Use a hidden div as the PlacesService target
         const div = document.createElement('div')
         const service = new window.google.maps.places.PlacesService(div)
         service.getDetails(
-          { placeId, fields: ['photos'] },
+          { placeId: placeId as string, fields: ['photos'] },
           (result, status) => {
             if (status === window.google.maps.places.PlacesServiceStatus.OK && result?.photos?.[0]) {
               const photoUrl = result.photos[0].getUrl({ maxWidth: width, maxHeight: width })
