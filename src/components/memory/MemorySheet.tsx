@@ -151,12 +151,12 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   return (
     <>
       <div className="absolute inset-0 z-20" style={{ background: 'rgba(13,79,87,0.4)' }} onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-3xl" style={{ maxHeight: '90vh', overflowY: 'auto', paddingBottom: 40 }}>
+      <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-3xl flex flex-col" style={{ maxHeight: '90vh' }}>
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
         </div>
 
-        <div className="px-5">
+        <div className="flex-1 overflow-y-auto px-5">
           <div className="flex items-center justify-between mb-4">
             {isNew && <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Save a memory</h2>}
             {!isNew && <div />}

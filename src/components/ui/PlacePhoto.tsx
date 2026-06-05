@@ -10,24 +10,60 @@ interface PlacePhotoProps {
   fallbackInitials?: string
 }
 
-export default function PlacePhoto({ placeId, width = 400, className, style, fallbackInitials }: PlacePhotoProps) {
+export default function PlacePhoto({ placeId, width = 400, style, fallbackInitials }: PlacePhotoProps) {
   const [url, setUrl] = useState<string | null>(null)
-  const [error, setError] = useState(false)
+  const [tried, setTried] = useState(false)
 
   useEffect(() => {
-    if (!placeId) { setError(true); return }
-    setUrl(`/api/place-photo?placeId=${encodeURIComponent(placeId)}&w=${width}`)
+    if (!placeId) { setTried(true); return }
+
+    function tryLoad() {
+      if (!window.google?.maps?.places) {
+        setTimeout(tryLoad, 300)
+        return
+      }
+
+      try {
+        // Use a hidden div as the PlacesService target
+        const div = document.createElement('div')
+        const service = new window.google.maps.places.PlacesService(div)
+        service.getDetails(
+          { placeId, fields: ['photos'] },
+          (result, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && result?.photos?.[0]) {
+              const photoUrl = result.photos[0].getUrl({ maxWidth: width, maxHeight: width })
+              setUrl(photoUrl)
+            }
+            setTried(true)
+          }
+        )
+      } catch {
+        setTried(true)
+      }
+    }
+
+    tryLoad()
   }, [placeId, width])
 
-  if (error || !url) {
+  // Fallback — show initials while loading or if no photo
+  if (!url) {
     return (
-      <div
-        className={className}
-        style={{ ...style, background: '#0D4F57', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <span style={{ color: '#C9A86A', fontWeight: 600, fontSize: 16 }}>
-          {fallbackInitials ?? '?'}
-        </span>
+      <div style={{
+        ...style,
+        background: tried ? '#1a3a40' : '#0D4F57',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        {tried ? (
+          <span style={{ color: '#C9A86A', fontWeight: 700, fontSize: typeof style?.width === 'number' && style.width < 60 ? 13 : 18, letterSpacing: 1 }}>
+            {fallbackInitials ?? '?'}
+          </span>
+        ) : (
+          // Loading shimmer
+          <div style={{ width: '60%', height: '60%', borderRadius: 8, background: 'rgba(201,168,106,0.2)', animation: 'pulse 1.5s infinite' }} />
+        )}
       </div>
     )
   }
@@ -36,9 +72,8 @@ export default function PlacePhoto({ placeId, width = 400, className, style, fal
     <img
       src={url}
       alt="Restaurant"
-      className={className}
-      style={{ ...style, objectFit: 'cover' }}
-      onError={() => setError(true)}
+      style={{ ...style, objectFit: 'cover', display: 'block' }}
+      onError={() => { setUrl(null); setTried(true) }}
     />
   )
 }
