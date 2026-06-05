@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import PlacePhoto from '@/components/ui/PlacePhoto'
 
 interface WishlistItem {
   id: string
@@ -48,6 +49,18 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
       <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-3xl" style={{ maxHeight: '85vh', overflowY: 'auto', paddingBottom: 40 }}>
         <div className="flex justify-center pt-3 pb-2"><div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} /></div>
         <div className="px-5 pt-1">
+
+          {/* Restaurant photo hero */}
+          {item.venue.google_place_id && (
+            <div className="-mx-5 mb-5 overflow-hidden" style={{ height: 200 }}>
+              <PlacePhoto
+                placeId={item.venue.google_place_id}
+                width={600}
+                fallbackInitials={item.venue.name.slice(0, 2).toUpperCase()}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          )}
 
           {/* Header */}
           <div className="flex items-start justify-between mb-1">

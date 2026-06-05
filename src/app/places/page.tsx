@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { MemoryWithDetails } from '@/lib/types/database'
 import MemorySheet from '@/components/memory/MemorySheet'
 import WishlistSheet from '@/components/wishlist/WishlistSheet'
+import PlacePhoto from '@/components/ui/PlacePhoto'
 import AddToWishlistButton from '@/components/wishlist/AddToWishlistButton'
 
 interface WishlistItem {
@@ -216,18 +217,31 @@ function WishlistCard({ item, onClick, onRemove }: {
 
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
-      <button onClick={onClick} className="w-full text-left px-4 pt-4 pb-3">
-        <div className="flex items-start justify-between mb-1">
-          <p className="font-semibold text-sm flex-1 mr-3" style={{ color: '#0D4F57' }}>{item.venue.name}</p>
-          {item.priority > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-              style={{ background: `${priorityColors[item.priority]}18`, color: priorityColors[item.priority], border: `0.5px solid ${priorityColors[item.priority]}40` }}>
-              {priorityLabels[item.priority]}
-            </span>
-          )}
+      <button onClick={onClick} className="w-full text-left">
+        <div className="flex">
+          {/* Restaurant photo */}
+          <div className="flex-shrink-0" style={{ width: 88, height: 88, overflow: 'hidden' }}>
+            <PlacePhoto
+              placeId={item.venue.google_place_id}
+              width={200}
+              fallbackInitials={item.venue.name.slice(0, 2).toUpperCase()}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+          <div className="flex-1 px-4 py-3">
+            <div className="flex items-start justify-between mb-1">
+              <p className="font-semibold text-sm flex-1 mr-2 leading-tight" style={{ color: '#0D4F57' }}>{item.venue.name}</p>
+              {item.priority > 0 && (
+                <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                  style={{ background: `${priorityColors[item.priority]}18`, color: priorityColors[item.priority], border: `0.5px solid ${priorityColors[item.priority]}40` }}>
+                  {priorityLabels[item.priority]}
+                </span>
+              )}
+            </div>
+            {item.venue.address && <p className="text-xs mb-1 truncate" style={{ color: '#7D878D' }}>{item.venue.address}</p>}
+            {item.notes && <p className="text-xs italic truncate" style={{ color: '#7D878D' }}>{item.notes}</p>}
+          </div>
         </div>
-        {item.venue.address && <p className="text-xs mb-1" style={{ color: '#7D878D' }}>{item.venue.address}</p>}
-        {item.notes && <p className="text-xs italic" style={{ color: '#7D878D' }}>{item.notes}</p>}
       </button>
       <div className="flex border-t" style={{ borderColor: 'rgba(13,79,87,0.06)' }}>
         <button onClick={onClick}
