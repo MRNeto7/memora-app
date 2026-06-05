@@ -66,8 +66,8 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: '#000', overflow: 'hidden' }}
+      className="fixed inset-0 z-[100] flex flex-col"
+      style={{ background: '#000', overflow: 'hidden', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0"
@@ -86,7 +86,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
       </div>
 
       {/* Media */}
-      <div className="flex-1 flex items-center justify-center px-4 relative" style={{ minHeight: 0 }}>
+      <div className="flex-1 flex items-center justify-center px-4 relative" style={{ minHeight: 0, marginBottom: 0 }}>
         {!url ? (
           <div className="w-16 h-16 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.1)' }} />
         ) : isVideo ? (
@@ -135,7 +135,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
 
       {/* Bottom dots + thumbnails */}
       {photos.length > 1 && (
-        <div className="flex-shrink-0 pb-6 pt-3"
+        <div className="flex-shrink-0 pt-3" style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 8px))' }}
           style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}>
           {/* Dot indicators */}
           <div className="flex justify-center gap-1.5 mb-3">
