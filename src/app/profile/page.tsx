@@ -117,15 +117,16 @@ export default function ProfilePage() {
           </div>
 
           {showVenuePicker && (
-            <div className="px-4 pb-3">
+            <div className="px-4 pb-3" onClick={(e) => e.stopPropagation()}>
               {venueOptions.length === 0 ? (
                 <p className="text-xs" style={{ color: '#7D878D' }}>Save some memories first</p>
               ) : (
                 <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
                   {venueOptions.map(v => (
-                    <button key={v.id} onClick={() => selectFavourite(v)}
+                    <button key={v.id}
+                      onClick={(e) => { e.stopPropagation(); selectFavourite(v) }}
                       className="text-left px-3 py-2 rounded-xl text-sm transition-colors hover:bg-gray-50"
-                      style={{ border: favouriteVenue?.id === v.id ? '1.5px solid #0D4F57' : '1px solid #f0ede8', color: '#0D4F57' }}>
+                      style={{ border: favouriteVenue?.id === v.id ? '1.5px solid #0D4F57' : '1px solid #f0ede8', color: '#0D4F57', width: '100%' }}>
                       <p className="font-medium text-sm">{v.name}</p>
                       {v.address && <p className="text-xs truncate" style={{ color: '#7D878D' }}>{v.address}</p>}
                     </button>
@@ -203,10 +204,7 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Venue picker backdrop */}
-      {showVenuePicker && (
-        <div className="fixed inset-0 z-0" onClick={() => setShowVenuePicker(false)} />
-      )}
+
     </div>
   )
 }
