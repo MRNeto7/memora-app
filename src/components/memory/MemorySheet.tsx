@@ -130,11 +130,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.5)' }} onClick={onClose} />
+      <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
 
       {/* Centred modal card */}
-      <div className="fixed inset-x-4 z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '8vh', maxHeight: '84vh', bottom: 'auto' }}>
+      <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
+        style={{ top: '8vh', maxHeight: '84vh', left: '50%', transform: 'translateX(-50%)', width: 'min(420px, calc(100vw - 32px))' }}>
 
         {/* Close button */}
         <button onClick={onClose}
@@ -501,21 +501,10 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
   }
 
   return (
-    <div className="relative">
-      <img
-        src={url}
-        alt=""
-        style={{ width: '100%', height: 'auto', maxHeight: '50vh', objectFit: 'contain', background: '#f5f2ed', display: 'block' }}
-      />
-      {/* Tap to expand hint */}
-      <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-lg"
-        style={{ background: 'rgba(0,0,0,0.4)' }}>
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
-          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-        </svg>
-        <span style={{ color: '#fff', fontSize: 10 }}>Tap to expand</span>
-      </div>
-    </div>
+    <img
+      src={url}
+      alt=""
+      style={{ width: '100%', height: 'auto', maxHeight: '45vh', objectFit: 'contain', background: '#f5f2ed', display: 'block' }}
+    />
   )
 }

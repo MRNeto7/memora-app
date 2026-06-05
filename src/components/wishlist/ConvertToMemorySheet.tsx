@@ -95,9 +95,9 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
   return (
     <>
-      <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.5)' }} onClick={onClose} />
-      <div className="fixed inset-x-4 z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '8vh', maxHeight: '84vh' }}>
+      <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
+      <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
+        style={{ top: '8vh', maxHeight: '84vh', left: '50%', transform: 'translateX(-50%)', width: 'min(420px, calc(100vw - 32px))' }}>
 
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
