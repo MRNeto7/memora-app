@@ -26,7 +26,7 @@ export default function SocialPage() {
   const [tab, setTab] = useState<'friends' | 'requests' | 'find'>('friends')
   const [friends, setFriends] = useState<FriendProfile[]>([])
   const [requests, setRequests] = useState<FriendRequest[]>([])
-  const [myMemoraId, setMyMemoraId] = useState<string>('')
+  const [myMimoraId, setMyMimoraId] = useState<string>('')
   const [searchId, setSearchId] = useState('')
   const [searchResult, setSearchResult] = useState<{ id: string; memora_id: string; display_name: string | null } | null>(null)
   const [searchError, setSearchError] = useState('')
@@ -43,7 +43,7 @@ export default function SocialPage() {
     if (!user) return
 
     const { data: profile } = await supabase.from('users').select('memora_id').eq('id', user.id).single()
-    if (profile?.memora_id) setMyMemoraId(profile.memora_id)
+    if (profile?.memora_id) setMyMimoraId(profile.memora_id)
 
     const { data: friendReqs } = await supabase
       .from('friend_requests')
@@ -80,7 +80,7 @@ export default function SocialPage() {
     setSearching(true); setSearchError(''); setSearchResult(null)
     const { data } = await supabase.from('users').select('id, memora_id, display_name').eq('memora_id', searchId.trim().toUpperCase()).single()
     if (data) setSearchResult(data)
-    else setSearchError('No user found with that Memora ID.')
+    else setSearchError('No user found with that Mimora ID.')
     setSearching(false)
   }
 
@@ -96,8 +96,8 @@ export default function SocialPage() {
     fetchAll()
   }
 
-  function copyMemoraId() {
-    navigator.clipboard.writeText(myMemoraId)
+  function copyMimoraId() {
+    navigator.clipboard.writeText(myMimoraId)
     setCopySuccess(true)
     setTimeout(() => setCopySuccess(false), 2000)
   }
@@ -112,13 +112,13 @@ export default function SocialPage() {
           <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{friends.length} {friends.length === 1 ? 'friend' : 'friends'}</p>
         </div>
 
-        {myMemoraId && (
+        {myMimoraId && (
           <div className="mx-5 mb-4 px-4 py-3 rounded-2xl flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <div>
-              <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Your Memora ID</p>
-              <p className="text-xl font-bold tracking-widest text-white">{myMemoraId}</p>
+              <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Your Mimora ID</p>
+              <p className="text-xl font-bold tracking-widest text-white">{myMimoraId}</p>
             </div>
-            <button onClick={copyMemoraId} className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+            <button onClick={copyMimoraId} className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
               style={{ background: copySuccess ? '#C9A86A' : 'rgba(255,255,255,0.15)', color: '#fff' }}>
               {copySuccess ? 'Copied!' : 'Copy'}
             </button>
@@ -145,7 +145,7 @@ export default function SocialPage() {
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
               <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>No friends yet</h2>
-              <p className="text-sm mb-4" style={{ color: '#7D878D', maxWidth: 240 }}>Share your Memora ID or search for friends</p>
+              <p className="text-sm mb-4" style={{ color: '#7D878D', maxWidth: 240 }}>Share your Mimora ID or search for friends</p>
               <button onClick={() => setTab('find')} className="px-5 py-2.5 rounded-2xl text-sm font-semibold" style={{ background: '#0D4F57', color: '#EAE5DD' }}>Find friends</button>
             </div>
           ) : (
@@ -184,7 +184,7 @@ export default function SocialPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-sm" style={{ color: '#0D4F57' }}>{req.from_user?.display_name ?? req.from_user?.memora_id}</p>
-                      <p className="text-xs" style={{ color: '#7D878D' }}>Wants to connect on Memora</p>
+                      <p className="text-xs" style={{ color: '#7D878D' }}>Wants to connect on Mimora</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -200,7 +200,7 @@ export default function SocialPage() {
         {tab === 'find' && (
           <div>
             <div className="rounded-2xl p-4 mb-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
-              <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Search by Memora ID</label>
+              <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Search by Mimora ID</label>
               <div className="flex gap-2">
                 <input type="text" placeholder="e.g. MA4829" value={searchId}
                   onChange={e => setSearchId(e.target.value.toUpperCase())}
@@ -228,7 +228,7 @@ export default function SocialPage() {
               )}
             </div>
             <div className="rounded-2xl p-4" style={{ background: 'rgba(201,168,106,0.1)', border: '0.5px solid rgba(201,168,106,0.25)' }}>
-              <p className="text-xs font-semibold mb-2" style={{ color: '#C9A86A' }}>How Memora IDs work</p>
+              <p className="text-xs font-semibold mb-2" style={{ color: '#C9A86A' }}>How Mimora IDs work</p>
               {['Each user has a unique ID like MA4829', 'Share yours so friends can find you', 'Friends see your public memories and wishlist', 'Control privacy in your Profile settings'].map(text => (
                 <div key={text} className="flex items-start gap-2 mb-1.5">
                   <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#C9A86A' }} />

@@ -70,8 +70,8 @@ export default function MapPage() {
               border: '0.5px solid rgba(13,79,87,0.12)',
             }}
           >
-            <img src="/logo.png" alt="Memora" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
-            <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Memora</span>
+            <img src="/logo.png" alt="Mimora" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
+            <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Mimora</span>
             <span className="text-xs" style={{ color: '#7D878D' }}>
               · {memories.length} {memories.length === 1 ? 'memory' : 'memories'}
             </span>

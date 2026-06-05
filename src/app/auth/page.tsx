@@ -72,9 +72,9 @@ export default function AuthPage() {
       {/* Logo */}
       <div className="flex flex-col items-center mb-8">
         <div className="mb-4 rounded-3xl overflow-hidden" style={{ width: 96, height: 96, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-          <Image src="/logo.png" alt="Memora" width={96} height={96} className="w-full h-full object-cover" priority />
+          <Image src="/logo.png" alt="Mimora" width={96} height={96} className="w-full h-full object-cover" priority />
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: '#EAE5DD' }}>Memora</h1>
+        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: '#EAE5DD' }}>Mimora</h1>
         <p className="text-sm mt-1.5" style={{ color: 'rgba(234,229,221,0.55)' }}>Pin your food memories to the map</p>
       </div>
 
@@ -198,7 +198,7 @@ export default function AuthPage() {
         </form>
 
         <p className="text-xs text-center mt-5" style={{ color: '#7D878D' }}>
-          By continuing you agree to Memora's terms and privacy policy.
+          By continuing you agree to Mimora's terms and privacy policy.
         </p>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.memora.ios',
-  appName: 'Memora',
+  appId: 'app.mimora.ios',
+  appName: 'Mimora',
   // Load live from Vercel — no static bundle needed
   // Updates go live instantly when you push to Vercel
   server: {

@@ -4,22 +4,22 @@
 <dict>
   <!-- Camera permission -->
   <key>NSCameraUsageDescription</key>
-  <string>Memora uses your camera to capture food memories.</string>
+  <string>Mimora uses your camera to capture food memories.</string>
 
   <!-- Photo library permission -->
   <key>NSPhotoLibraryUsageDescription</key>
-  <string>Memora accesses your photos to save food memories and read location data.</string>
+  <string>Mimora accesses your photos to save food memories and read location data.</string>
 
   <!-- Photo library add permission -->
   <key>NSPhotoLibraryAddUsageDescription</key>
-  <string>Memora saves photos to your library.</string>
+  <string>Mimora saves photos to your library.</string>
 
   <!-- Location permission -->
   <key>NSLocationWhenInUseUsageDescription</key>
-  <string>Memora uses your location to pin memories on the map.</string>
+  <string>Mimora uses your location to pin memories on the map.</string>
 
   <!-- Microphone (for video) -->
   <key>NSMicrophoneUsageDescription</key>
-  <string>Memora uses the microphone when recording video memories.</string>
+  <string>Mimora uses the microphone when recording video memories.</string>
 </dict>
 </plist>

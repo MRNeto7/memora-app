@@ -11,7 +11,7 @@ interface VenueOption { id: string; name: string; address: string | null }
 export default function ProfilePage() {
   const [email, setEmail] = useState('')
   const [displayName, setDisplayName] = useState('')
-  const [memoraId, setMemoraId] = useState('')
+  const [mimoraId, setMimoraId] = useState('')
   const [stats, setStats] = useState<Stats>({ totalMemories: 0, totalVenues: 0, avgRating: 0 })
   const [favouriteVenue, setFavouriteVenue] = useState<VenueOption | null>(null)
   const [venueOptions, setVenueOptions] = useState<VenueOption[]>([])
@@ -31,7 +31,7 @@ export default function ProfilePage() {
 
     const { data: profile } = await supabase.from('users').select('display_name, memora_id, favourite_venue_id').eq('id', user.id).maybeSingle()
     if (profile?.display_name) setDisplayName(profile.display_name)
-    if (profile?.memora_id) setMemoraId(profile.memora_id)
+    if (profile?.memora_id) setMimoraId(profile.memora_id)
 
     const { data: memories } = await supabase.from('memories').select('rating, venue:venues(id, name, address)')
     if (memories) {
@@ -87,7 +87,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="font-semibold text-white text-base leading-tight">{displayLabel}</p>
-            {memoraId && <p className="text-xs mt-0.5 font-mono tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>{memoraId}</p>}
+            {mimoraId && <p className="text-xs mt-0.5 font-mono tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>{mimoraId}</p>}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">

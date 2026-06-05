@@ -4,7 +4,7 @@ import NavWrapper from '@/components/layout/NavWrapper'
 import MapsProvider from '@/components/layout/MapsProvider'
 
 export const metadata: Metadata = {
-  title: 'Memora',
+  title: 'Mimora',
   description: 'Pin your food memories to the map',
 }
 

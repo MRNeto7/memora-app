@@ -19,15 +19,15 @@ export default function TermsPage() {
         {[
           {
             title: '1. Acceptance',
-            body: `By using Memora, you agree to these Terms of Service. If you do not agree, please do not use the app. We may update these terms from time to time and will notify you of material changes.`
+            body: `By using Mimora, you agree to these Terms of Service. If you do not agree, please do not use the app. We may update these terms from time to time and will notify you of material changes.`
           },
           {
             title: '2. Your account',
-            body: `You are responsible for maintaining the security of your account. You must be 13 years or older to use Memora. One account per person — creating multiple accounts to circumvent restrictions is prohibited.`
+            body: `You are responsible for maintaining the security of your account. You must be 13 years or older to use Mimora. One account per person — creating multiple accounts to circumvent restrictions is prohibited.`
           },
           {
             title: '3. Your content',
-            body: `You retain ownership of all photos, notes, and memories you upload to Memora. By uploading, you grant us a limited licence to store and display your content solely for the purpose of providing the Memora service to you.
+            body: `You retain ownership of all photos, notes, and memories you upload to Mimora. By uploading, you grant us a limited licence to store and display your content solely for the purpose of providing the Mimora service to you.
 
 You agree not to upload content that:
 • Infringes third-party intellectual property rights
@@ -36,7 +36,7 @@ You agree not to upload content that:
           },
           {
             title: '4. Social features',
-            body: `When you make memories or wishlists public, other Memora users can view them. You control this through your Privacy settings. You can make content private again at any time. You are responsible for the content you share publicly.`
+            body: `When you make memories or wishlists public, other Mimora users can view them. You control this through your Privacy settings. You can make content private again at any time. You are responsible for the content you share publicly.`
           },
           {
             title: '5. Service availability',
@@ -48,7 +48,7 @@ You agree not to upload content that:
           },
           {
             title: '7. Liability',
-            body: `Memora is provided "as is". We are not liable for indirect, incidental, or consequential damages arising from your use of the service. Our total liability is limited to the amount you paid to use the service (if any) in the past 12 months.`
+            body: `Mimora is provided "as is". We are not liable for indirect, incidental, or consequential damages arising from your use of the service. Our total liability is limited to the amount you paid to use the service (if any) in the past 12 months.`
           },
           {
             title: '8. Governing law',
@@ -56,7 +56,7 @@ You agree not to upload content that:
           },
           {
             title: 'Contact',
-            body: `For questions about these terms, contact us at legal@memora.app`
+            body: `For questions about these terms, contact us at legal@mimora.app`
           },
         ].map(section => (
           <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
