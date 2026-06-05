@@ -9,6 +9,10 @@ import MemorySheet from '@/components/memory/MemorySheet'
 import MemoryPin from '@/components/map/MemoryPin'
 import AddMemoryButton from '@/components/memory/AddMemoryButton'
 
+interface WishlistVenue {
+  id: string; name: string; lat: number; lng: number; address: string | null
+}
+
 const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
 const DEFAULT_CENTER = { lat: 51.505, lng: -0.09 }
 
@@ -21,7 +25,16 @@ export default function MapPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createClient() as any
 
-  useEffect(() => { fetchMemories() }, [])
+  const [wishlist, setWishlist] = useState<WishlistVenue[]>([])
+  const [showMemories, setShowMemories] = useState(true)
+  const [showWishlist, setShowWishlist] = useState(true)
+
+  useEffect(() => { fetchMemories(); fetchWishlist() }, [])
+
+  async function fetchWishlist() {
+    const { data } = await supabase.from('wishlists').select('id, venue:venues(id, name, lat, lng, address)')
+    if (data) setWishlist(data.map((w: { id: string; venue: WishlistVenue }) => w.venue).filter(Boolean))
+  }
 
   async function fetchMemories() {
     const { data, error } = await supabase
@@ -67,13 +80,34 @@ export default function MapPage() {
           gestureHandling="greedy"
           style={{ width: '100%', height: '100%' }}
         >
+          {showWishlist && wishlist.map(venue => (
+            <AdvancedMarker key={`wish-${venue.id}`} position={{ lat: venue.lat, lng: venue.lng }}>
+              <WishlistPin name={venue.name} />
+            </AdvancedMarker>
+          ))}
           <ClusteredMarkers
-            memories={memories}
+            memories={showMemories ? memories : []}
             selected={selected}
             onSelect={(m) => { setSelected(m); setShowAddSheet(false) }}
           />
         </Map>
       </APIProvider>
+
+      {/* Map toggle */}
+      <div className="absolute top-4 right-4 z-10 flex gap-1.5">
+        <button onClick={() => setShowMemories(v => !v)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+          style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.96)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
+          Memories
+        </button>
+        <button onClick={() => setShowWishlist(v => !v)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+          style={{ background: showWishlist ? '#C9A86A' : 'rgba(234,229,221,0.96)', color: showWishlist ? '#fff' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
+          Wishlist
+        </button>
+      </div>
 
       <AddMemoryButton onClick={() => { setShowAddSheet(true); setSelected(null) }} />
 
@@ -155,5 +189,32 @@ function ClusteredMarkers({
         )
       })}
     </>
+  )
+}
+
+// Wishlist pin — gold bookmark style
+function WishlistPin({ name }: { name: string }) {
+  return (
+    <div className="flex flex-col items-center" style={{ cursor: 'pointer' }}>
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%',
+        background: '#fff',
+        border: '3px solid #C9A86A',
+        boxShadow: '0 2px 8px rgba(201,168,106,0.4)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#C9A86A">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div style={{ width: 2, height: 6, background: '#C9A86A', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C9A86A' }} />
+      <div style={{
+        marginTop: 2, background: 'rgba(255,255,255,0.95)', borderRadius: 6,
+        padding: '2px 6px', fontSize: 10, fontWeight: 600, color: '#0D4F57',
+        maxWidth: 80, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+      }}>{name}</div>
+    </div>
   )
 }
