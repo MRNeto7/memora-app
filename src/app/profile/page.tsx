@@ -29,7 +29,7 @@ export default function ProfilePage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (user?.email) setEmail(user.email)
 
-    const { data: profile } = await supabase.from('users').select('display_name, memora_id, favourite_venue_id').eq('id', user.id).single()
+    const { data: profile } = await supabase.from('users').select('display_name, memora_id, favourite_venue_id').eq('id', user.id).maybeSingle()
     if (profile?.display_name) setDisplayName(profile.display_name)
     if (profile?.memora_id) setMemoraId(profile.memora_id)
 
@@ -155,6 +155,15 @@ export default function ProfilePage() {
           <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: '#7D878D' }}>Settings</p>
 
           <PrivacyToggles />
+
+          <Link href="/bulk-upload" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
+            style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+            <div className="flex-1">
+              <p className="text-sm" style={{ color: '#0D4F57' }}>Bulk upload</p>
+              <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>Import multiple photos from camera roll</p>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0babe" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+          </Link>
 
           <Link href="/settings" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
             style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>

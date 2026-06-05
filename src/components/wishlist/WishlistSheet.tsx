@@ -157,7 +157,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
             {item.venue.google_place_id && (
               <a href={`https://www.google.com/maps/place/?q=place_id:${item.venue.google_place_id}`}
                 target="_blank" rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1.5"
+                className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
                 style={{ background: '#f5f2ed', color: '#0D4F57' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
                 View on Maps
@@ -165,7 +165,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
             )}
             {!editing ? (
               <button onClick={() => setEditing(true)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-start justify-center pt-8 gap-1.5"
+                className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
                 style={{ background: '#f5f2ed', color: '#0D4F57' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Edit

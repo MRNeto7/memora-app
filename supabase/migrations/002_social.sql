@@ -112,3 +112,7 @@ create index if not exists users_memora_id_idx on public.users(memora_id);
 create index if not exists friend_requests_from_idx on public.friend_requests(from_user_id);
 create index if not exists friend_requests_to_idx on public.friend_requests(to_user_id);
 create index if not exists friend_requests_status_idx on public.friend_requests(status);
+
+-- Add favourite_venue_id to users (run this if 002 already ran)
+alter table public.users
+  add column if not exists favourite_venue_id uuid references public.venues(id) on delete set null;

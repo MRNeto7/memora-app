@@ -96,7 +96,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
   return (
     <div>
       <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
-      <div className="fixed inset-0 z-30 flex items-start justify-center pt-8 pointer-events-none" style={{ padding: '12px 16px 88px' }}>
+      <div className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none" style={{ padding: '12px 16px 88px' }}>
       <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
@@ -136,7 +136,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
                 <div key={i} className="relative flex-shrink-0" style={{ width: 80, height: 80 }}>
                   <img src={p.preview} className="w-full h-full object-cover rounded-xl" />
                   <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-start justify-center pt-8 text-white"
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
                     style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>✕</button>
                 </div>
               ))}

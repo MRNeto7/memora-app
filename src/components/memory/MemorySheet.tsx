@@ -445,21 +445,21 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
           {venueDetails?.website && (
             <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
-              className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1"
+              className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
               style={{ background: '#0D4F57', color: '#EAE5DD' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Website
             </a>
           )}
           {venueDetails?.phone && (
-            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1" style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: '#f5f2ed', color: '#0D4F57' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
           )}
           <a href={`https://www.google.com/maps/place/?q=place_id:${memory.venue?.google_place_id ?? ''}`}
             target="_blank" rel="noopener noreferrer"
-            className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1"
+            className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
             style={{ background: '#f5f2ed', color: '#0D4F57' }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
             Details
