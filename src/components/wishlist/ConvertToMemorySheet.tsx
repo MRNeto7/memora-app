@@ -94,10 +94,11 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
   }
 
   return (
-    <>
+    <div>
       <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
-      <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxHeight: '85vh', width: 'min(420px, calc(100vw - 32px))' }}>
+      <div className="fixed inset-0 z-30 flex items-start justify-center pt-8 pointer-events-none" style={{ padding: '12px 16px 88px' }}>
+      <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
+        style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
@@ -109,7 +110,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
             <p className="text-xs mb-0.5" style={{ color: '#7D878D' }}>Saving memory at</p>
             <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>{venue.name}</h2>
           </div>
-          <button onClick={onClose} style={{ color: '#7D878D', fontSize: 18 }}>✕</button>
+          
         </div>
 
         {/* Scrollable body */}
@@ -135,7 +136,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
                 <div key={i} className="relative flex-shrink-0" style={{ width: 80, height: 80 }}>
                   <img src={p.preview} className="w-full h-full object-cover rounded-xl" />
                   <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-start justify-center pt-8 text-white"
                     style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>✕</button>
                 </div>
               ))}
@@ -210,6 +211,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
           <p className="text-center text-xs mt-2" style={{ color: '#b0babe' }}>This will remove it from your wishlist</p>
         </div>
       </div>
-    </>
+    </div>
+    </div>
   )
 }

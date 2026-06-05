@@ -73,21 +73,24 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
 
   return (
     <>
-      <div className="absolute inset-0 z-20" style={{ background: 'rgba(13,79,87,0.4)', bottom: 80 }} onClick={onClose} />
+      <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
 
       {/* Sheet — flex column with fixed footer */}
-      <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxHeight: '85vh', width: 'min(420px, calc(100vw - 32px))' }}>
+      <div className="fixed inset-0 z-30 flex items-start justify-center pt-8 pointer-events-none" style={{ padding: '12px 16px 88px' }}>
+      <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
+        style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
+          <div />
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
           <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Add to wishlist</h2>
-          <button onClick={onClose} style={{ color: '#7D878D', fontSize: 18, lineHeight: 1 }}>✕</button>
+          
         </div>
 
         {/* Scrollable body */}
@@ -156,6 +159,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
           {!canSave && <p className="text-center text-xs mt-2" style={{ color: '#b0babe' }}>Search for a restaurant first</p>}
         </div>
       </div>
+    </div>
     </>
   )
 }

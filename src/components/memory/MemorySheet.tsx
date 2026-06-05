@@ -133,13 +133,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
 
       {/* Centred modal card */}
-      <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxHeight: '85vh', width: 'min(420px, calc(100vw - 32px))' }}>
-
-        {/* Close button */}
-        <button onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D' }}>✕</button>
+      <div className="fixed inset-0 z-30 flex items-start justify-center pt-8 pointer-events-none" style={{ padding: '12px 16px 88px' }}>
+      <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
+        style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto">
@@ -150,7 +146,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           {/* ── ADD MODE ── */}
           {isNew && (
             <div className="px-5 pt-5 pb-4">
-              <h2 className="font-semibold text-base mb-4" style={{ color: '#0D4F57' }}>Save a memory</h2>
+              <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Save a memory</h2>
+              <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+            </div>
 
               {/* Photos */}
               <div className="mb-4">
@@ -159,7 +159,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                     <div key={i} className="relative flex-shrink-0" style={{ width: 80, height: 80 }}>
                       <img src={p.preview} className="w-full h-full object-cover rounded-xl" />
                       <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-start justify-center pt-8 text-white"
                         style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>✕</button>
                     </div>
                   ))}
@@ -241,6 +241,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           </div>
         )}
       </div>
+    </div>
     </>
   )
 }
@@ -260,13 +261,18 @@ function SliderRating({ value, onChange }: { value: number; onChange: (v: number
 // ── Star display ──
 function StarRow({ value, max = 5 }: { value: number; max?: number }) {
   return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: max }, (_, i) => (
-        <div key={i} style={{ position: 'relative', width: 14, height: 14 }}>
-          <span style={{ fontSize: 13, opacity: 0.2 }}>★</span>
-          <span style={{ fontSize: 13, position: 'absolute', left: 0, top: 0, overflow: 'hidden', width: `${Math.min(Math.max((value - i) * 100, 0), 100)}%`, color: '#C9A86A' }}>★</span>
-        </div>
-      ))}
+    <div style={{ display: 'flex', gap: 2, lineHeight: 1 }}>
+      {Array.from({ length: max }, (_, i) => {
+        const fill = Math.min(Math.max(value - i, 0), 1) * 100
+        return (
+          <div key={i} style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
+            {/* Grey base */}
+            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: '#d4cdc3' }}>★</span>
+            {/* Gold fill — clip with overflow hidden */}
+            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: '#C9A86A', overflow: 'hidden', width: `${fill}%`, whiteSpace: 'nowrap' }}>★</span>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -346,10 +352,10 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           onClick={() => setLightboxOpen(true)}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
-            <div className="flex items-center justify-center gap-2 py-2" style={{ background: '#f5f2ed' }}>
+            <div className="flex items-start justify-center pt-8 gap-2 py-2" style={{ background: '#f5f2ed' }}>
               {currentPhoto > 0 && (
                 <button onClick={() => setCurrentPhoto(p => p - 1)}
-                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  className="w-7 h-7 rounded-full flex items-start justify-center pt-8"
                   style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>‹</button>
               )}
               {photos.map((_, i) => (
@@ -358,7 +364,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
               ))}
               {currentPhoto < photos.length - 1 && (
                 <button onClick={() => setCurrentPhoto(p => p + 1)}
-                  className="w-7 h-7 rounded-full flex items-center justify-center"
+                  className="w-7 h-7 rounded-full flex items-start justify-center pt-8"
                   style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>›</button>
               )}
             </div>
@@ -436,21 +442,21 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         <div className="flex gap-2">
           {venueDetails?.website && (
             <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
-              className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1"
+              className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1"
               style={{ background: '#0D4F57', color: '#EAE5DD' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Website
             </a>
           )}
           {venueDetails?.phone && (
-            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1" style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1" style={{ background: '#f5f2ed', color: '#0D4F57' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
           )}
           <a href={`https://www.google.com/maps/place/?q=place_id:${memory.venue?.google_place_id ?? ''}`}
             target="_blank" rel="noopener noreferrer"
-            className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1"
+            className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1"
             style={{ background: '#f5f2ed', color: '#0D4F57' }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
             Details

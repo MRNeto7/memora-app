@@ -57,13 +57,16 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
   }
 
   return (
-    <>
+    <div>
       <div className="fixed inset-0 z-20" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
-      <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxHeight: '85vh', width: 'min(420px, calc(100vw - 32px))' }}>
+      <div className="fixed inset-0 z-30 flex items-start justify-center pt-8 pointer-events-none" style={{ padding: '12px 16px 88px' }}>
+      <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
+        style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
+        {/* Top bar — consistent close button */}
+        <div className="flex items-center justify-end px-4 pt-3 pb-1 flex-shrink-0">
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
         </div>
 
         {/* Scrollable content */}
@@ -83,7 +86,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
             {/* Header */}
             <div className="flex items-start justify-between mb-1">
               <h2 className="text-xl font-semibold leading-tight flex-1 mr-3" style={{ color: '#0D4F57' }}>{item.venue.name}</h2>
-              <button onClick={onClose} style={{ color: '#7D878D', fontSize: 18, marginTop: 2 }}>✕</button>
+              
             </div>
             {item.venue.address && <p className="text-xs mb-1" style={{ color: '#7D878D' }}>{item.venue.address}</p>}
             <p className="text-xs mb-4" style={{ color: '#b0babe' }}>
@@ -139,7 +142,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
           {/* "I've been here" — primary CTA */}
           {!editing && (
             <button onClick={() => setConverting(true)}
-              className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 mb-2"
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-start justify-center pt-8 gap-2 mb-2"
               style={{ background: '#0D4F57', color: '#EAE5DD' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -154,7 +157,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
             {item.venue.google_place_id && (
               <a href={`https://www.google.com/maps/place/?q=place_id:${item.venue.google_place_id}`}
                 target="_blank" rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-center flex items-start justify-center pt-8 gap-1.5"
                 style={{ background: '#f5f2ed', color: '#0D4F57' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
                 View on Maps
@@ -162,7 +165,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
             )}
             {!editing ? (
               <button onClick={() => setEditing(true)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-start justify-center pt-8 gap-1.5"
                 style={{ background: '#f5f2ed', color: '#0D4F57' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Edit
@@ -182,6 +185,6 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
           </div>
         </div>
       </div>
-    </>
+    </div></div>
   )
 }

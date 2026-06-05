@@ -167,17 +167,17 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
     <button onClick={onClick} className="w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform"
       style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
       <div className="flex">
-        <div className="flex-shrink-0" style={{ width: 88, height: 88, background: '#EAE5DD', overflow: 'hidden' }}>
+        <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
-            ? <img src={photoUrl} className="w-full h-full object-cover" />
+            ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
             : <div className="w-full h-full flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#0D4F57' }}>
-                  <span className="text-white text-sm font-semibold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#0D4F57' }}>
+                  <span className="text-white text-xs font-semibold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
                 </div>
               </div>
           }
           {memory.memory_photos.length > 1 && (
-            <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-white" style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>
+            <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md text-white" style={{ background: 'rgba(0,0,0,0.5)', fontSize: 9 }}>
               +{memory.memory_photos.length - 1}
             </div>
           )}
@@ -220,7 +220,7 @@ function WishlistCard({ item, onClick, onRemove }: {
       <button onClick={onClick} className="w-full text-left">
         <div className="flex">
           {/* Restaurant photo */}
-          <div className="flex-shrink-0" style={{ width: 88, height: 88, overflow: 'hidden' }}>
+          <div className="flex-shrink-0" style={{ width: 76, height: 76, overflow: 'hidden', borderRadius: 12, margin: 6 }}>
             <PlacePhoto
               placeId={item.venue.google_place_id}
               width={200}
