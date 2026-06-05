@@ -150,8 +150,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
   return (
     <>
-      <div className="absolute inset-0 z-20" style={{ background: 'rgba(13,79,87,0.4)' }} onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-3xl flex flex-col" style={{ maxHeight: '90vh' }}>
+      <div className="absolute inset-0 z-20" style={{ background: 'rgba(13,79,87,0.4)', bottom: 80 }} onClick={onClose} />
+      <div className="absolute left-0 right-0 z-30 bg-white rounded-t-3xl flex flex-col" style={{ maxHeight: 'calc(90vh - 80px)', bottom: 80 }}>
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
         </div>
