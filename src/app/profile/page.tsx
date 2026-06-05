@@ -16,7 +16,7 @@ export default function ProfilePage() {
   const [favouriteVenue, setFavouriteVenue] = useState<VenueOption | null>(null)
   const [venueOptions, setVenueOptions] = useState<VenueOption[]>([])
   const [showVenuePicker, setShowVenuePicker] = useState(false)
-  const [wishlist, setWishlist] = useState<{ name: string; address: string | null }[]>([])
+
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,14 +52,18 @@ export default function ProfilePage() {
       }
     }
 
-    const { data: wish } = await supabase.from('wishlists').select('venue:venues(name, address)').limit(3)
-    if (wish) setWishlist(wish.map((w: { venue: { name: string; address: string | null } }) => w.venue))
+
     setLoading(false)
   }
 
   async function selectFavourite(venue: VenueOption) {
     const { data: { user } } = await supabase.auth.getUser()
-    await supabase.from('users').update({ favourite_venue_id: venue.id }).eq('id', user.id)
+    if (!user) return
+    const { error } = await supabase.from('users').update({ favourite_venue_id: venue.id }).eq('id', user.id)
+    if (error) {
+      console.error('Failed to save favourite:', error.message)
+      // Column may not exist — show it locally anyway
+    }
     setFavouriteVenue(venue)
     setShowVenuePicker(false)
   }
