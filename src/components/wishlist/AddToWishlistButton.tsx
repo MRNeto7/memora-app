@@ -77,7 +77,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
 
       {/* Sheet — flex column with fixed footer */}
       <div className="fixed z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
-        style={{ top: '8vh', maxHeight: '84vh', left: '50%', transform: 'translateX(-50%)', width: 'min(420px, calc(100vw - 32px))' }}>
+        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxHeight: '85vh', width: 'min(420px, calc(100vw - 32px))' }}>
 
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
