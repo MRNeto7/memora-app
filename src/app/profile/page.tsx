@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -128,10 +128,10 @@ export default function ProfilePage() {
         {/* Settings */}
         <div className="rounded-2xl overflow-hidden mb-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
           <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: '#7D878D' }}>Settings</p>
+          <PrivacyToggles />
           {[
             { label: 'Edit profile', sub: 'Name and avatar' },
             { label: 'Notifications', sub: 'On this day reminders' },
-            { label: 'Privacy', sub: 'Public map and data' },
           ].map((item) => (
             <button key={item.label} className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50"
               style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
@@ -156,5 +156,56 @@ export default function ProfilePage() {
         </button>
       </div>
     </div>
+  )
+}
+
+function PrivacyToggleRow({ label, sub, value, onChange }: { label: string; sub: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="w-full flex items-center px-4 py-3.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+      <div className="flex-1">
+        <p className="text-sm" style={{ color: '#0D4F57' }}>{label}</p>
+        <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>{sub}</p>
+      </div>
+      <button
+        onClick={() => onChange(!value)}
+        className="relative flex-shrink-0"
+        style={{ width: 44, height: 26, borderRadius: 13, background: value ? '#0D4F57' : '#d4cdc3', transition: 'background 0.2s', border: 'none', cursor: 'pointer' }}>
+        <div style={{ position: 'absolute', top: 3, left: value ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+      </button>
+    </div>
+  )
+}
+
+function PrivacyToggles() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any
+  const [memoriesPublic, setMemoriesPublic] = React.useState(false)
+  const [wishlistPublic, setWishlistPublic] = React.useState(false)
+  const [userId, setUserId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUserId(user.id)
+      const { data } = await supabase.from('users').select('profile_public, wishlist_public').eq('id', user.id).single()
+      if (data) { setMemoriesPublic(data.profile_public); setWishlistPublic(data.wishlist_public ?? false) }
+    }
+    load()
+  }, [])
+
+  async function toggle(field: string, value: boolean) {
+    if (!userId) return
+    await supabase.from('users').update({ [field]: value }).eq('id', userId)
+  }
+
+  return (
+    <>
+      <PrivacyToggleRow label="Public memories" sub="Friends can see your public memories" value={memoriesPublic}
+        onChange={v => { setMemoriesPublic(v); toggle('profile_public', v) }} />
+      <PrivacyToggleRow label="Public wishlist" sub="Friends can see your wishlist" value={wishlistPublic}
+        onChange={v => { setWishlistPublic(v); toggle('wishlist_public', v) }} />
+    </>
   )
 }
