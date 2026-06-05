@@ -76,8 +76,8 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
       <div className="absolute inset-0 z-20" style={{ background: 'rgba(13,79,87,0.4)', bottom: 80 }} onClick={onClose} />
 
       {/* Sheet — flex column with fixed footer */}
-      <div className="absolute left-0 right-0 z-30 bg-white rounded-t-3xl flex flex-col"
-        style={{ maxHeight: 'calc(88vh - 80px)', bottom: 80 }}>
+      <div className="fixed inset-x-4 z-30 rounded-3xl bg-white overflow-hidden flex flex-col"
+        style={{ top: '8vh', maxHeight: '84vh' }}>
 
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
