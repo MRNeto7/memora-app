@@ -67,7 +67,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: '#000' }}
+      style={{ background: '#000', overflow: 'hidden' }}
     >
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0"
@@ -86,7 +86,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
       </div>
 
       {/* Media */}
-      <div className="flex-1 flex items-center justify-center px-2 relative">
+      <div className="flex-1 flex items-center justify-center px-4 relative" style={{ minHeight: 0 }}>
         {!url ? (
           <div className="w-16 h-16 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.1)' }} />
         ) : isVideo ? (
@@ -94,7 +94,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
             src={url}
             controls
             playsInline
-            style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 8 }}
+            style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 8, display: 'block' }}
           />
         ) : (
           <img
@@ -103,9 +103,12 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
             style={{
               maxWidth: '100%',
               maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
               objectFit: 'contain',
-              borderRadius: 4,
+              borderRadius: 8,
               userSelect: 'none',
+              display: 'block',
             }}
             draggable={false}
           />
