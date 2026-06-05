@@ -59,7 +59,7 @@ export default function MapPage() {
   }
 
   return (
-    <div style={{ height: 'calc(100vh - 80px)', position: 'relative' }}>
+    <div style={{ height: 'calc(100vh - 80px - env(safe-area-inset-bottom))', position: 'relative', paddingTop: 'env(safe-area-inset-top)' }}>
       {/* Header pill */}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
           <div

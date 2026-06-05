@@ -56,10 +56,10 @@ export default function PlacesPage() {
   }, {} as Record<string, MemoryWithDetails[]>)
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 80 }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
 
       {/* Header */}
-      <div style={{ background: '#0D4F57', paddingTop: 48, paddingBottom: 0 }}>
+      <div style={{ background: '#0D4F57', paddingTop: 'calc(48px + env(safe-area-inset-top))', paddingBottom: 0 }}>
         <div className="px-5 mb-4">
           <h1 className="text-xl font-semibold text-white">Places</h1>
           <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
