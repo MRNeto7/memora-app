@@ -5,6 +5,7 @@ import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage } from '@/lib/exif'
 import PlacesSearch from './PlacesSearch'
+import Lightbox from '@/components/media/Lightbox'
 
 interface PlaceSuggestion {
   placeId: string; name: string; address: string; lat: number; lng: number; rating?: number
@@ -52,14 +53,41 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     const newPhotos: PhotoEntry[] = []
+
     for (const file of files) {
+      // Enforce 15 second limit on videos
+      if (file.type.startsWith('video/')) {
+        const duration = await getVideoDuration(file)
+        if (duration > 15) {
+          alert(`"${file.name}" is ${Math.round(duration)}s — videos must be 15 seconds or under.`)
+          continue
+        }
+      }
+
       const exif = await readPhotoExif(file)
-      newPhotos.push({ file, preview: URL.createObjectURL(file), lat: exif.lat, lng: exif.lng, takenAt: exif.takenAt, exifMessage: getExifMessage(exif) })
+      newPhotos.push({
+        file,
+        preview: URL.createObjectURL(file),
+        lat: exif.lat, lng: exif.lng,
+        takenAt: exif.takenAt,
+        exifMessage: getExifMessage(exif),
+      })
       if (exif.lat && exif.lng && !detectedLat) { setDetectedLat(exif.lat); setDetectedLng(exif.lng) }
       if (exif.takenAt && !detectedDate) setDetectedDate(exif.takenAt)
     }
+
     setPhotos(prev => [...prev, ...newPhotos])
     e.target.value = ''
+  }
+
+  function getVideoDuration(file: File): Promise<number> {
+    return new Promise((resolve) => {
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      video.onloadedmetadata = () => { window.URL.revokeObjectURL(video.src); resolve(video.duration) }
+      video.onerror = () => resolve(0)
+      video.src = URL.createObjectURL(file)
+    })
   }
 
   async function handleSave() {
@@ -139,7 +167,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                     style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}
                     onClick={() => fileInputRef.current?.click()}>
                     <span style={{ fontSize: photos.length === 0 ? 24 : 18 }}>📷</span>
-                    <span className="text-xs mt-1" style={{ color: '#C9A86A' }}>{photos.length === 0 ? 'Add photos' : '+'}</span>
+                    <span className="text-xs mt-1 text-center px-1" style={{ color: '#C9A86A', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
                   </div>
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handlePhotoSelect} />
@@ -248,6 +276,7 @@ interface VenueDetails { website: string | null; phone: string | null; openNow: 
 
 function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onUpdate: () => void }) {
   const [currentPhoto, setCurrentPhoto] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
   const [editing, setEditing] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -310,10 +339,11 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
   }
 
   return (
-    <div>
+    <>
       {/* Photos — square crop, natural and clean */}
       {photos.length > 0 && (
-        <div className="relative overflow-hidden" style={{ background: '#f5f2ed' }}>
+        <div className="relative overflow-hidden cursor-pointer" style={{ background: '#f5f2ed' }}
+          onClick={() => setLightboxOpen(true)}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
             <div className="flex items-center justify-center gap-2 py-2" style={{ background: '#f5f2ed' }}>
@@ -427,7 +457,12 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           </a>
         </div>
       </div>
-    </div>
+
+    {/* Fullscreen lightbox */}
+    {lightboxOpen && (
+      <Lightbox photos={photos} initialIndex={currentPhoto} onClose={() => setLightboxOpen(false)} />
+    )}
+  </>
   )
 }
 
@@ -448,24 +483,39 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
   const [url, setUrl] = useState<string | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createClient() as any
+  const isVideo = storagePath.match(/\.(mp4|mov|webm|m4v)$/i)
+
   useEffect(() => {
     supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
       .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
   }, [storagePath])
+
   if (!url) return <div className="animate-pulse" style={{ height: 200, background: '#EAE5DD' }} />
-  // Natural aspect ratio — image dictates its own height, capped at 50vh
+
+  if (isVideo) {
+    return (
+      <div className="relative" style={{ background: '#111' }}>
+        <video src={url} controls playsInline style={{ width: '100%', maxHeight: '50vh', display: 'block' }} />
+      </div>
+    )
+  }
+
   return (
-    <img
-      src={url}
-      alt=""
-      style={{
-        width: '100%',
-        height: 'auto',
-        maxHeight: '50vh',
-        objectFit: 'contain',
-        background: '#f5f2ed',
-        display: 'block',
-      }}
-    />
+    <div className="relative">
+      <img
+        src={url}
+        alt=""
+        style={{ width: '100%', height: 'auto', maxHeight: '50vh', objectFit: 'contain', background: '#f5f2ed', display: 'block' }}
+      />
+      {/* Tap to expand hint */}
+      <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-lg"
+        style={{ background: 'rgba(0,0,0,0.4)' }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
+          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+        <span style={{ color: '#fff', fontSize: 10 }}>Tap to expand</span>
+      </div>
+    </div>
   )
 }
