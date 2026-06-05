@@ -135,8 +135,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
 
       {/* Bottom dots + thumbnails */}
       {photos.length > 1 && (
-        <div className="flex-shrink-0 pt-3" style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 8px))' }}
-          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}>
+        <div className="flex-shrink-0 pt-3" style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 8px))', background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}>
           {/* Dot indicators */}
           <div className="flex justify-center gap-1.5 mb-3">
             {photos.map((_, i) => (
