@@ -61,7 +61,7 @@ export default function MapPage() {
   return (
     <div style={{ height: 'calc(100vh - 80px - env(safe-area-inset-bottom))', position: 'relative', paddingTop: 'env(safe-area-inset-top)' }}>
       {/* Header pill */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
+        <div className="absolute left-4 right-4 z-10 flex items-center justify-between pointer-events-none" style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}>
           <div
             className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl pointer-events-auto"
             style={{
@@ -109,7 +109,7 @@ export default function MapPage() {
         </Map>
 
       {/* Map toggle */}
-      <div className="absolute top-4 right-4 z-10 flex gap-1.5">
+      <div className="absolute right-4 z-10 flex gap-1.5" style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}>
         <button onClick={() => setShowMemories(v => !v)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
           style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.96)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>

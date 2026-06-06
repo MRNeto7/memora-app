@@ -16,6 +16,8 @@ export default function BottomNav() {
         backdropFilter: 'blur(12px)',
         borderTop: '0.5px solid rgba(13,79,87,0.12)',
         paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
       }}
     >
       <div className="flex items-end justify-around px-2 pt-2 pb-3 relative">
