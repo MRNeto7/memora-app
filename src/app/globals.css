@@ -30,11 +30,8 @@ body {
   background: var(--stone);
   color: var(--teal);
   margin: 0;
-  /* Account for iOS safe areas */
-  padding-top: env(safe-area-inset-top);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-  /* Bottom padding handled per-page */
+  padding: 0;
+  /* Safe areas handled per-component */
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }

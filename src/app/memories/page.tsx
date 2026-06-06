@@ -40,7 +40,7 @@ export default function MemoriesPage() {
       {/* Header */}
       <div
         className="px-5 pb-4"
-        style={{ background: '#0D4F57', paddingTop: 'calc(48px + env(safe-area-inset-top))' }}
+        style={{ background: '#0D4F57', paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}
       >
         <h1 className="text-xl font-semibold text-white">My memories</h1>
         <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
