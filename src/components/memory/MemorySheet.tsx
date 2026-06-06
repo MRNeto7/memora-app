@@ -130,7 +130,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed z-20" style={{ top: 0, left: 0, right: 0, bottom: 0 }} style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
+      <div className="fixed z-20" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
 
       {/* Centred modal card */}
       <div className="fixed z-30 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(var(--safe-top) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(var(--safe-bottom) + 80px)' }}>
