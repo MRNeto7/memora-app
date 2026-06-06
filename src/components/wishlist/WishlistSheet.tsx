@@ -155,13 +155,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
           {/* Secondary actions */}
           <div className="flex gap-2">
             {item.venue.google_place_id && (
-              <a href={`https://www.google.com/maps/place/?q=place_id:${item.venue.google_place_id}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-                style={{ background: '#f5f2ed', color: '#0D4F57' }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
-                View on Maps
-              </a>
+              <VenueWebsiteButton placeId={item.venue.google_place_id} venueName={item.venue.name} address={item.venue.address} />
             )}
             {!editing ? (
               <button onClick={() => setEditing(true)}
@@ -186,5 +180,37 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
         </div>
       </div>
     </div></div>
+  )
+}
+
+function VenueWebsiteButton({ placeId, venueName, address }: { placeId: string | null; venueName: string; address: string | null }) {
+  const [website, setWebsite] = useState<string | null>(null)
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    if (!placeId) { setChecked(true); return }
+    fetch(`/api/venue-details?placeId=${placeId}`)
+      .then(r => r.json())
+      .then(data => { setWebsite(data.website ?? null); setChecked(true) })
+      .catch(() => setChecked(true))
+  }, [placeId])
+
+  // Build the best URL available
+  const url = website
+    ?? `https://www.google.com/search?q=${encodeURIComponent(`${venueName} ${address ?? ''}`.trim())}`
+
+  const label = website ? 'Website' : 'Search Google'
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
+      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: checked ? 1 : 0.7 }}>
+      {website ? (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      ) : (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      )}
+      {checked ? label : '…'}
+    </a>
   )
 }

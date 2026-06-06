@@ -457,12 +457,13 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
               Call
             </a>
           )}
-          <a href={`https://www.google.com/maps/place/?q=place_id:${memory.venue?.google_place_id ?? ''}`}
+          <a href={venueDetails?.website
+              ?? `https://www.google.com/search?q=${encodeURIComponent(((memory.venue?.name ?? '') + ' ' + (memory.venue?.address ?? '')).trim())}`}
             target="_blank" rel="noopener noreferrer"
             className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
             style={{ background: '#f5f2ed', color: '#0D4F57' }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-            Details
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            {venueDetails?.website ? 'Website' : 'Search'}
           </a>
         </div>
       </div>
