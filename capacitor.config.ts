@@ -8,18 +8,15 @@ const config: CapacitorConfig = {
     cleartext: false,
   },
   ios: {
-    contentInset: 'automatic',
+    contentInset: 'never',
     scrollEnabled: false,
     backgroundColor: '#0D4F57',
-    limitsNavigationsToAppBoundDomains: true,
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
       backgroundColor: '#0D4F57',
-      iosSpinnerStyle: 'small',
-      spinnerColor: '#C9A86A',
       showSpinner: false,
       splashFullScreen: true,
       splashImmersive: true,

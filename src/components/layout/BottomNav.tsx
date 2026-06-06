@@ -15,7 +15,7 @@ export default function BottomNav() {
         background: 'rgba(234,229,221,0.96)',
         backdropFilter: 'blur(12px)',
         borderTop: '0.5px solid rgba(13,79,87,0.12)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingBottom: 'var(--safe-bottom)',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
       }}

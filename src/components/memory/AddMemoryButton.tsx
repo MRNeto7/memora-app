@@ -12,7 +12,7 @@ export default function AddMemoryButton({ onClick }: AddMemoryButtonProps) {
       style={{
         background: '#0D4F57',
         boxShadow: '0 4px 20px rgba(13,79,87,0.35)',
-        bottom: 'calc(env(safe-area-inset-bottom) + 96px)',
+        bottom: 'calc(var(--safe-bottom) + 96px)',
       }}
     >
       <span style={{ color: '#C9A86A', fontSize: 18, lineHeight: 1 }}>+</span>

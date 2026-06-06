@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import NavWrapper from '@/components/layout/NavWrapper'
 import MapsProvider from '@/components/layout/MapsProvider'
+import SafeAreaProvider from '@/components/layout/SafeAreaProvider'
 
 export const metadata: Metadata = {
   title: 'Mimora',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <SafeAreaProvider />
         <MapsProvider>
           {children}
           <NavWrapper />

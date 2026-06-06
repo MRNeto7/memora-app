@@ -67,7 +67,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
   return (
     <div
       className="fixed inset-0 z-[100] flex flex-col"
-      style={{ background: '#000', overflow: 'hidden', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ background: '#000', overflow: 'hidden', paddingBottom: 'var(--safe-bottom)' }}
     >
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0"
