@@ -67,7 +67,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         venue_id: venue.id,
         dish_name: dishName || null,
         notes: notes || null,
-        rating: overall > 0 ? overall : null,
+        rating: overall > 0 ? parseFloat(overall.toFixed(1)) : null,
         is_public: false,
         visited_at: new Date(visitDate).toISOString(),
       }).select().single()

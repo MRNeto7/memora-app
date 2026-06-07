@@ -95,7 +95,7 @@ export default function CapturePage() {
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId,
         dish_name: dishName || null, notes: notes || null,
-        rating: overall > 0 ? overall : null,
+        rating: overall > 0 ? parseFloat(overall.toFixed(1)) : null,
         is_public: false,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
       }).select().single()
