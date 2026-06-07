@@ -5,7 +5,7 @@ import Link from 'next/link'
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
-      <div className="px-5 pb-5" className="page-header">
+      <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3">
           <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
