@@ -170,9 +170,9 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
         <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
             ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
-            : <div className="w-full h-full flex items-center justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#0D4F57' }}>
-                  <span className="text-white text-xs font-semibold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
+            : <div className="w-full h-full flex items-center justify-center" style={{ background: '#f0ede8' }}>
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: '#0D4F57' }}>
+                  <span className="text-white text-xs font-bold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
                 </div>
               </div>
           }
@@ -182,24 +182,25 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
             </div>
           )}
         </div>
-        <div className="flex-1 px-4 py-3">
-          <div className="flex items-start justify-between mb-1">
-            <p className="font-semibold text-sm" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Unknown'}</p>
+        <div className="flex-1 px-3 py-3 min-w-0">
+          <div className="flex items-start justify-between mb-0.5">
+            <p className="font-semibold text-sm leading-tight flex-1 mr-2" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Unknown'}</p>
             {memory.rating && (
-              <div className="flex items-center gap-0.5 ml-2 flex-shrink-0">
-                <span style={{ fontSize: 11 }}>⭐</span>
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                <span style={{ fontSize: 10 }}>⭐</span>
                 <span className="text-xs font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}</span>
               </div>
             )}
           </div>
-          {memory.venue?.address && <p className="text-xs mb-1 truncate" style={{ color: '#7D878D' }}>{memory.venue.address}</p>}
-          {memory.dish_name && <p className="text-xs italic mb-1" style={{ color: '#7D878D' }}>{memory.dish_name}</p>}
+          {memory.venue?.address && (
+            <p className="text-xs mb-0.5" style={{ color: '#7D878D', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+              {memory.venue.address}
+            </p>
+          )}
+          {memory.dish_name && <p className="text-xs italic mb-0.5" style={{ color: '#7D878D' }}>{memory.dish_name}</p>}
           <p className="text-xs" style={{ color: '#b0babe' }}>
             {new Date(memory.visited_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
           </p>
-        </div>
-        <div className="flex items-center pr-3" style={{ color: '#b0babe' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
     </button>
@@ -238,7 +239,7 @@ function WishlistCard({ item, onClick, onRemove }: {
                 </span>
               )}
             </div>
-            {item.venue.address && <p className="text-xs mb-1 truncate" style={{ color: '#7D878D' }}>{item.venue.address}</p>}
+            {item.venue.address && <p className="text-xs mb-1" style={{ color: '#7D878D', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{item.venue.address}</p>}
             {item.notes && <p className="text-xs italic truncate" style={{ color: '#7D878D' }}>{item.notes}</p>}
           </div>
         </div>

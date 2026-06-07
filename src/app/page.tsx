@@ -60,23 +60,7 @@ export default function MapPage() {
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-      {/* Header pill */}
-        <div className="absolute left-4 right-4 z-10 flex items-center justify-between pointer-events-none" style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
-          <div
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl pointer-events-auto"
-            style={{
-              background: 'rgba(234,229,221,0.96)',
-              backdropFilter: 'blur(12px)',
-              border: '0.5px solid rgba(13,79,87,0.12)',
-            }}
-          >
-            <img src="/logo.png" alt="Mimora" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
-            <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Mimora</span>
-            <span className="text-xs" style={{ color: '#7D878D' }}>
-              · {memories.length} {memories.length === 1 ? 'memory' : 'memories'}
-            </span>
-          </div>
-        </div>
+
 
         <Map
           defaultCenter={DEFAULT_CENTER}
@@ -108,20 +92,31 @@ export default function MapPage() {
           />
         </Map>
 
-      {/* Map toggle */}
-      <div className="absolute right-4 z-10 flex gap-1.5" style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
-        <button onClick={() => setShowMemories(v => !v)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-          style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.96)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
-          <div className="w-2.5 h-2.5 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
-          Memories
-        </button>
-        <button onClick={() => setShowWishlist(v => !v)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-          style={{ background: showWishlist ? '#C9A86A' : 'rgba(234,229,221,0.96)', color: showWishlist ? '#fff' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
-          <div className="w-2.5 h-2.5 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
-          Wishlist
-        </button>
+      {/* Unified header bar */}
+      <div className="absolute left-0 right-0 z-10 flex items-center justify-between px-4"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', pointerEvents: 'none' }}>
+        {/* Logo + count */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl pointer-events-auto"
+          style={{ background: 'rgba(234,229,221,0.96)', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+          <img src="/logo.png" alt="Mimora" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover' }} />
+          <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Mimora</span>
+          <span className="text-xs" style={{ color: '#7D878D' }}>· {memories.length}</span>
+        </div>
+        {/* Toggles */}
+        <div className="flex gap-1.5 pointer-events-auto">
+          <button onClick={() => setShowMemories(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.96)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
+            Memories
+          </button>
+          <button onClick={() => setShowWishlist(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            style={{ background: showWishlist ? '#C9A86A' : 'rgba(234,229,221,0.96)', color: showWishlist ? '#fff' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
+            Wishlist
+          </button>
+        </div>
       </div>
 
       <AddMemoryButton onClick={() => { setShowAddSheet(true); setSelected(null) }} />

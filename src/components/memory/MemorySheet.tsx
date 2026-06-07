@@ -135,7 +135,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       {/* Centred modal card */}
       <div className="fixed z-30 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
       <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
-        style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
+        style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto">
@@ -159,7 +159,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                     <div key={i} className="relative flex-shrink-0" style={{ width: 80, height: 80 }}>
                       <img src={p.preview} className="w-full h-full object-cover rounded-xl" />
                       <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-start justify-center pt-8 text-white"
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
                         style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>✕</button>
                     </div>
                   ))}
@@ -352,10 +352,10 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           onClick={() => setLightboxOpen(true)}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
-            <div className="flex items-start justify-center pt-8 gap-2 py-2" style={{ background: '#f5f2ed' }}>
+            <div className="flex items-center justify-center gap-2 py-2" style={{ background: '#f5f2ed' }}>
               {currentPhoto > 0 && (
                 <button onClick={() => setCurrentPhoto(p => p - 1)}
-                  className="w-7 h-7 rounded-full flex items-start justify-center pt-8"
+                  className="w-7 h-7 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>‹</button>
               )}
               {photos.map((_, i) => (
@@ -364,7 +364,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
               ))}
               {currentPhoto < photos.length - 1 && (
                 <button onClick={() => setCurrentPhoto(p => p + 1)}
-                  className="w-7 h-7 rounded-full flex items-start justify-center pt-8"
+                  className="w-7 h-7 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>›</button>
               )}
             </div>

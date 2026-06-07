@@ -137,12 +137,12 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
         </div>
 
         {/* Fixed footer */}
-        <div className="flex-shrink-0 px-5 pt-3 pb-5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="flex-shrink-0 px-5 pt-3 pb-4" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
 
           {/* "I've been here" — primary CTA */}
           {!editing && (
             <button onClick={() => setConverting(true)}
-              className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-start justify-center pt-8 gap-2 mb-2"
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 mb-2"
               style={{ background: '#0D4F57', color: '#EAE5DD' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
