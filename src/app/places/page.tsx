@@ -268,21 +268,7 @@ function WishlistCard({ item, onClick, onRemove }: {
           </div>
         </div>
       </button>
-      <div className="flex border-t" style={{ borderColor: 'rgba(13,79,87,0.06)' }}>
-        <button onClick={onClick}
-          className="flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5"
-          style={{ color: '#0D4F57' }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-          View
-        </button>
-        <div style={{ width: '0.5px', background: 'rgba(13,79,87,0.06)' }} />
-        <button onClick={onRemove}
-          className="flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1.5"
-          style={{ color: '#a32d2d' }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          Remove
-        </button>
-      </div>
+
     </div>
   )
 }

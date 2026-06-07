@@ -201,13 +201,7 @@ function VenueWebsiteButton({ placeId, venueName, address }: { placeId: string |
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-      className="flex-1 py-3 rounded-xl text-xs font-semibold"
-      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: checked ? 1 : 0.7, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, lineHeight: 1 }}>
-      {website ? (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      ) : (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      )}
+      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: checked ? 1 : 0.7, flex: 1, padding: '12px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, textAlign: 'center', display: 'block', lineHeight: 1 }}>
       {checked ? label : '…'}
     </a>
   )
