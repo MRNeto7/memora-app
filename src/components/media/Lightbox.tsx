@@ -70,8 +70,8 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
       style={{ background: '#000', overflow: 'hidden', paddingBottom: 'var(--safe-bottom)' }}
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0"
-        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)' }}>
+      <div className="flex items-center justify-between px-4 pb-2 flex-shrink-0"
+        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}>
         <button onClick={onClose}
           className="w-9 h-9 rounded-full flex items-center justify-center"
           style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 18 }}>

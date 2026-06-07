@@ -212,7 +212,7 @@ export default function BulkUploadPage() {
   const saved = groups.filter(g => g.saved)
 
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{ background: '#EAE5DD', minHeight: '100vh', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3 mb-1">

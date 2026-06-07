@@ -135,10 +135,10 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       {/* Centred modal card */}
       <div className="fixed z-30 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
       <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
-        style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
+        style={{ maxHeight: '82vh', width: 'min(420px, 100%)', display: 'flex', flexDirection: 'column' }}>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 8 }}>
 
           {/* ── VIEW MODE ── */}
           {!isNew && (
@@ -449,9 +449,6 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           </div>
         )}
 
-        {/* Delete */}
-        <DeleteMemoryButton memoryId={memory.id} onDeleted={onUpdate} />
-
         {/* Action buttons */}
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
           {venueDetails?.website && (
@@ -476,6 +473,11 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             {venueDetails?.website ? 'Website' : 'Search'}
           </a>
+        </div>
+
+        {/* Delete — below all action buttons */}
+        <div className="mt-3 pb-2">
+          <DeleteMemoryButton memoryId={memory.id} onDeleted={onUpdate} />
         </div>
       </div>
 
