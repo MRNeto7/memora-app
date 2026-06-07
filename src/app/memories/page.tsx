@@ -36,11 +36,11 @@ export default function MemoriesPage() {
   }, {} as Record<string, MemoryWithDetails[]>)
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--stone)', paddingBottom: 'var(--nav-total)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--stone)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
       <div
         className="px-5 pb-4"
-        style={{ background: '#0D4F57', paddingTop: 'calc(var(--safe-top) + 16px)' }}
+        className="page-header"
       >
         <h1 className="text-xl font-semibold text-white">My memories</h1>
         <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>

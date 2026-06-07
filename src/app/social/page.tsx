@@ -105,8 +105,8 @@ export default function SocialPage() {
   if (selectedFriend) return <FriendMemories friend={selectedFriend} onBack={() => setSelectedFriend(null)} />
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'var(--nav-total)' }}>
-      <div style={{ background: '#0D4F57', paddingTop: 'calc(var(--safe-top) + 16px)', paddingBottom: 0 }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="page-header" style={{ paddingBottom: 0 }}>
         <div className="px-5 mb-4">
           <h1 className="text-xl font-semibold text-white">Social</h1>
           <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{friends.length} {friends.length === 1 ? 'friend' : 'friends'}</p>

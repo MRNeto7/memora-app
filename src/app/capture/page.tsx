@@ -26,7 +26,7 @@ export default function CapturePage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-6 text-center"
-      style={{ background: 'var(--stone)', paddingBottom: 'var(--nav-total)' }}
+      style={{ background: 'var(--stone)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
     >
       {/* Camera icon */}
       <div
