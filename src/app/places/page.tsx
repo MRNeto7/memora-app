@@ -220,10 +220,7 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
           <div className="flex items-start justify-between mb-0.5">
             <p className="font-semibold text-sm leading-tight flex-1 mr-2" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Unknown'}</p>
             {memory.rating && (
-              <div className="flex items-center gap-0.5 flex-shrink-0">
-                <span style={{ fontSize: 10 }}>⭐</span>
-                <span className="text-xs font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}</span>
-              </div>
+              <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#C9A86A' }}>{memory.rating} ⭐</span>
             )}
           </div>
           {memory.venue?.address && (

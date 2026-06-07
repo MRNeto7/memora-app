@@ -411,8 +411,8 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
         {memory.rating && (
           <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
             <div className="flex items-center gap-1.5 flex-1">
-              <StarRow value={memory.rating} max={5} />
-              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/10</span>
+              <span className="text-xl font-bold" style={{ color: '#C9A86A' }}>{memory.rating}</span>
+              <span className="text-sm" style={{ color: '#C9A86A' }}>/ 10 ⭐</span>
             </div>
             {venueDetails?.rating && (
               <span className="text-xs" style={{ color: '#7D878D' }}>Google {venueDetails.rating}★</span>
