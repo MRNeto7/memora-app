@@ -141,7 +141,15 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         <div className="flex-1 overflow-y-auto">
 
           {/* ── VIEW MODE ── */}
-          {!isNew && <MemoryDetailView memory={memory} onUpdate={onUpdate} />}
+          {!isNew && (
+            <>
+              <div className="flex items-center justify-end px-4 pt-3 pb-1 flex-shrink-0">
+                <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+              </div>
+              <MemoryDetailView memory={memory} onUpdate={onUpdate} />
+            </>
+          )}
 
           {/* ── ADD MODE ── */}
           {isNew && (

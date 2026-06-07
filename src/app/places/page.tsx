@@ -25,6 +25,7 @@ interface WishlistItem {
 
 export default function PlacesPage() {
   const [tab, setTab] = useState<'memories' | 'wishlist'>('memories')
+  const [sortBy, setSortBy] = useState<'date' | 'name' | 'rating'>('date')
   const [memories, setMemories] = useState<MemoryWithDetails[]>([])
   const [wishlist, setWishlist] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,13 +48,20 @@ export default function PlacesPage() {
     setLoading(false)
   }
 
-  // Group memories by month
-  const grouped = memories.reduce((acc, m) => {
-    const key = new Date(m.visited_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-    if (!acc[key]) acc[key] = []
-    acc[key].push(m)
-    return acc
-  }, {} as Record<string, MemoryWithDetails[]>)
+  // Sort and group memories
+  const sortedMemories = [...memories].sort((a, b) => {
+    if (sortBy === 'name') return (a.venue?.name ?? '').localeCompare(b.venue?.name ?? '')
+    if (sortBy === 'rating') return (b.rating ?? 0) - (a.rating ?? 0)
+    return new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime()
+  })
+  const grouped = sortBy === 'date'
+    ? sortedMemories.reduce((acc, m) => {
+        const key = new Date(m.visited_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase()
+        if (!acc[key]) acc[key] = []
+        acc[key].push(m)
+        return acc
+      }, {} as Record<string, MemoryWithDetails[]>)
+    : { [sortBy === 'name' ? 'A–Z' : 'Top rated']: sortedMemories }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
@@ -84,6 +92,22 @@ export default function PlacesPage() {
 
       {/* Content */}
       <div className="flex-1 px-4 pt-4">
+        {/* Sort bar */}
+        {tab === 'memories' && memories.length > 1 && (
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+            {([['date', '📅 Date'], ['name', '🔤 Name'], ['rating', '⭐ Rating']] as const).map(([opt, label]) => (
+              <button key={opt} onClick={() => setSortBy(opt)}
+                className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
+                style={{
+                  background: sortBy === opt ? '#0D4F57' : '#fff',
+                  color: sortBy === opt ? '#EAE5DD' : '#7D878D',
+                  border: `0.5px solid ${sortBy === opt ? '#0D4F57' : 'rgba(13,79,87,0.12)'}`,
+                }}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <p className="text-sm" style={{ color: '#7D878D' }}>Loading…</p>
