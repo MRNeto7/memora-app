@@ -154,9 +154,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
 
           {/* Secondary actions */}
           <div className="flex gap-2">
-            {item.venue.google_place_id && (
-              <VenueWebsiteButton placeId={item.venue.google_place_id} venueName={item.venue.name} address={item.venue.address} />
-            )}
+            <VenueWebsiteButton placeId={item.venue.google_place_id} venueName={item.venue.name} address={item.venue.address} />
             {!editing ? (
               <button onClick={() => setEditing(true)}
                 className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
@@ -203,8 +201,8 @@ function VenueWebsiteButton({ placeId, venueName, address }: { placeId: string |
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-      className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: checked ? 1 : 0.7 }}>
+      className="flex-1 py-3 rounded-xl text-xs font-semibold"
+      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: checked ? 1 : 0.7, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, lineHeight: 1 }}>
       {website ? (
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       ) : (
