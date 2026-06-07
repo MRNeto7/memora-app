@@ -42,10 +42,6 @@ export default function BottomNav() {
 
   const isActive = (href: string) => href === '/places' ? pathname.startsWith('/places') : pathname === href
 
-  function handleCameraPress() {
-    fileInputRef.current?.click()
-  }
-
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
@@ -111,15 +107,8 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* Hidden file input — no navigate, just picks file */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*,video/*"
-        multiple
-        className="hidden"
-        onChange={handleFileChange}
-      />
+      {/* File input rendered invisibly over the camera button — direct tap, no JS trigger */}
+      {/* This avoids Capacitor WebView crash from programmatic .click() */}
 
       {/* Full-screen save form — slides up over current page */}
       {showForm && (
@@ -233,13 +222,30 @@ export default function BottomNav() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive('/places') ? 2 : 1.5}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           </NavItem>
 
-          {/* Camera button — triggers file picker directly */}
-          <button onClick={handleCameraPress} className="flex flex-col items-center gap-0.5" style={{ minWidth: 48 }}>
+          {/* Camera button — input overlaid directly so iOS treats it as direct tap */}
+          <div className="flex flex-col items-center gap-0.5 relative" style={{ minWidth: 48 }}>
             <div style={{ color: '#7D878D' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
             <span style={{ fontSize: 10, color: '#7D878D', fontWeight: 400 }}>Capture</span>
-          </button>
+            {/* Input sits on top of the button, invisible — direct native tap */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              onChange={handleFileChange}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                opacity: 0,
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer',
+                fontSize: 0,
+              }}
+            />
+          </div>
 
           {/* Map — centre elevated */}
           <div className="flex flex-col items-center -mt-6">
