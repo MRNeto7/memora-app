@@ -23,7 +23,7 @@ interface ConvertToMemorySheetProps {
 function calcOverall(food: number, service: number, ambiance: number): number {
   const vals = [food, service, ambiance].filter(v => v > 0)
   if (!vals.length) return 0
-  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length / 10 * 5) * 10) / 10
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10
 }
 
 export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSaved }: ConvertToMemorySheetProps) {
@@ -67,7 +67,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         venue_id: venue.id,
         dish_name: dishName || null,
         notes: notes || null,
-        rating: overall > 0 ? Math.round(overall) : null,
+        rating: overall > 0 ? overall : null,
         is_public: false,
         visited_at: new Date(visitDate).toISOString(),
       }).select().single()
@@ -184,7 +184,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
             {overall > 0 && (
               <div className="flex items-center gap-2 pt-3" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
                 <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/5</span>
+                <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
               </div>
             )}
           </div>

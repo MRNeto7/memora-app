@@ -182,13 +182,14 @@ export default function PlacesPage() {
 
 function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [imgLoaded, setImgLoaded] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createClient() as any
   const firstPhoto = memory.memory_photos?.[0]
 
   useEffect(() => {
     if (!firstPhoto) return
-    supabase.storage.from('memory-photos').createSignedUrl(firstPhoto.storage_path, 3600)
+    supabase.storage.from('memory-photos').createSignedUrl(firstPhoto.storage_path, 86400)
       .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setPhotoUrl(data.signedUrl) })
   }, [firstPhoto?.storage_path])
 
@@ -196,9 +197,13 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
     <button onClick={onClick} className="w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform"
       style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
       <div className="flex">
-        <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
+        <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0, position: 'relative' }}>
           {photoUrl
-            ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
+            ? <>
+                {!imgLoaded && <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD', position: 'absolute', inset: 0 }} />}
+                <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block', opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.3s' }}
+                  onLoad={() => setImgLoaded(true)} />
+              </>
             : <div className="w-full h-full flex items-center justify-center" style={{ background: '#f0ede8' }}>
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: '#0D4F57' }}>
                   <span className="text-white text-xs font-bold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>

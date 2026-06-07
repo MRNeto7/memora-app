@@ -19,7 +19,7 @@ interface DetailRatings { food: number; service: number; ambiance: number }
 function calcOverall(r: DetailRatings): number {
   const vals = [r.food, r.service, r.ambiance].filter(v => v > 0)
   if (!vals.length) return 0
-  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length / 10 * 5) * 10) / 10
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10
 }
 
 export default function BottomNav() {
@@ -114,7 +114,7 @@ export default function BottomNav() {
       const overall = calcOverall(ratings)
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId, dish_name: dishName || null, notes: notes || null,
-        rating: overall > 0 ? Math.round(overall) : null, is_public: false,
+        rating: overall > 0 ? overall : null, is_public: false,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
       }).select().single()
 
@@ -219,7 +219,7 @@ export default function BottomNav() {
                 {overall > 0 && (
                   <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
                     <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                    <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/5</span>
+                    <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
                   </div>
                 )}
               </div>

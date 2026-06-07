@@ -96,7 +96,7 @@ export default function ProfilePage() {
           {[
             { label: 'Memories', value: stats.totalMemories },
             { label: 'Places', value: stats.totalVenues },
-            { label: 'Avg rating', value: stats.avgRating > 0 ? `${stats.avgRating}★` : '—' },
+            { label: 'Avg rating', value: stats.avgRating > 0 ? `${stats.avgRating}/10` : '—' },
           ].map(s => (
             <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
               <p className="text-xl font-semibold text-white">{loading ? '…' : s.value}</p>

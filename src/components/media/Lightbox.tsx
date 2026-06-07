@@ -24,7 +24,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
   useEffect(() => {
     photos.forEach(async (p) => {
       if (urls[p.id]) return
-      const { data } = await supabase.storage.from('memory-photos').createSignedUrl(p.storage_path, 3600)
+      const { data } = await supabase.storage.from('memory-photos').createSignedUrl(p.storage_path, 86400)
       if (data?.signedUrl) setUrls(prev => ({ ...prev, [p.id]: data.signedUrl }))
     })
   }, [photos])
