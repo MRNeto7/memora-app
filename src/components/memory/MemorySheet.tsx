@@ -147,7 +147,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
               </div>
-              <MemoryDetailView memory={memory} onUpdate={onUpdate} />
+              <MemoryDetailView memory={memory} onUpdate={onUpdate} onClose={onClose} />
             </>
           )}
 
@@ -288,7 +288,7 @@ function StarRow({ value, max = 5 }: { value: number; max?: number }) {
 // ── Rich memory detail view ──
 interface VenueDetails { website: string | null; phone: string | null; openNow: boolean | null; rating: number | null; totalRatings: number | null; priceLevel: number | null }
 
-function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onUpdate: () => void }) {
+function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDetails; onUpdate: () => void; onClose: () => void }) {
   const [currentPhoto, setCurrentPhoto] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
@@ -477,7 +477,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
 
         {/* Delete — below all action buttons */}
         <div className="mt-3 pb-2">
-          <DeleteMemoryButton memoryId={memory.id} onDeleted={onUpdate} />
+          <DeleteMemoryButton memoryId={memory.id} onDeleted={() => { onUpdate(); onClose() }} />
         </div>
       </div>
 
