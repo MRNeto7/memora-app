@@ -19,11 +19,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" style={{ height: '100%' }}>
+      <body style={{ height: '100%', overflow: 'hidden', position: 'fixed', width: '100%' }}>
         <SafeAreaProvider />
         <MapsProvider>
-          {children}
+          {/* Full screen scroll container */}
+          <div id="scroll-root" style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+          }}>
+            {children}
+          </div>
           <NavWrapper />
         </MapsProvider>
       </body>

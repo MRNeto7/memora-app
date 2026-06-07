@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import PullToRefresh from '@/components/ui/PullToRefresh'
 import FriendMemories from '@/components/social/FriendMemories'
 
 interface FriendProfile {
@@ -104,8 +105,10 @@ export default function SocialPage() {
 
   if (selectedFriend) return <FriendMemories friend={selectedFriend} onBack={() => setSelectedFriend(null)} />
 
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <PullToRefresh onRefresh={fetchAll}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="page-header" style={{ paddingBottom: 0 }}>
         <div className="px-5 mb-4">
           <h1 className="text-xl font-semibold text-white">Social</h1>
@@ -240,5 +243,6 @@ export default function SocialPage() {
         )}
       </div>
     </div>
+    </PullToRefresh>
   )
 }

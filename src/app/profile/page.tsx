@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import PullToRefresh from '@/components/ui/PullToRefresh'
 
 interface Stats { totalMemories: number; totalVenues: number; avgRating: number }
 interface VenueOption { id: string; name: string; address: string | null }
@@ -77,7 +78,8 @@ export default function ProfilePage() {
   const displayLabel = displayName || email.split('@')[0]
 
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(140px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+    <PullToRefresh onRefresh={fetchProfile}>
+    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(140px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Hero header */}
       <div className="page-header px-5 pb-8">
         <div className="flex items-center gap-4 mb-6">
@@ -206,6 +208,7 @@ export default function ProfilePage() {
 
 
     </div>
+    </PullToRefresh>
   )
 }
 

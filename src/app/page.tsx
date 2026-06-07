@@ -59,7 +59,7 @@ export default function MapPage() {
   }
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'env(safe-area-inset-top, 0px)', zIndex: 1 }}>
 
 
         <Map

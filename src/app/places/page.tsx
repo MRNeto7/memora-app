@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import PullToRefresh from '@/components/ui/PullToRefresh'
 import { MemoryWithDetails } from '@/lib/types/database'
 import MemorySheet from '@/components/memory/MemorySheet'
 import WishlistSheet from '@/components/wishlist/WishlistSheet'
@@ -64,7 +65,9 @@ export default function PlacesPage() {
     : { [sortBy === 'name' ? 'A–Z' : 'Top rated']: sortedMemories }
 
   return (
-    <div className="flex flex-col" style={{ background: '#EAE5DD', minHeight: '100vh', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+    <>
+    <PullToRefresh onRefresh={fetchAll}>
+    <div className="flex flex-col" style={{ background: '#EAE5DD', minHeight: '100vh', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}>
 
       {/* Header */}
       <div className="page-header" style={{ paddingBottom: 0 }}>
@@ -161,7 +164,9 @@ export default function PlacesPage() {
         )}
       </div>
 
-      {/* Sheets */}
+    </div>
+    </PullToRefresh>
+
       {selectedMemory && (
         <MemorySheet memory={selectedMemory} onClose={() => setSelectedMemory(null)} onUpdate={fetchAll} />
       )}
@@ -171,7 +176,7 @@ export default function PlacesPage() {
       {showAddWishlist && (
         <AddToWishlistButton onClose={() => setShowAddWishlist(false)} onSaved={fetchAll} />
       )}
-    </div>
+    </>
   )
 }
 
