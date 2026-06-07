@@ -24,6 +24,7 @@ interface MemoryGroup {
   date: Date
   dishName: string
   notes: string
+  ratings: { food: number; service: number; ambiance: number }
   confirmed: boolean
   saving: boolean
   saved: boolean
@@ -72,6 +73,7 @@ function makeGroup(photos: PhotoItem[]): MemoryGroup {
     date,
     dishName: '',
     notes: '',
+    ratings: { food: 0, service: 0, ambiance: 0 },
     confirmed: false,
     saving: false,
     saved: false,
@@ -85,18 +87,23 @@ export default function BulkUploadPage() {
   const supabase = createClient() as any
   const [groups, setGroups] = useState<MemoryGroup[]>([])
   const [loading, setLoading] = useState(false)
+  const [processingCount, setProcessingCount] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
   const [untagged, setUntagged] = useState<PhotoItem[]>([])
 
   async function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
     setLoading(true)
+    setProcessingCount(0)
+    setTotalCount(files.length)
 
     const photos: PhotoItem[] = []
     const noLocation: PhotoItem[] = []
 
     for (const file of files) {
       if (!file.type.startsWith('image/')) continue
+      setProcessingCount(prev => prev + 1)
       const exif = await readPhotoExif(file)
       const item: PhotoItem = {
         file,
@@ -171,11 +178,16 @@ export default function BulkUploadPage() {
         }
       }
 
+      const r = group.ratings
+      const ratedVals = [r.food, r.service, r.ambiance].filter(v => v > 0)
+      const overall = ratedVals.length > 0 ? Math.round(ratedVals.reduce((a, b) => a + b, 0) / ratedVals.length / 10 * 5) : null
+
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id,
         venue_id: venueId,
         dish_name: group.dishName || null,
         notes: group.notes || null,
+        rating: overall,
         is_public: false,
         visited_at: group.date.toISOString(),
       }).select().single()
@@ -253,7 +265,13 @@ export default function BulkUploadPage() {
         {loading && (
           <div className="flex flex-col items-center py-20">
             <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
-            <p className="text-sm" style={{ color: '#7D878D' }}>Reading photo metadata…</p>
+            <p className="text-sm font-medium mb-1" style={{ color: '#0D4F57' }}>Reading photos…</p>
+            <p className="text-sm" style={{ color: '#7D878D' }}>{processingCount} of {totalCount}</p>
+            {totalCount > 20 && (
+              <p className="text-xs mt-2 text-center" style={{ color: '#b0babe', maxWidth: 240 }}>
+                This may take a moment for large batches
+              </p>
+            )}
           </div>
         )}
 
@@ -380,6 +398,24 @@ function GroupCard({ group, onUpdate, onSave, onDismiss }: {
                 placeholder="What did you have?"
                 className="w-full text-sm px-3 py-2 rounded-xl outline-none"
                 style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+            </div>
+
+            {/* Ratings */}
+            <div className="mb-3 rounded-xl p-3" style={{ background: '#f5f2ed' }}>
+              <p className="text-xs font-semibold mb-2" style={{ color: '#0D4F57' }}>Rate it <span style={{ fontWeight: 400, color: '#b0babe' }}>(optional)</span></p>
+              {(['food', 'service', 'ambiance'] as const).map(key => (
+                <div key={key} className="flex items-center gap-2 mb-2">
+                  <span className="text-xs w-14 flex-shrink-0 capitalize" style={{ color: '#7D878D' }}>{key}</span>
+                  <div className="flex gap-0.5 flex-1">
+                    {Array.from({ length: 10 }, (_, i) => (
+                      <button key={i}
+                        onClick={() => onUpdate({ ratings: { ...group.ratings, [key]: i + 1 === group.ratings[key] ? 0 : i + 1 } })}
+                        className="flex-1 rounded-sm" style={{ height: 14, background: i < group.ratings[key] ? '#C9A86A' : '#d4cdc3', opacity: i < group.ratings[key] ? 1 : 0.4 }} />
+                    ))}
+                  </div>
+                  <span className="text-xs w-4 text-right" style={{ color: '#C9A86A' }}>{group.ratings[key] || ''}</span>
+                </div>
+              ))}
             </div>
 
             {/* Notes */}

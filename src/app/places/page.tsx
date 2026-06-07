@@ -64,7 +64,7 @@ export default function PlacesPage() {
     : { [sortBy === 'name' ? 'A–Z' : 'Top rated']: sortedMemories }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="flex flex-col" style={{ background: '#EAE5DD', minHeight: '100vh', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
 
       {/* Header */}
       <div className="page-header" style={{ paddingBottom: 0 }}>

@@ -449,6 +449,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           </div>
         )}
 
+        {/* Delete */}
+        <DeleteMemoryButton memoryId={memory.id} onDeleted={onUpdate} />
+
         {/* Action buttons */}
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
           {venueDetails?.website && (
@@ -550,5 +553,46 @@ function PublicToggle({ memoryId, initialValue, onUpdate }: { memoryId: string; 
         {isPublic ? 'Public — visible to friends' : 'Private — only you can see this'}
       </span>
     </div>
+  )
+}
+
+function DeleteMemoryButton({ memoryId, onDeleted }: { memoryId: string; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createClient() as any
+
+  async function handleDelete() {
+    setDeleting(true)
+    // Delete photos from storage
+    const { data: photos } = await supabase.from('memory_photos').select('storage_path').eq('memory_id', memoryId)
+    if (photos) {
+      for (const p of photos) {
+        await supabase.storage.from('memory-photos').remove([p.storage_path])
+      }
+    }
+    await supabase.from('memories').delete().eq('id', memoryId)
+    setDeleting(false)
+    onDeleted()
+  }
+
+  if (confirming) {
+    return (
+      <div className="rounded-xl px-4 py-3 mb-3 flex items-center gap-3" style={{ background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)' }}>
+        <p className="text-xs flex-1" style={{ color: '#a32d2d' }}>Delete this memory and all its photos?</p>
+        <button onClick={() => setConfirming(false)} className="text-xs px-2 py-1 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>Cancel</button>
+        <button onClick={handleDelete} disabled={deleting} className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ background: '#a32d2d', color: '#fff' }}>
+          {deleting ? '…' : 'Delete'}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button onClick={() => setConfirming(true)} className="w-full py-2.5 rounded-xl text-xs font-medium mb-3 flex items-center justify-center gap-1.5"
+      style={{ background: 'rgba(163,45,45,0.06)', color: '#a32d2d', border: '0.5px solid rgba(163,45,45,0.15)' }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      Delete memory
+    </button>
   )
 }
