@@ -55,7 +55,9 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
         user_id: user.id, venue_id: venueId, notes: notes || null, priority
       })
       if (we) { setError(we.message); setSaving(false); return }
+      setSaving(false)
       onSaved()
+      onClose()
     } catch (e) {
       console.error(e)
       setError('Something went wrong.')
