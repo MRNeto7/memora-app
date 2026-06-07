@@ -77,7 +77,7 @@ export default function ProfilePage() {
   const displayLabel = displayName || email.split('@')[0]
 
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
       {/* Hero header */}
       <div className="page-header px-5 pb-8">
         <div className="flex items-center gap-4 mb-6">

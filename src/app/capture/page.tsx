@@ -46,13 +46,7 @@ export default function CapturePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createClient() as any
 
-  // On mobile, auto-trigger camera immediately
-  useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    if (isMobile) {
-      setTimeout(() => cameraRef.current?.click(), 300)
-    }
-  }, [])
+  // Note: don't auto-trigger — programmatic file input clicks crash Capacitor WebViews
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
@@ -267,7 +261,7 @@ export default function CapturePage() {
       <p className="text-xs" style={{ color: '#b0babe' }}>Or tap the map tab and press "Save memory"</p>
 
       {/* Hidden inputs */}
-      <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
+      <input ref={cameraRef} type="file" accept="image/*" capture="user" className="hidden"
         onChange={e => handleFiles(e.target.files)} />
       <input ref={galleryRef} type="file" accept="image/*,video/*" multiple className="hidden"
         onChange={e => handleFiles(e.target.files)} />
