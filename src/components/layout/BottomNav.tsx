@@ -154,7 +154,7 @@ export default function BottomNav() {
               </div>
             </div>
 
-            <div className="px-4 pt-4 flex flex-col gap-4" style={{ paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))' }}>
+            <div className="px-4 pt-4 flex flex-col gap-4" style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))' }}>
 
               {/* Photos strip */}
               <div className="flex gap-2 overflow-x-auto pb-1">
