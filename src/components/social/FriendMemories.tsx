@@ -82,7 +82,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
   const initials = (friend.display_name ?? friend.memora_id).slice(0, 2).toUpperCase()
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 80 }}>
+    <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 80 }}>
       {/* Header */}
       <div style={{ background: '#0D4F57', paddingTop: 48, paddingBottom: 0 }}>
         <div className="px-5 mb-4 flex items-center gap-3">
@@ -122,7 +122,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           ) : (
             <div className="flex flex-col gap-3">
               {memories.map(mem => (
-                <div key={mem.id} className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+                <div key={mem.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
                   <div className="flex">
                     <div style={{ width: 76, height: 76, flexShrink: 0, margin: 6, borderRadius: 12, overflow: 'hidden', background: '#EAE5DD' }}>
                       {mem.memory_photos.length > 0
@@ -166,7 +166,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           ) : (
             <div className="flex flex-col gap-3">
               {wishlist.map(item => (
-                <div key={item.id} className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+                <div key={item.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
                   <div className="flex">
                     <div style={{ width: 76, height: 76, flexShrink: 0, margin: 6, borderRadius: 12, overflow: 'hidden' }}>
                       <PlacePhoto placeId={item.venue?.google_place_id ?? null} width={150} fallbackInitials={item.venue?.name?.slice(0, 2).toUpperCase()} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

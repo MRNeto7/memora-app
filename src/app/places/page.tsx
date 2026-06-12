@@ -74,7 +74,7 @@ export default function PlacesPage() {
     : { [sortBy === 'name' ? 'A–Z' : 'Top rated']: sortedMemories }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
 
       {/* Header */}
       <div className="page-header" style={{ paddingBottom: 0 }}>
@@ -206,7 +206,7 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
 
   return (
     <button onClick={onClick} className="w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform"
-      style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+      style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
       <div className="flex">
         <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
@@ -258,7 +258,7 @@ function WishlistCard({ item, onClick, onRemove }: {
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
       <button onClick={onClick} className="w-full text-left">
         <div className="flex">
           {/* Restaurant photo */}

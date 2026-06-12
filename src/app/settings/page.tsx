@@ -70,7 +70,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3 mb-1">

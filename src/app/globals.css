@@ -47,13 +47,81 @@ body {
 .safe-top    { padding-top: env(safe-area-inset-top, 0px); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-/* Page header — teal bar that respects notch */
+/* Page header — teal gradient that respects notch (Apple Sports-style depth) */
 .page-header {
-  background: #0D4F57;
+  background: linear-gradient(180deg, #136570 0%, #0D4F57 60%, #0B454C 100%);
   padding-top: env(safe-area-inset-top, 0px);
 }
 .page-header-content {
   padding: 16px 20px 0;
+}
+
+/* ── Glass materials ─────────────────────────────── */
+
+/* Frosted card on the stone background */
+.glass-card {
+  background: rgba(255, 255, 255, 0.66);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 0.5px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 12px rgba(13, 79, 87, 0.06), 0 0.5px 0 rgba(13, 79, 87, 0.04);
+}
+
+/* Frosted chip/panel on dark teal surfaces (headers) */
+.glass-dark {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border: 0.5px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Floating pill — nav, overlay controls */
+.glass-pill {
+  background: rgba(234, 229, 221, 0.78);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
+  border: 0.5px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 32px rgba(13, 79, 87, 0.18), 0 1px 2px rgba(13, 79, 87, 0.08);
+}
+
+/* ── Motion ──────────────────────────────────────── */
+
+/* Springy ease used everywhere */
+:root { --spring: cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Content rising into place on page load */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.page-enter { animation: rise-in 0.45s var(--spring) both; }
+
+/* Staggered list/card entrances */
+.rise { animation: rise-in 0.5s var(--spring) both; }
+.rise-1 { animation: rise-in 0.5s var(--spring) 0.04s both; }
+.rise-2 { animation: rise-in 0.5s var(--spring) 0.08s both; }
+.rise-3 { animation: rise-in 0.5s var(--spring) 0.12s both; }
+
+/* Sheets/modals springing up */
+@keyframes sheet-up {
+  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sheet-enter { animation: sheet-up 0.4s var(--spring) both; }
+
+/* Backdrop fading in */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.backdrop-enter { animation: fade-in 0.25s ease-out both; }
+
+/* Tactile press — anything tappable */
+.press {
+  transition: transform 0.25s var(--spring), opacity 0.2s ease;
+}
+.press:active { transform: scale(0.96); }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter, .rise, .rise-1, .rise-2, .rise-3, .sheet-enter, .backdrop-enter { animation: none; }
+  .press, .press:active { transition: none; transform: none; }
 }
 
 /* Bottom nav */

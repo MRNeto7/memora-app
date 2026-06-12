@@ -128,7 +128,7 @@ export default function CapturePage() {
 
   if (stage === 'form') {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
         <div className="page-header px-5 pb-4">
           <div className="flex items-center gap-3">
             <button onClick={() => setStage('prompt')}
@@ -174,7 +174,7 @@ export default function CapturePage() {
           </div>
 
           {/* Location */}
-          <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
             <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Restaurant</label>
             <PlacesSearch
               value={locationQuery}
@@ -185,7 +185,7 @@ export default function CapturePage() {
           </div>
 
           {/* Dish */}
-          <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
             <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <input type="text" value={dishName} onChange={e => setDishName(e.target.value)} placeholder="e.g. Truffle pasta"
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
@@ -193,7 +193,7 @@ export default function CapturePage() {
           </div>
 
           {/* Ratings */}
-          <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
             <p className="text-xs font-semibold mb-3" style={{ color: '#0D4F57' }}>Rate your experience</p>
             {([['food', 'Food'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).map(([key, label]) => (
               <div key={key} className="flex items-center gap-3 mb-2.5">
@@ -216,7 +216,7 @@ export default function CapturePage() {
           </div>
 
           {/* Notes */}
-          <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
             <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="What made it special?" rows={2}
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none"
@@ -236,7 +236,7 @@ export default function CapturePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center"
+    <div className="page-enter min-h-screen flex flex-col items-center justify-center px-6 text-center"
       style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
 
       <div className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6" style={{ background: '#0D4F57' }}>

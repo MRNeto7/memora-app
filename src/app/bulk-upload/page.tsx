@@ -209,7 +209,7 @@ export default function BulkUploadPage() {
   const saved = groups.filter(g => g.saved)
 
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3 mb-1">
@@ -302,7 +302,7 @@ export default function BulkUploadPage() {
             </div>
 
             {pending.length === 0 && saved.length > 0 && (
-              <div className="mt-4 rounded-2xl p-5 text-center" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+              <div className="mt-4 rounded-2xl p-5 text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
                 <p className="text-2xl mb-2">🎉</p>
                 <p className="font-semibold" style={{ color: '#0D4F57' }}>All done!</p>
                 <p className="text-sm mt-1 mb-4" style={{ color: '#7D878D' }}>{saved.length} {saved.length === 1 ? 'memory' : 'memories'} saved to your map</p>
@@ -341,7 +341,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss }: {
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.1)' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
       {/* Photo strip */}
       <div className="flex gap-1 p-2 overflow-x-auto">
         {group.photos.slice(0, 6).map((photo, i) => (

@@ -108,7 +108,7 @@ export default function MapPage() {
 
       {/* Load error banner */}
       {loadError && (
-        <div className="absolute left-4 right-4 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-2xl"
+        <div className="rise absolute left-4 right-4 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-2xl"
           style={{ top: 'calc(env(safe-area-inset-top, 0px) + 60px)', background: 'rgba(163,45,45,0.95)', backdropFilter: 'blur(12px)' }}>
           <p className="text-xs font-medium text-white">Couldn&apos;t load your memories. Check your connection.</p>
           <button onClick={loadAll} className="text-xs font-semibold px-3 py-1.5 rounded-xl flex-shrink-0"
@@ -119,11 +119,11 @@ export default function MapPage() {
       )}
 
       {/* Unified header bar */}
-      <div className="absolute left-0 right-0 z-10 flex items-center justify-between px-4"
+      <div className="rise absolute left-0 right-0 z-10 flex items-center justify-between px-4"
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', pointerEvents: 'none' }}>
         {/* Logo + count */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl pointer-events-auto"
-          style={{ background: 'rgba(234,229,221,0.96)', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+          style={{ background: 'rgba(234,229,221,0.78)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', border: '0.5px solid rgba(255,255,255,0.55)', boxShadow: '0 4px 16px rgba(13,79,87,0.12)' }}>
           <img src="/logo.png" alt="Mimora" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover' }} />
           <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Mimora</span>
           <span className="text-xs" style={{ color: '#7D878D' }}>· {memories.length}</span>
@@ -132,13 +132,13 @@ export default function MapPage() {
         <div className="flex gap-1.5 pointer-events-auto">
           <button onClick={() => setShowMemories(v => !v)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.96)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+            style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.78)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', border: '0.5px solid rgba(255,255,255,0.55)', boxShadow: '0 4px 16px rgba(13,79,87,0.12)' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
             Memories
           </button>
           <button onClick={() => setShowWishlist(v => !v)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showWishlist ? '#C9A86A' : 'rgba(234,229,221,0.96)', color: showWishlist ? '#fff' : '#7D878D', backdropFilter: 'blur(12px)', border: '0.5px solid rgba(13,79,87,0.12)' }}>
+            style={{ background: showWishlist ? '#C9A86A' : 'rgba(234,229,221,0.78)', color: showWishlist ? '#fff' : '#7D878D', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', border: '0.5px solid rgba(255,255,255,0.55)', boxShadow: '0 4px 16px rgba(13,79,87,0.12)' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
             Wishlist
           </button>

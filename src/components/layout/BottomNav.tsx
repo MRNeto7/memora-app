@@ -10,17 +10,13 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50"
-      style={{
-        background: 'rgba(234,229,221,0.96)',
-        backdropFilter: 'blur(12px)',
-        borderTop: '0.5px solid rgba(13,79,87,0.12)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
-      }}
+      className="fixed left-0 right-0 z-50 flex justify-center pointer-events-none"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)' }}
     >
-      <div className="flex items-end justify-around px-2 pt-2 pb-3 relative">
+      <div
+        className="glass-pill flex items-end justify-around pointer-events-auto"
+        style={{ borderRadius: 32, padding: '8px 10px 9px', width: 'min(420px, calc(100% - 24px))' }}
+      >
 
         {/* LEFT: Places */}
         <NavItem href="/places" label="Places" active={isActive('/places')}>
@@ -39,17 +35,18 @@ export default function BottomNav() {
         </NavItem>
 
         {/* CENTER: Map — elevated */}
-        <div className="flex flex-col items-center -mt-6">
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <div
-              className="flex flex-col items-center"
-            >
+        <div className="flex flex-col items-center -mt-7">
+          <Link href="/" className="press" style={{ textDecoration: 'none' }}>
+            <div className="flex flex-col items-center">
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
                 style={{
                   background: isActive('/') ? '#C9A86A' : '#0D4F57',
-                  boxShadow: '0 4px 20px rgba(13,79,87,0.3)',
-                  border: '3px solid rgba(234,229,221,0.96)',
+                  boxShadow: isActive('/')
+                    ? '0 6px 24px rgba(201,168,106,0.45)'
+                    : '0 4px 20px rgba(13,79,87,0.35)',
+                  border: '3px solid rgba(255,255,255,0.7)',
+                  transition: 'background 0.3s ease, box-shadow 0.3s ease',
                 }}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -95,10 +92,18 @@ function NavItem({ href, label, active, children }: {
   children: React.ReactNode
 }) {
   return (
-    <Link href={href} className="flex flex-col items-center gap-0.5" style={{ textDecoration: 'none', minWidth: 48 }}>
-      <div style={{ color: active ? '#0D4F57' : '#7D878D' }}>{children}</div>
-      <span style={{ fontSize: 10, color: active ? '#0D4F57' : '#7D878D', fontWeight: active ? 600 : 400 }}>{label}</span>
-      {active && <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C9A86A', marginTop: 1 }} />}
+    <Link href={href} className="press flex flex-col items-center gap-0.5" style={{ textDecoration: 'none', minWidth: 48, padding: '2px 0' }}>
+      <div style={{
+        color: active ? '#0D4F57' : '#7D878D',
+        transform: active ? 'translateY(-1px) scale(1.08)' : 'none',
+        transition: 'transform 0.3s var(--spring), color 0.2s ease',
+      }}>{children}</div>
+      <span style={{ fontSize: 10, color: active ? '#0D4F57' : '#7D878D', fontWeight: active ? 600 : 400, transition: 'color 0.2s ease' }}>{label}</span>
+      <div style={{
+        width: 4, height: 4, borderRadius: '50%', background: '#C9A86A', marginTop: 1,
+        opacity: active ? 1 : 0, transform: active ? 'scale(1)' : 'scale(0)',
+        transition: 'opacity 0.25s ease, transform 0.3s var(--spring)',
+      }} />
     </Link>
   )
 }

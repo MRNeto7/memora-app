@@ -117,7 +117,7 @@ export default function SocialPage() {
   if (selectedFriend) return <FriendMemories friend={selectedFriend} onBack={() => setSelectedFriend(null)} />
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="page-header" style={{ paddingBottom: 0 }}>
         <div className="px-5 mb-4">
           <h1 className="text-xl font-semibold text-white">Social</h1>
@@ -175,7 +175,7 @@ export default function SocialPage() {
               {friends.map(f => (
                 <button key={f.friend_id} onClick={() => setSelectedFriend(f)}
                   className="w-full text-left rounded-2xl px-4 py-3.5 flex items-center gap-4"
-                  style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+                  style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
                   <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#0D4F57' }}>
                     <span className="text-white font-semibold text-sm">{(f.display_name ?? f.memora_id).slice(0, 2).toUpperCase()}</span>
                   </div>
@@ -199,7 +199,7 @@ export default function SocialPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {requests.map(req => (
-                <div key={req.id} className="rounded-2xl px-4 py-3.5" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+                <div key={req.id} className="rounded-2xl px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#0D4F57' }}>
                       <span className="text-white font-semibold text-sm">{(req.from_user?.display_name ?? req.from_user?.memora_id ?? '?').slice(0, 2).toUpperCase()}</span>
@@ -221,7 +221,7 @@ export default function SocialPage() {
 
         {tab === 'find' && (
           <div>
-            <div className="rounded-2xl p-4 mb-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+            <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
               <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Search by Mimora ID</label>
               <div className="flex gap-2">
                 <input type="text" placeholder="e.g. MA4829" value={searchId}

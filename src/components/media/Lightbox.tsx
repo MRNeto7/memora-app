@@ -73,7 +73,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col"
+      className="backdrop-enter fixed inset-0 z-[100] flex flex-col"
       style={{ background: '#000', overflow: 'hidden', paddingBottom: 'var(--safe-bottom)' }}
     >
       {/* Top bar */}

@@ -87,7 +87,7 @@ export default function ProfilePage() {
   const displayLabel = displayName || email.split('@')[0]
 
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+    <div className="page-enter min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
       {/* Hero header */}
       <div className="page-header px-5 pb-8">
         <div className="flex items-center gap-4 mb-6">
@@ -128,7 +128,7 @@ export default function ProfilePage() {
         )}
 
         {/* Favourite place */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
             <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>Favourite place</p>
             <button onClick={() => setShowVenuePicker(!showVenuePicker)}
@@ -177,7 +177,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Settings */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
           <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: '#7D878D' }}>Settings</p>
 
           <PrivacyToggles />
