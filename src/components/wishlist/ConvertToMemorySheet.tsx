@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
+import { compressImage } from '@/lib/images'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
 interface Venue {
@@ -79,9 +80,10 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
       if (me) { setError(me.message); return }
 
       for (const photo of photos) {
-        const ext = photo.file.name.split('.').pop()
+        const upload = await compressImage(photo.file)
+        const ext = upload.name.split('.').pop()
         const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
+        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
 

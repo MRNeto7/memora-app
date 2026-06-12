@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
+import { getSignedPhotoUrl } from '@/lib/storage'
 
 interface MemoryPinProps {
   memory: MemoryWithDetails
@@ -18,10 +19,8 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
   useEffect(() => {
     if (!firstPhoto) return
     async function loadPhoto() {
-      const { data } = await supabase.storage
-        .from('memory-photos')
-        .createSignedUrl(firstPhoto.storage_path, 3600)
-      if (data?.signedUrl) setPhotoUrl(data.signedUrl)
+      const url = await getSignedPhotoUrl(supabase, firstPhoto!.storage_path)
+      if (url) setPhotoUrl(url)
     }
     loadPhoto()
   }, [firstPhoto?.storage_path])

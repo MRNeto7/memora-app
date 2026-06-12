@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
+import { compressImage } from '@/lib/images'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
 
@@ -190,9 +191,10 @@ export default function BulkUploadPage() {
       if (me) { updateGroup(group.id, { saving: false, error: me.message }); return }
 
       for (const photo of group.photos) {
-        const ext = photo.file.name.split('.').pop()
+        const upload = await compressImage(photo.file)
+        const ext = upload.name.split('.').pop()
         const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
+        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
 

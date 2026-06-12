@@ -24,7 +24,13 @@ export async function GET(req: NextRequest) {
     const details = await detailsRes.json()
     const photoRef = details.result?.photos?.[0]?.photo_reference
 
-    if (!photoRef) return NextResponse.json({ url: null })
+    if (!photoRef) {
+      // Cache "no photo" too — otherwise every card render re-asks Google
+      return NextResponse.json({ url: null }, {
+        status: 404,
+        headers: { 'Cache-Control': 'public, max-age=86400, s-maxage=604800' },
+      })
+    }
 
     // Step 2: build the photo URL — redirect to actual image
     const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${width}&photo_reference=${photoRef}&key=${key}`
@@ -37,7 +43,8 @@ export async function GET(req: NextRequest) {
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=86400',
+        // Browser caches a day; CDN holds a month so repeat visitors never hit Google
+        'Cache-Control': 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400',
       },
     })
   } catch {

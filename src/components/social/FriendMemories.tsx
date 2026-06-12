@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getSignedPhotoUrl } from '@/lib/storage'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
 interface FriendProfile {
@@ -190,8 +191,7 @@ function SignedThumb({ storagePath }: { storagePath: string }) {
   const [url, setUrl] = useState<string | null>(null)
   const supabase = createClient()
   useEffect(() => {
-    supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
-      .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
+    getSignedPhotoUrl(supabase, storagePath).then(u => { if (u) setUrl(u) })
   }, [storagePath])
   if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
   return <img src={url} className="w-full h-full" style={{ objectFit: 'cover' }} />

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getSignedPhotoUrls } from '@/lib/storage'
 
 interface LightboxPhoto {
   id: string
@@ -19,12 +20,19 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
   const [urls, setUrls] = useState<Record<string, string>>({})
   const supabase = createClient()
 
-  // Load signed URLs for all photos
+  // Load signed URLs for all photos in one batched request
   useEffect(() => {
-    photos.forEach(async (p) => {
-      if (urls[p.id]) return
-      const { data } = await supabase.storage.from('memory-photos').createSignedUrl(p.storage_path, 3600)
-      if (data?.signedUrl) setUrls(prev => ({ ...prev, [p.id]: data.signedUrl }))
+    const pending = photos.filter(p => !urls[p.id])
+    if (pending.length === 0) return
+    getSignedPhotoUrls(supabase, pending.map(p => p.storage_path)).then(map => {
+      setUrls(prevUrls => {
+        const next = { ...prevUrls }
+        for (const p of pending) {
+          const url = map.get(p.storage_path)
+          if (url) next[p.id] = url
+        }
+        return next
+      })
     })
   }, [photos])
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 interface PlacePhotoProps {
   placeId: string | null
@@ -10,74 +10,37 @@ interface PlacePhotoProps {
   fallbackInitials?: string
 }
 
+// Loads venue photos through /api/place-photo, which the CDN and browser
+// cache — one Google Places billing event per venue per cache window,
+// instead of a Place Details call on every card render.
 export default function PlacePhoto({ placeId, width = 400, style, fallbackInitials }: PlacePhotoProps) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [tried, setTried] = useState(false)
-
-  // No placeId means there is nothing to load — treat as already tried
-  const settled = tried || !placeId
-
-  useEffect(() => {
-    if (!placeId) return
-
-    function tryLoad() {
-      if (!window.google?.maps?.places) {
-        setTimeout(tryLoad, 300)
-        return
-      }
-      if (!placeId) { setTried(true); return }
-
-      try {
-        // Use a hidden div as the PlacesService target
-        const div = document.createElement('div')
-        const service = new window.google.maps.places.PlacesService(div)
-        service.getDetails(
-          { placeId: placeId as string, fields: ['photos'] },
-          (result, status) => {
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && result?.photos?.[0]) {
-              const photoUrl = result.photos[0].getUrl({ maxWidth: width, maxHeight: width })
-              setUrl(photoUrl)
-            }
-            setTried(true)
-          }
-        )
-      } catch {
-        setTried(true)
-      }
-    }
-
-    tryLoad()
-  }, [placeId, width])
-
-  // Fallback — show initials while loading or if no photo
-  if (!url) {
-    return (
-      <div style={{
-        ...style,
-        background: settled ? '#1a3a40' : '#0D4F57',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        {settled ? (
-          <span style={{ color: '#C9A86A', fontWeight: 700, fontSize: typeof style?.width === 'number' && style.width < 60 ? 13 : 18, letterSpacing: 1 }}>
-            {fallbackInitials ?? '?'}
-          </span>
-        ) : (
-          // Loading shimmer
-          <div style={{ width: '60%', height: '60%', borderRadius: 8, background: 'rgba(201,168,106,0.2)', animation: 'pulse 1.5s infinite' }} />
-        )}
-      </div>
-    )
-  }
+  const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const showImage = Boolean(placeId) && !failed
 
   return (
-    <img
-      src={url}
-      alt="Restaurant"
-      style={{ ...style, display: 'block' }}
-      onError={() => { setUrl(null); setTried(true) }}
-    />
+    <div style={{
+      ...style,
+      position: 'relative',
+      background: '#1a3a40',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      overflow: 'hidden',
+    }}>
+      <span style={{ color: '#C9A86A', fontWeight: 700, fontSize: typeof style?.width === 'number' && style.width < 60 ? 13 : 18, letterSpacing: 1 }}>
+        {fallbackInitials ?? '?'}
+      </span>
+      {showImage && (
+        <img
+          src={`/api/place-photo?placeId=${encodeURIComponent(placeId!)}&w=${width}`}
+          alt="Restaurant"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity 0.2s' }}
+        />
+      )}
+    </div>
   )
 }

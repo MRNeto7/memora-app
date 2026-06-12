@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
+import { getSignedPhotoUrl } from '@/lib/storage'
 import { filterMediaFiles } from '@/lib/uploads'
+import { compressImage } from '@/lib/images'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
 
@@ -99,9 +101,10 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       if (me) { setSaveError(`Error: ${me.message}`); setSaving(false); return }
 
       for (const photo of photos) {
-        const ext = photo.file.name.split('.').pop()
+        const upload = await compressImage(photo.file)
+        const ext = upload.name.split('.').pop()
         const path = `${user.id}/${newMemory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
+        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: newMemory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
       onUpdate()
@@ -487,8 +490,7 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
   const isVideo = storagePath.match(/\.(mp4|mov|webm|m4v)$/i)
 
   useEffect(() => {
-    supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
-      .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })
+    getSignedPhotoUrl(supabase, storagePath).then(u => { if (u) setUrl(u) })
   }, [storagePath])
 
   if (!url) return <div className="animate-pulse" style={{ height: 200, background: '#EAE5DD' }} />

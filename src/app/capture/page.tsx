@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
+import { compressImage } from '@/lib/images'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
 
@@ -108,9 +109,10 @@ export default function CapturePage() {
       if (me) { setSaveError(me.message); setSaving(false); return }
 
       for (const photo of photos) {
-        const ext = photo.file.name.split('.').pop()
+        const upload = await compressImage(photo.file)
+        const ext = upload.name.split('.').pop()
         const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
+        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
 
