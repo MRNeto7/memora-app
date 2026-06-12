@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import RatingSliders from '@/components/ui/RatingSliders'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
 
@@ -119,7 +120,6 @@ export default function CapturePage() {
     } finally { setSaving(false) }
   }
 
-  const overall = calcOverall(detailRatings)
   const displayDate = detectedDate ?? new Date()
 
   if (stage === 'form') {
@@ -190,25 +190,7 @@ export default function CapturePage() {
 
           {/* Ratings */}
           <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-            <p className="text-xs font-semibold mb-3" style={{ color: '#0D4F57' }}>Rate your experience</p>
-            {([['food', 'Food'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).map(([key, label]) => (
-              <div key={key} className="flex items-center gap-3 mb-2.5">
-                <span className="text-xs w-16 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
-                <div className="flex gap-1 flex-1">
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <button key={i} onClick={() => setDetailRatings(prev => ({ ...prev, [key]: i + 1 === prev[key] ? 0 : i + 1 }))}
-                      className="flex-1 rounded-sm" style={{ height: 18, background: i < detailRatings[key] ? '#C9A86A' : '#d4cdc3', opacity: i < detailRatings[key] ? 1 : 0.4 }} />
-                  ))}
-                </div>
-                <span className="text-xs w-5 text-right font-medium" style={{ color: detailRatings[key] > 0 ? '#C9A86A' : '#b0babe' }}>{detailRatings[key] || '—'}</span>
-              </div>
-            ))}
-            {overall > 0 && (
-              <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
-                <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
-              </div>
-            )}
+            <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
           </div>
 
           {/* Notes */}

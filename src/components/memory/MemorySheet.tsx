@@ -8,6 +8,7 @@ import { getSignedPhotoUrl } from '@/lib/storage'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import RatingSliders from '@/components/ui/RatingSliders'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
 
@@ -191,25 +192,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               </div>
 
               <div className="mb-4 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
-                <p className="text-xs font-semibold mb-3" style={{ color: '#0D4F57' }}>Rate your experience</p>
-                {([['food', 'Food'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-3 mb-2.5">
-                    <span className="text-xs w-16 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
-                    <div className="flex gap-1 flex-1">
-                      {Array.from({ length: 10 }, (_, i) => (
-                        <button key={i} onClick={() => setDetailRatings(prev => ({ ...prev, [key]: i + 1 === prev[key] ? 0 : i + 1 }))}
-                          className="flex-1 rounded-sm" style={{ height: 18, background: i < detailRatings[key] ? '#C9A86A' : '#d4cdc3', opacity: i < detailRatings[key] ? 1 : 0.45 }} />
-                      ))}
-                    </div>
-                    <span className="text-xs w-5 text-right font-medium" style={{ color: detailRatings[key] > 0 ? '#C9A86A' : '#b0babe' }}>{detailRatings[key] || '—'}</span>
-                  </div>
-                ))}
-                {overall > 0 && (
-                  <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
-                    <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                    <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
-                  </div>
-                )}
+                <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
               </div>
 
               <div className="mb-4">
@@ -236,18 +219,6 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       </div>
     </div>
     </>
-  )
-}
-
-// ── Detailed ratings slider ──
-function SliderRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex gap-1 flex-1">
-      {Array.from({ length: 10 }, (_, i) => (
-        <button key={i} onClick={() => onChange(i + 1 === value ? 0 : i + 1)}
-          className="flex-1 rounded-sm" style={{ height: 18, background: i < value ? '#C9A86A' : '#d4cdc3', opacity: i < value ? 1 : 0.45 }} />
-      ))}
-    </div>
   )
 }
 
@@ -333,14 +304,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
             className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
         </div>
         <div className="mb-5 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
-          <p className="text-xs font-semibold mb-3" style={{ color: '#0D4F57' }}>Update ratings</p>
-          {([['food', 'Food'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).map(([key, label]) => (
-            <div key={key} className="flex items-center gap-3 mb-2.5">
-              <span className="text-xs w-16 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
-              <SliderRating value={editRatings[key]} onChange={v => setEditRatings(prev => ({ ...prev, [key]: v }))} />
-              <span className="text-xs w-5 text-right" style={{ color: '#C9A86A' }}>{editRatings[key] || '—'}</span>
-            </div>
-          ))}
+          <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
         <button onClick={handleSaveEdit} disabled={saving} className="w-full py-3 rounded-2xl text-white font-semibold text-sm"
           style={{ background: '#0D4F57', opacity: saving ? 0.6 : 1 }}>{saving ? 'Saving…' : 'Save changes'}</button>

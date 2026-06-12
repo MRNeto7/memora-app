@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
+import { calcOverall, DetailRatings } from '@/lib/ratings'
+import RatingSliders from '@/components/ui/RatingSliders'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
 
@@ -26,6 +28,7 @@ interface MemoryGroup {
   date: Date
   dishName: string
   notes: string
+  ratings: DetailRatings
   confirmed: boolean
   saving: boolean
   saved: boolean
@@ -74,6 +77,7 @@ function makeGroup(photos: PhotoItem[]): MemoryGroup {
     date,
     dishName: '',
     notes: '',
+    ratings: { food: 0, service: 0, ambiance: 0 },
     confirmed: false,
     saving: false,
     saved: false,
@@ -180,11 +184,16 @@ export default function BulkUploadPage() {
       const memLat = place?.lat ?? firstPhoto?.lat ?? null
       const memLng = place?.lng ?? firstPhoto?.lng ?? null
       const fuzzed = memLat && memLng ? fuzzCoordinates(memLat, memLng) : null
+      const overall = calcOverall(group.ratings)
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id,
         venue_id: venueId,
         dish_name: group.dishName || null,
         notes: group.notes || null,
+        rating: overall > 0 ? overall : null,
+        rating_food: group.ratings.food || null,
+        rating_service: group.ratings.service || null,
+        rating_ambiance: group.ratings.ambiance || null,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: group.date.toISOString(),
@@ -427,6 +436,11 @@ function GroupCard({ group, onUpdate, onSave, onDismiss }: {
                 placeholder="What did you have?"
                 className="w-full text-sm px-3 py-2 rounded-xl outline-none"
                 style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+            </div>
+
+            {/* Ratings */}
+            <div className="mb-3 rounded-xl p-3" style={{ background: '#f5f2ed' }}>
+              <RatingSliders ratings={group.ratings} onChange={r => onUpdate({ ratings: r })} title="Rate it (optional)" />
             </div>
 
             {/* Notes */}

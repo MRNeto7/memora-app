@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
-import { calcOverall } from '@/lib/ratings'
+import { calcOverall, DetailRatings } from '@/lib/ratings'
+import RatingSliders from '@/components/ui/RatingSliders'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
 interface Venue {
@@ -29,15 +30,13 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
   const [dishName, setDishName] = useState('')
   const [notes, setNotes] = useState('')
-  const [food, setFood] = useState(0)
-  const [service, setService] = useState(0)
-  const [ambiance, setAmbiance] = useState(0)
+  const [ratings, setRatings] = useState<DetailRatings>({ food: 0, service: 0, ambiance: 0 })
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
   const [visitDate, setVisitDate] = useState(new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const overall = calcOverall({ food, service, ambiance })
+  const overall = calcOverall(ratings)
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
@@ -67,9 +66,9 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         dish_name: dishName || null,
         notes: notes || null,
         rating: overall > 0 ? overall : null,
-        rating_food: food || null,
-        rating_service: service || null,
-        rating_ambiance: ambiance || null,
+        rating_food: ratings.food || null,
+        rating_service: ratings.service || null,
+        rating_ambiance: ratings.ambiance || null,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: new Date(visitDate).toISOString(),
@@ -172,25 +171,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
           {/* Ratings */}
           <div className="rounded-2xl p-4 mb-4" style={{ background: '#f5f2ed' }}>
-            <p className="text-xs font-semibold mb-3" style={{ color: '#0D4F57' }}>Rate your experience</p>
-            {([['Food & drink', food, setFood], ['Service', service, setService], ['Ambiance', ambiance, setAmbiance]] as [string, number, (v: number) => void][]).map(([label, val, setter]) => (
-              <div key={label} className="flex items-center gap-3 mb-3">
-                <span className="text-xs w-24 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
-                <div className="flex gap-1 flex-1">
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <button key={i} onClick={() => setter(i + 1 === val ? 0 : i + 1)}
-                      className="flex-1 rounded-sm" style={{ height: 20, background: i < val ? '#C9A86A' : '#d4cdc3', opacity: i < val ? 1 : 0.45 }} />
-                  ))}
-                </div>
-                <span className="text-xs w-5 text-right font-medium" style={{ color: val > 0 ? '#C9A86A' : '#b0babe' }}>{val || '—'}</span>
-              </div>
-            ))}
-            {overall > 0 && (
-              <div className="flex items-center gap-2 pt-3" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
-                <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
-              </div>
-            )}
+            <RatingSliders ratings={ratings} onChange={setRatings} />
           </div>
 
           {/* Notes */}
