@@ -8,6 +8,7 @@ import { getSignedPhotoUrl } from '@/lib/storage'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
@@ -27,6 +28,7 @@ interface MemorySheetProps {
 export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetProps) {
   const isNew = !memory
   const supabase = createClient()
+  const isPro = useIsPro()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -48,7 +50,15 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
-    const { accepted, rejected } = await filterMediaFiles(files, { allowVideo: true })
+    const { accepted: allAccepted, rejected } = await filterMediaFiles(files, {
+      allowVideo: isPro === true,
+      videoRejectionMessage: 'Video memories are part of Mimora Pro — coming soon.',
+    })
+    let accepted = allAccepted
+    if (isPro !== true && photos.length + accepted.length > FREE_PHOTOS_PER_MEMORY) {
+      accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
+      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+    }
     if (rejected.length > 0) alert(rejected.join('\n'))
     const newPhotos: PhotoEntry[] = []
 
@@ -76,6 +86,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setSaveError('You need to be signed in.'); setSaving(false); return }
+
+      const allowanceError = await checkMemoryAllowance(supabase, user.id, isPro)
+      if (allowanceError) { setSaveError(allowanceError); setSaving(false); return }
 
       let venueId: string | null = null
       const venueData = { name: locationName.trim(), lat: selectedPlace?.lat ?? detectedLat ?? 0, lng: selectedPlace?.lng ?? detectedLng ?? 0, google_place_id: selectedPlace?.placeId ?? null, address: selectedPlace?.address ?? null }

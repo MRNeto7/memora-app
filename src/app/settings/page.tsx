@@ -20,6 +20,8 @@ export default function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const [resetSent, setResetSent] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -64,9 +66,22 @@ export default function SettingsPage() {
 
   async function deleteAccount() {
     if (!confirm('Are you sure? This permanently deletes all your memories, photos, and wishlist. This cannot be undone.')) return
-    // Sign out — full deletion requires server-side, this at minimum removes their session
-    await supabase.auth.signOut()
-    router.push('/auth')
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setDeleteError(data.error ?? 'Deletion failed — please try again')
+        setDeleting(false)
+        return
+      }
+      await supabase.auth.signOut()
+      router.push('/auth')
+    } catch {
+      setDeleteError('Deletion failed — check your connection and try again')
+      setDeleting(false)
+    }
   }
 
   return (
@@ -146,9 +161,10 @@ export default function SettingsPage() {
         <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(163,45,45,0.15)' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#a32d2d' }}>Danger zone</p>
           <p className="text-xs mb-3" style={{ color: '#7D878D' }}>Permanently delete your account and all your data including memories, photos, and wishlist.</p>
-          <button onClick={deleteAccount} className="w-full py-3 rounded-2xl text-sm font-medium"
-            style={{ color: '#a32d2d', background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)' }}>
-            Delete my account
+          {deleteError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>{deleteError}</div>}
+          <button onClick={deleteAccount} disabled={deleting} className="w-full py-3 rounded-2xl text-sm font-medium"
+            style={{ color: '#a32d2d', background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)', opacity: deleting ? 0.6 : 1 }}>
+            {deleting ? 'Deleting…' : 'Delete my account'}
           </button>
         </div>
       </div>

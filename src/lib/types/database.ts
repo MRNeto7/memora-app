@@ -15,6 +15,7 @@ export type Database = {
           wishlist_public: boolean
           bio: string | null
           favourite_venue_id: string | null
+          is_pro: boolean
           created_at: string
         }
         Insert: {
@@ -28,6 +29,7 @@ export type Database = {
           wishlist_public?: boolean
           bio?: string | null
           favourite_venue_id?: string | null
+          is_pro?: boolean
           created_at?: string
         }
         Update: {
@@ -41,6 +43,7 @@ export type Database = {
           wishlist_public?: boolean
           bio?: string | null
           favourite_venue_id?: string | null
+          is_pro?: boolean
           created_at?: string
         }
         Relationships: [

@@ -6,6 +6,7 @@ import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
@@ -40,12 +41,21 @@ export default function CapturePage() {
   const [detectedLat, setDetectedLat] = useState<number | null>(null)
   const [detectedLng, setDetectedLng] = useState<number | null>(null)
   const supabase = createClient()
+  const isPro = useIsPro()
 
   // Note: don't auto-trigger — programmatic file input clicks crash Capacitor WebViews
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
-    const { accepted, rejected } = await filterMediaFiles(Array.from(files), { allowVideo: true })
+    const { accepted: allAccepted, rejected } = await filterMediaFiles(Array.from(files), {
+      allowVideo: isPro === true,
+      videoRejectionMessage: 'Video memories are part of Mimora Pro — coming soon.',
+    })
+    let accepted = allAccepted
+    if (isPro !== true && photos.length + accepted.length > FREE_PHOTOS_PER_MEMORY) {
+      accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
+      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+    }
     if (rejected.length > 0) alert(rejected.join('\n'))
     if (accepted.length === 0) return
     const newPhotos: PhotoEntry[] = []
@@ -72,6 +82,9 @@ export default function CapturePage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setSaveError('Please sign in.'); setSaving(false); return }
+
+      const allowanceError = await checkMemoryAllowance(supabase, user.id, isPro)
+      if (allowanceError) { setSaveError(allowanceError); setSaving(false); return }
 
       let venueId: string | null = null
       const venueName = selectedPlace?.name ?? locationQuery.trim()

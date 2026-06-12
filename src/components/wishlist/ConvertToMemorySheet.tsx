@@ -6,6 +6,7 @@ import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
@@ -26,6 +27,7 @@ interface ConvertToMemorySheetProps {
 
 export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSaved }: ConvertToMemorySheetProps) {
   const supabase = createClient()
+  const isPro = useIsPro()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [dishName, setDishName] = useState('')
@@ -40,7 +42,12 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
-    const { accepted, rejected } = await filterMediaFiles(files)
+    const { accepted: allAccepted, rejected } = await filterMediaFiles(files)
+    let accepted = allAccepted
+    if (isPro !== true && photos.length + accepted.length > FREE_PHOTOS_PER_MEMORY) {
+      accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
+      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+    }
     if (rejected.length > 0) alert(rejected.join('\n'))
     const newPhotos: PhotoEntry[] = []
     for (const file of accepted) {
@@ -58,6 +65,9 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setError('Not signed in.'); return }
+
+      const allowanceError = await checkMemoryAllowance(supabase, user.id, isPro)
+      if (allowanceError) { setError(allowanceError); return }
 
       const fuzzed = venue.lat && venue.lng ? fuzzCoordinates(venue.lat, venue.lng) : null
       const { data: memory, error: me } = await supabase.from('memories').insert({

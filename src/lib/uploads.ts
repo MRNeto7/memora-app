@@ -14,12 +14,12 @@ export function getVideoDuration(file: File): Promise<number> {
 }
 
 /** Returns a user-facing rejection reason, or null if the file is acceptable. */
-export async function validateMediaFile(file: File, opts: { allowVideo?: boolean } = {}): Promise<string | null> {
+export async function validateMediaFile(file: File, opts: { allowVideo?: boolean; videoRejectionMessage?: string } = {}): Promise<string | null> {
   const isImage = file.type.startsWith('image/')
   const isVideo = file.type.startsWith('video/')
 
   if (!isImage && !isVideo) return `"${file.name}" isn't a photo or video.`
-  if (isVideo && !opts.allowVideo) return `"${file.name}" is a video — only photos are supported here.`
+  if (isVideo && !opts.allowVideo) return opts.videoRejectionMessage ?? `"${file.name}" is a video — only photos are supported here.`
 
   if (isImage && file.size > MAX_IMAGE_BYTES) {
     return `"${file.name}" is too large — photos must be under ${MAX_IMAGE_BYTES / 1024 / 1024}MB.`
@@ -42,7 +42,7 @@ export async function validateMediaFile(file: File, opts: { allowVideo?: boolean
  */
 export async function filterMediaFiles(
   files: File[],
-  opts: { allowVideo?: boolean } = {}
+  opts: { allowVideo?: boolean; videoRejectionMessage?: string } = {}
 ): Promise<{ accepted: File[]; rejected: string[] }> {
   const accepted: File[] = []
   const rejected: string[] = []

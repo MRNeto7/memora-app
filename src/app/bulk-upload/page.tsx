@@ -6,7 +6,9 @@ import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import { useIsPro } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import ProUpsell from '@/components/pro/ProUpsell'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
 
@@ -88,6 +90,7 @@ function makeGroup(photos: PhotoItem[]): MemoryGroup {
 export default function BulkUploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
+  const isPro = useIsPro()
   const [groups, setGroups] = useState<MemoryGroup[]>([])
   const [loading, setLoading] = useState(false)
   const [untagged, setUntagged] = useState<PhotoItem[]>([])
@@ -262,7 +265,9 @@ export default function BulkUploadPage() {
 
       <div className="px-4 pt-4">
 
-        {groups.length === 0 && !loading && (
+        {isPro === false && <ProUpsell feature="Bulk upload" />}
+
+        {isPro === true && groups.length === 0 && !loading && (
           <>
             {/* Upload area */}
             <div
