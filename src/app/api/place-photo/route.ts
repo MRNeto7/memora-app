@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+const PLACE_ID_PATTERN = /^[A-Za-z0-9_-]{10,300}$/
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const placeId = searchParams.get('placeId')
-  const width = searchParams.get('w') ?? '400'
+  const width = Math.min(Math.max(Number(searchParams.get('w')) || 400, 50), 1600)
 
-  if (!placeId) return NextResponse.json({ url: null })
+  if (!placeId || !PLACE_ID_PATTERN.test(placeId)) return NextResponse.json({ url: null })
 
   const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  if (!key) {
+    console.error('Google Maps API key missing')
+    return NextResponse.json({ url: null }, { status: 500 })
+  }
 
   try {
     // Step 1: get photo reference from place details
@@ -34,8 +40,8 @@ export async function GET(req: NextRequest) {
         'Cache-Control': 'public, max-age=86400',
       },
     })
-  } catch (err) {
-    console.error('Place photo error:', err)
+  } catch {
+    console.error('Place photo fetch failed')
     return NextResponse.json({ url: null })
   }
 }
