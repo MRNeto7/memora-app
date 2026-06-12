@@ -17,7 +17,10 @@ interface PublicMemory {
   notes: string | null
   rating: number | null
   visited_at: string
-  venue: { id: string; name: string; address: string | null; google_place_id: string | null; lat: number; lng: number } | null
+  // Only the ~1km fuzzed coords are fetched for another user's memories — never the exact venue location
+  public_lat: number | null
+  public_lng: number | null
+  venue: { id: string; name: string; address: string | null; google_place_id: string | null } | null
   memory_photos: { id: string; storage_path: string }[]
 }
 
@@ -45,7 +48,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
 
       const { data: mems } = await supabase
         .from('memories')
-        .select('id, dish_name, notes, rating, visited_at, venue:venues(id, name, address, google_place_id, lat, lng), memory_photos(id, storage_path)')
+        .select('id, dish_name, notes, rating, visited_at, public_lat, public_lng, venue:venues(id, name, address, google_place_id), memory_photos(id, storage_path)')
         .eq('user_id', friend.friend_id)
         .eq('is_public', true)
         .order('visited_at', { ascending: false })
@@ -69,15 +72,8 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setAddingToWishlist(null); return }
 
-    // Find or create venue
-    let venueId = venue.id
-    const { data: existing } = await supabase.from('venues').select('id').eq('id', venue.id).single()
-    if (!existing) {
-      const { data: nv } = await supabase.from('venues').insert({ name: venue.name, address: venue.address, lat: venue.lat, lng: venue.lng, google_place_id: venue.google_place_id }).select('id').single()
-      venueId = nv?.id ?? venue.id
-    }
-
-    const { error } = await supabase.from('wishlists').insert({ user_id: user.id, venue_id: venueId, priority: 2 })
+    // The venue row already exists — it came from the venues join
+    const { error } = await supabase.from('wishlists').insert({ user_id: user.id, venue_id: venue.id, priority: 2 })
     if (!error) alert(`${venue.name} added to your wishlist!`)
     setAddingToWishlist(null)
   }

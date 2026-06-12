@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
@@ -64,6 +64,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setError('Not signed in.'); return }
 
+      const fuzzed = venue.lat && venue.lng ? fuzzCoordinates(venue.lat, venue.lng) : null
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id,
         venue_id: venue.id,
@@ -71,6 +72,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         notes: notes || null,
         rating: overall > 0 ? Math.round(overall) : null,
         is_public: false,
+        public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: new Date(visitDate).toISOString(),
       }).select().single()
 

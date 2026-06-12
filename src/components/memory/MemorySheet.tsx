@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
-import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
@@ -88,9 +88,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         if (ev) { venueId = ev.id } else { const { data: nv } = await supabase.from('venues').insert(venueData).select('id').single(); venueId = nv?.id ?? null }
       } else { const { data: nv } = await supabase.from('venues').insert(venueData).select('id').single(); venueId = nv?.id ?? null }
 
+      const fuzzed = venueData.lat && venueData.lng ? fuzzCoordinates(venueData.lat, venueData.lng) : null
       const { data: newMemory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId, dish_name: dishName || null, notes: notes || null,
         rating: overall > 0 ? Math.round(overall) : null, is_public: false,
+        public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
       }).select().single()
 
@@ -374,7 +376,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         </div>
 
         {/* Public / Private toggle */}
-        <PublicToggle memoryId={memory.id} initialValue={memory.is_public} onUpdate={onUpdate} />
+        <PublicToggle memoryId={memory.id} initialValue={memory.is_public} venue={memory.venue} onUpdate={onUpdate} />
 
         {/* Meta */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -509,14 +511,19 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
 }
 
 // Public/private toggle for a memory
-function PublicToggle({ memoryId, initialValue, onUpdate }: { memoryId: string; initialValue: boolean; onUpdate: () => void }) {
+function PublicToggle({ memoryId, initialValue, venue, onUpdate }: { memoryId: string; initialValue: boolean; venue: { lat: number; lng: number } | null; onUpdate: () => void }) {
   const [isPublic, setIsPublic] = useState(initialValue)
   const supabase = createClient()
 
   async function toggle() {
     const newVal = !isPublic
     setIsPublic(newVal)
-    await supabase.from('memories').update({ is_public: newVal }).eq('id', memoryId)
+    // Going public: (re)store the ~1km fuzzed coords so friends never see the exact location
+    const fuzzed = newVal && venue ? fuzzCoordinates(venue.lat, venue.lng) : null
+    await supabase.from('memories').update({
+      is_public: newVal,
+      ...(fuzzed ? { public_lat: fuzzed.lat, public_lng: fuzzed.lng } : {}),
+    }).eq('id', memoryId)
     onUpdate()
   }
 

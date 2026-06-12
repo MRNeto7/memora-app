@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { readPhotoExif } from '@/lib/exif'
+import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
@@ -174,12 +174,16 @@ export default function BulkUploadPage() {
         }
       }
 
+      const memLat = place?.lat ?? firstPhoto?.lat ?? null
+      const memLng = place?.lng ?? firstPhoto?.lng ?? null
+      const fuzzed = memLat && memLng ? fuzzCoordinates(memLat, memLng) : null
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id,
         venue_id: venueId,
         dish_name: group.dishName || null,
         notes: group.notes || null,
         is_public: false,
+        public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: group.date.toISOString(),
       }).select().single()
 

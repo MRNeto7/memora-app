@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
@@ -95,11 +95,13 @@ export default function CapturePage() {
       }
 
       const overall = calcOverall(detailRatings)
+      const fuzzed = vData.lat && vData.lng ? fuzzCoordinates(vData.lat, vData.lng) : null
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId,
         dish_name: dishName || null, notes: notes || null,
         rating: overall > 0 ? Math.round(overall) : null,
         is_public: false,
+        public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
       }).select().single()
 
