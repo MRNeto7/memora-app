@@ -43,8 +43,7 @@ export default function CapturePage() {
   const [detectedDate, setDetectedDate] = useState<Date | null>(null)
   const [detectedLat, setDetectedLat] = useState<number | null>(null)
   const [detectedLng, setDetectedLng] = useState<number | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   // Note: don't auto-trigger — programmatic file input clicks crash Capacitor WebViews
 
@@ -86,9 +85,9 @@ export default function CapturePage() {
       }
       if (selectedPlace?.placeId) {
         const { data: ev } = await supabase.from('venues').select('id').eq('google_place_id', selectedPlace.placeId).single()
-        if (ev) { venueId = ev.id } else { const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id }
+        if (ev) { venueId = ev.id } else { const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id ?? null }
       } else {
-        const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id
+        const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id ?? null
       }
 
       const overall = calcOverall(detailRatings)
@@ -104,7 +103,7 @@ export default function CapturePage() {
 
       for (const photo of photos) {
         const ext = photo.file.name.split('.').pop()
-        const path = `${user.id}/${memory.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
         const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
@@ -241,7 +240,7 @@ export default function CapturePage() {
 
       <h1 className="text-xl font-semibold mb-2" style={{ color: '#0D4F57' }}>Capture a memory</h1>
       <p className="text-sm mb-8 leading-relaxed" style={{ color: '#7D878D', maxWidth: 280 }}>
-        Take a photo of your meal and we'll save it as a memory on your map.
+        Take a photo of your meal and we&apos;ll save it as a memory on your map.
       </p>
 
       {/* Camera button — opens native camera */}
@@ -258,7 +257,7 @@ export default function CapturePage() {
         🖼️ Choose from library
       </button>
 
-      <p className="text-xs" style={{ color: '#b0babe' }}>Or tap the map tab and press "Save memory"</p>
+      <p className="text-xs" style={{ color: '#b0babe' }}>Or tap the map tab and press &quot;Save memory&quot;</p>
 
       {/* Hidden inputs */}
       <input ref={cameraRef} type="file" accept="image/*" capture="user" className="hidden"

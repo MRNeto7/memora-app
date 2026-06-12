@@ -14,8 +14,7 @@ interface AddToWishlistButtonProps {
 }
 
 export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistButtonProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const [selectedPlace, setSelectedPlace] = useState<PlaceSuggestion | null>(null)
   const [locationQuery, setLocationQuery] = useState('')
   const [notes, setNotes] = useState('')

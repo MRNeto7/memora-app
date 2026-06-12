@@ -32,21 +32,30 @@ export default function PlacesPage() {
   const [selectedMemory, setSelectedMemory] = useState<MemoryWithDetails | null>(null)
   const [selectedWishlist, setSelectedWishlist] = useState<WishlistItem | null>(null)
   const [showAddWishlist, setShowAddWishlist] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
-
-  useEffect(() => { fetchAll() }, [])
+  const [loadError, setLoadError] = useState(false)
+  const supabase = createClient()
 
   async function fetchAll() {
-    setLoading(true)
-    const [{ data: mems }, { data: wish }] = await Promise.all([
+    const [{ data: mems, error: memError }, { data: wish, error: wishError }] = await Promise.all([
       supabase.from('memories').select('*, venue:venues(*), memory_photos(*)').order('visited_at', { ascending: false }),
       supabase.from('wishlists').select('*, venue:venues(*)').order('priority', { ascending: false }).order('added_at', { ascending: false }),
     ])
+    setLoadError(Boolean(memError || wishError))
     if (mems) setMemories(mems as MemoryWithDetails[])
     if (wish) setWishlist(wish as WishlistItem[])
     setLoading(false)
   }
+
+  function retryFetch() {
+    setLoading(true)
+    setLoadError(false)
+    fetchAll()
+  }
+
+  useEffect(() => {
+    const load = async () => { await fetchAll() }
+    load()
+  }, [])
 
   // Sort and group memories
   const sortedMemories = [...memories].sort((a, b) => {
@@ -111,6 +120,15 @@ export default function PlacesPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <p className="text-sm" style={{ color: '#7D878D' }}>Loading…</p>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+            <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>Couldn&apos;t load your places</h2>
+            <p className="text-sm mb-4" style={{ color: '#7D878D' }}>Check your connection and try again</p>
+            <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
+              style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+              Retry
+            </button>
           </div>
         ) : tab === 'memories' ? (
           <>
@@ -177,8 +195,7 @@ export default function PlacesPage() {
 
 function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const firstPhoto = memory.memory_photos?.[0]
 
   useEffect(() => {

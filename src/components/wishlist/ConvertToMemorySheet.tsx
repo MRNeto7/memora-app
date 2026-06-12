@@ -27,8 +27,7 @@ function calcOverall(food: number, service: number, ambiance: number): number {
 }
 
 export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSaved }: ConvertToMemorySheetProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [dishName, setDishName] = useState('')
@@ -76,7 +75,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
       for (const photo of photos) {
         const ext = photo.file.name.split('.').pop()
-        const path = `${user.id}/${memory.id}/${Date.now()}.${ext}`
+        const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
         const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }

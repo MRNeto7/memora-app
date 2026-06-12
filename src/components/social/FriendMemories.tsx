@@ -17,7 +17,7 @@ interface PublicMemory {
   notes: string | null
   rating: number | null
   visited_at: string
-  venue: { id: string; name: string; address: string | null; google_place_id: string | null; lat: number; lng: number }
+  venue: { id: string; name: string; address: string | null; google_place_id: string | null; lat: number; lng: number } | null
   memory_photos: { id: string; storage_path: string }[]
 }
 
@@ -29,8 +29,7 @@ interface WishlistItem {
 }
 
 export default function FriendMemories({ friend, onBack }: { friend: FriendProfile; onBack: () => void }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const [tab, setTab] = useState<'memories' | 'wishlist'>('memories')
   const [memories, setMemories] = useState<PublicMemory[]>([])
   const [wishlist, setWishlist] = useState<WishlistItem[]>([])
@@ -65,6 +64,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
   }, [friend.friend_id])
 
   async function addToMyWishlist(venue: PublicMemory['venue']) {
+    if (!venue) return
     setAddingToWishlist(venue.id)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setAddingToWishlist(null); return }
@@ -120,7 +120,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           memories.length === 0 ? (
             <div className="flex flex-col items-center py-20 text-center">
               <p className="font-semibold" style={{ color: '#0D4F57' }}>No public memories yet</p>
-              <p className="text-sm mt-1" style={{ color: '#7D878D' }}>{friend.display_name ?? friend.memora_id} hasn't shared any memories</p>
+              <p className="text-sm mt-1" style={{ color: '#7D878D' }}>{friend.display_name ?? friend.memora_id} hasn&apos;t shared any memories</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -160,7 +160,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           !wishlistPublic ? (
             <div className="flex flex-col items-center py-20 text-center">
               <p className="font-semibold" style={{ color: '#0D4F57' }}>Wishlist is private</p>
-              <p className="text-sm mt-1" style={{ color: '#7D878D' }}>{friend.display_name ?? friend.memora_id} hasn't made their wishlist public</p>
+              <p className="text-sm mt-1" style={{ color: '#7D878D' }}>{friend.display_name ?? friend.memora_id} hasn&apos;t made their wishlist public</p>
             </div>
           ) : wishlist.length === 0 ? (
             <div className="flex flex-col items-center py-20 text-center">
@@ -192,8 +192,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
 
 function SignedThumb({ storagePath }: { storagePath: string }) {
   const [url, setUrl] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   useEffect(() => {
     supabase.storage.from('memory-photos').createSignedUrl(storagePath, 3600)
       .then(({ data }: { data: { signedUrl: string } | null }) => { if (data?.signedUrl) setUrl(data.signedUrl) })

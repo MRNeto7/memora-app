@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function SettingsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const router = useRouter()
 
   const [displayName, setDisplayName] = useState('')
@@ -25,7 +24,8 @@ export default function SettingsPage() {
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email) setEmail(user.email)
+      if (!user) { router.push('/auth'); return }
+      if (user.email) setEmail(user.email)
       const { data } = await supabase.from('users').select('display_name').eq('id', user.id).single()
       if (data?.display_name) setDisplayName(data.display_name)
     }
@@ -35,6 +35,7 @@ export default function SettingsPage() {
   async function saveName() {
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setSaving(false); return }
     await supabase.from('users').update({ display_name: displayName }).eq('id', user.id)
     setSaving(false)
     setNameSuccess(true)

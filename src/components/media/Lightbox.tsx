@@ -17,8 +17,7 @@ interface LightboxProps {
 export default function Lightbox({ photos, initialIndex, onClose }: LightboxProps) {
   const [current, setCurrent] = useState(initialIndex)
   const [urls, setUrls] = useState<Record<string, string>>({})
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   // Load signed URLs for all photos
   useEffect(() => {

@@ -14,8 +14,11 @@ export default function PlacePhoto({ placeId, width = 400, style, fallbackInitia
   const [url, setUrl] = useState<string | null>(null)
   const [tried, setTried] = useState(false)
 
+  // No placeId means there is nothing to load — treat as already tried
+  const settled = tried || !placeId
+
   useEffect(() => {
-    if (!placeId) { setTried(true); return }
+    if (!placeId) return
 
     function tryLoad() {
       if (!window.google?.maps?.places) {
@@ -51,13 +54,13 @@ export default function PlacePhoto({ placeId, width = 400, style, fallbackInitia
     return (
       <div style={{
         ...style,
-        background: tried ? '#1a3a40' : '#0D4F57',
+        background: settled ? '#1a3a40' : '#0D4F57',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
       }}>
-        {tried ? (
+        {settled ? (
           <span style={{ color: '#C9A86A', fontWeight: 700, fontSize: typeof style?.width === 'number' && style.width < 60 ? 13 : 18, letterSpacing: 1 }}>
             {fallbackInitials ?? '?'}
           </span>

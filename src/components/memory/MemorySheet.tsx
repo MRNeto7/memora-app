@@ -29,8 +29,7 @@ function calcOverall(r: DetailRatings): number {
 
 export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetProps) {
   const isNew = !memory
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -115,7 +114,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
       for (const photo of photos) {
         const ext = photo.file.name.split('.').pop()
-        const path = `${user.id}/${newMemory.id}/${Date.now()}.${ext}`
+        const path = `${user.id}/${newMemory.id}/${crypto.randomUUID()}.${ext}`
         const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: newMemory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
@@ -293,8 +292,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
   const [editing, setEditing] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   const [editDish, setEditDish] = useState(memory.dish_name ?? '')
   const [editNotes, setEditNotes] = useState(memory.notes ?? '')
@@ -499,8 +497,7 @@ function PhotoCarousel({ photos, current, onChange }: { photos: MemoryWithDetail
 
 function CarouselPhoto({ storagePath }: { storagePath: string }) {
   const [url, setUrl] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const isVideo = storagePath.match(/\.(mp4|mov|webm|m4v)$/i)
 
   useEffect(() => {
@@ -530,8 +527,7 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
 // Public/private toggle for a memory
 function PublicToggle({ memoryId, initialValue, onUpdate }: { memoryId: string; initialValue: boolean; onUpdate: () => void }) {
   const [isPublic, setIsPublic] = useState(initialValue)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   async function toggle() {
     const newVal = !isPublic

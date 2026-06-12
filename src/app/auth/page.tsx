@@ -198,7 +198,7 @@ export default function AuthPage() {
         </form>
 
         <p className="text-xs text-center mt-5" style={{ color: '#7D878D' }}>
-          By continuing you agree to Mimora's terms and privacy policy.
+          By continuing you agree to Mimora&apos;s terms and privacy policy.
         </p>
       </div>
     </div>
@@ -207,8 +207,7 @@ export default function AuthPage() {
 
 async function handleForgotPassword(
   email: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   setSuccess: (s: string) => void,
   setError: (s: string) => void
 ) {

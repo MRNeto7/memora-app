@@ -20,8 +20,7 @@ interface WishlistSheetProps {
 }
 
 export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheetProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const [editing, setEditing] = useState(false)
   const [converting, setConverting] = useState(false)
   const [notes, setNotes] = useState(item.notes ?? '')
@@ -148,7 +147,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
-              I've been here — save a memory
+              I&apos;ve been here — save a memory
             </button>
           )}
 
@@ -185,8 +184,11 @@ function VenueWebsiteButton({ placeId, venueName, address }: { placeId: string |
   const [website, setWebsite] = useState<string | null>(null)
   const [checked, setChecked] = useState(false)
 
+  // No placeId means there is no lookup to wait for
+  const ready = checked || !placeId
+
   useEffect(() => {
-    if (!placeId) { setChecked(true); return }
+    if (!placeId) return
     fetch(`/api/venue-details?placeId=${placeId}`)
       .then(r => r.json())
       .then(data => { setWebsite(data.website ?? null); setChecked(true) })
@@ -201,8 +203,8 @@ function VenueWebsiteButton({ placeId, venueName, address }: { placeId: string |
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: checked ? 1 : 0.7, flex: 1, padding: '12px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, textAlign: 'center', display: 'block', lineHeight: 1 }}>
-      {checked ? label : '…'}
+      style={{ background: '#0D4F57', color: '#EAE5DD', opacity: ready ? 1 : 0.7, flex: 1, padding: '12px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, textAlign: 'center', display: 'block', lineHeight: 1 }}>
+      {ready ? label : '…'}
     </a>
   )
 }

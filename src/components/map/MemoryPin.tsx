@@ -11,8 +11,7 @@ interface MemoryPinProps {
 
 export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   const firstPhoto = memory.memory_photos?.[0]
 

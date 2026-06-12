@@ -28,26 +28,25 @@ export default function MapPage() {
   const [selected, setSelected] = useState<MemoryWithDetails | null>(null)
   const [selectedWishlist, setSelectedWishlist] = useState<WishlistVenue | null>(null)
   const [showAddSheet, setShowAddSheet] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
 
   const [wishlist, setWishlist] = useState<WishlistVenue[]>([])
   const [showMemories, setShowMemories] = useState(true)
   const [showWishlist, setShowWishlist] = useState(true)
-
-  useEffect(() => { fetchMemories(); fetchWishlist() }, [])
+  const [loadError, setLoadError] = useState(false)
 
   async function fetchWishlist() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('wishlists')
       .select('id, notes, priority, added_at, venue:venues(id, name, lat, lng, address, google_place_id)')
-    if (data) setWishlist(data.map((w: { id: string; notes: string | null; priority: number; added_at: string; venue: { id: string; name: string; lat: number; lng: number; address: string | null; google_place_id: string | null } }) => ({
-      ...w.venue,
+    if (error) throw error
+    if (data) setWishlist(data.filter(w => w.venue).map(w => ({
+      ...w.venue!,
       wishlistId: w.id,
       wishlistNotes: w.notes,
       wishlistPriority: w.priority,
       wishlistAddedAt: w.added_at,
-    })).filter(Boolean))
+    })))
   }
 
   async function fetchMemories() {
@@ -55,8 +54,23 @@ export default function MapPage() {
       .from('memories')
       .select('*, venue:venues(*), memory_photos(*)')
       .order('visited_at', { ascending: false })
-    if (!error && data) setMemories(data as MemoryWithDetails[])
+    if (error) throw error
+    if (data) setMemories(data as MemoryWithDetails[])
   }
+
+  async function loadAll() {
+    try {
+      await Promise.all([fetchMemories(), fetchWishlist()])
+      setLoadError(false)
+    } catch {
+      setLoadError(true)
+    }
+  }
+
+  useEffect(() => {
+    const load = async () => { await loadAll() }
+    load()
+  }, [])
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'env(safe-area-inset-top, 0px)' }}>
@@ -92,6 +106,18 @@ export default function MapPage() {
           />
         </Map>
 
+      {/* Load error banner */}
+      {loadError && (
+        <div className="absolute left-4 right-4 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-2xl"
+          style={{ top: 'calc(env(safe-area-inset-top, 0px) + 60px)', background: 'rgba(163,45,45,0.95)', backdropFilter: 'blur(12px)' }}>
+          <p className="text-xs font-medium text-white">Couldn&apos;t load your memories. Check your connection.</p>
+          <button onClick={loadAll} className="text-xs font-semibold px-3 py-1.5 rounded-xl flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Unified header bar */}
       <div className="absolute left-0 right-0 z-10 flex items-center justify-between px-4"
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', pointerEvents: 'none' }}>
@@ -122,7 +148,7 @@ export default function MapPage() {
       <AddMemoryButton onClick={() => { setShowAddSheet(true); setSelected(null) }} />
 
       {selected && (
-        <MemorySheet memory={selected} onClose={() => setSelected(null)} onUpdate={fetchMemories} />
+        <MemorySheet memory={selected} onClose={() => setSelected(null)} onUpdate={loadAll} />
       )}
       {selectedWishlist && (
         <WishlistSheet
@@ -141,14 +167,14 @@ export default function MapPage() {
             }
           }}
           onClose={() => setSelectedWishlist(null)}
-          onUpdate={() => { fetchWishlist(); setSelectedWishlist(null) }}
+          onUpdate={() => { loadAll(); setSelectedWishlist(null) }}
         />
       )}
       {showAddSheet && (
         <MemorySheet
           memory={null}
           onClose={() => setShowAddSheet(false)}
-          onUpdate={() => { fetchMemories(); setShowAddSheet(false) }}
+          onUpdate={() => { loadAll(); setShowAddSheet(false) }}
         />
       )}
     </div>
@@ -165,8 +191,7 @@ function ClusteredMarkers({
 }) {
   const map = useMap()
   const clusterer = useRef<MarkerClusterer | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markerRefs = useRef<Record<string, any>>({})
+  const markerRefs = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
 
   useEffect(() => {
     if (!map) return

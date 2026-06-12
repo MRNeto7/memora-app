@@ -81,8 +81,7 @@ function makeGroup(photos: PhotoItem[]): MemoryGroup {
 
 export default function BulkUploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const [groups, setGroups] = useState<MemoryGroup[]>([])
   const [loading, setLoading] = useState(false)
   const [untagged, setUntagged] = useState<PhotoItem[]>([])
@@ -165,9 +164,9 @@ export default function BulkUploadPage() {
         if (place?.placeId) {
           const { data: ev } = await supabase.from('venues').select('id').eq('google_place_id', place.placeId).single()
           if (ev) { venueId = ev.id }
-          else { const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id }
+          else { const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id ?? null }
         } else {
-          const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id
+          const { data: nv } = await supabase.from('venues').insert(vData).select('id').single(); venueId = nv?.id ?? null
         }
       }
 
@@ -184,7 +183,7 @@ export default function BulkUploadPage() {
 
       for (const photo of group.photos) {
         const ext = photo.file.name.split('.').pop()
-        const path = `${user.id}/${memory.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
         const { error: ue } = await supabase.storage.from('memory-photos').upload(path, photo.file, { upsert: true })
         if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
@@ -228,7 +227,7 @@ export default function BulkUploadPage() {
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </div>
               <p className="font-semibold text-base mb-1" style={{ color: '#0D4F57' }}>Select photos from camera roll</p>
-              <p className="text-sm" style={{ color: '#7D878D', maxWidth: 260 }}>Choose multiple food photos — we'll group them into memories automatically by date and location</p>
+              <p className="text-sm" style={{ color: '#7D878D', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
 
@@ -275,7 +274,7 @@ export default function BulkUploadPage() {
             {/* Untagged warning */}
             {untagged.length > 0 && (
               <div className="rounded-2xl px-4 py-3 mb-4 text-xs" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid #C9A86A' }}>
-                {untagged.length} photo{untagged.length > 1 ? 's' : ''} had no location data and weren't grouped — they may have been shared via WhatsApp or another app that strips metadata.
+                {untagged.length} photo{untagged.length > 1 ? 's' : ''} had no location data and weren&apos;t grouped — they may have been shared via WhatsApp or another app that strips metadata.
               </div>
             )}
 

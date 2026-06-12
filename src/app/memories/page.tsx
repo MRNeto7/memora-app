@@ -8,23 +8,30 @@ import MemorySheet from '@/components/memory/MemorySheet'
 export default function MemoriesPage() {
   const [memories, setMemories] = useState<MemoryWithDetails[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [selected, setSelected] = useState<MemoryWithDetails | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
-
-  useEffect(() => {
-    fetchMemories()
-  }, [])
+  const supabase = createClient()
 
   async function fetchMemories() {
-    setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('memories')
       .select('*, venue:venues(*), memory_photos(*)')
       .order('visited_at', { ascending: false })
-    if (data) setMemories(data as MemoryWithDetails[])
+    if (error) setLoadError(true)
+    else { setLoadError(false); if (data) setMemories(data as MemoryWithDetails[]) }
     setLoading(false)
   }
+
+  function retryFetch() {
+    setLoading(true)
+    setLoadError(false)
+    fetchMemories()
+  }
+
+  useEffect(() => {
+    const load = async () => { await fetchMemories() }
+    load()
+  }, [])
 
   // Group by month
   const grouped = memories.reduce((acc, memory) => {
@@ -50,6 +57,15 @@ export default function MemoriesPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="text-sm" style={{ color: '#7D878D' }}>Loading…</div>
+        </div>
+      ) : loadError ? (
+        <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+          <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>Couldn&apos;t load your memories</h2>
+          <p className="text-sm mb-4" style={{ color: '#7D878D' }}>Check your connection and try again</p>
+          <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+            Retry
+          </button>
         </div>
       ) : memories.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
@@ -96,8 +112,7 @@ export default function MemoriesPage() {
 
 function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const firstPhoto = memory.memory_photos?.[0]
 
   useEffect(() => {

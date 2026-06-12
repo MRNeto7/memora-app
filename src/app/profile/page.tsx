@@ -18,27 +18,26 @@ export default function ProfilePage() {
   const [showVenuePicker, setShowVenuePicker] = useState(false)
 
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const router = useRouter()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
-
-  useEffect(() => { fetchProfile() }, [])
+  const supabase = createClient()
 
   async function fetchProfile() {
-    setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (user?.email) setEmail(user.email)
+    if (!user) { setLoading(false); router.push('/auth'); return }
+    if (user.email) setEmail(user.email)
 
-    const { data: profile } = await supabase.from('users').select('display_name, memora_id, favourite_venue_id').eq('id', user.id).maybeSingle()
+    const { data: profile, error: profileError } = await supabase.from('users').select('display_name, memora_id, favourite_venue_id').eq('id', user.id).maybeSingle()
     if (profile?.display_name) setDisplayName(profile.display_name)
     if (profile?.memora_id) setMimoraId(profile.memora_id)
 
-    const { data: memories } = await supabase.from('memories').select('rating, venue:venues(id, name, address)')
+    const { data: memories, error: memError } = await supabase.from('memories').select('rating, venue:venues(id, name, address)')
+    if (profileError || memError) setLoadError(true)
     if (memories) {
-      const rated = memories.filter((m: { rating: number | null }) => m.rating)
-      const avg = rated.length > 0 ? rated.reduce((s: number, m: { rating: number }) => s + m.rating, 0) / rated.length : 0
-      const uniqueVenues = new Map()
-      memories.forEach((m: { venue?: { id: string; name: string; address: string | null } }) => {
+      const rated = memories.filter(m => m.rating != null)
+      const avg = rated.length > 0 ? rated.reduce((s, m) => s + (m.rating ?? 0), 0) / rated.length : 0
+      const uniqueVenues = new Map<string, VenueOption>()
+      memories.forEach(m => {
         if (m.venue) uniqueVenues.set(m.venue.id, m.venue)
       })
       const venueList = Array.from(uniqueVenues.values()) as VenueOption[]
@@ -55,6 +54,17 @@ export default function ProfilePage() {
 
     setLoading(false)
   }
+
+  function retryFetch() {
+    setLoading(true)
+    setLoadError(false)
+    fetchProfile()
+  }
+
+  useEffect(() => {
+    const load = async () => { await fetchProfile() }
+    load()
+  }, [])
 
   async function selectFavourite(venue: VenueOption) {
     const { data: { user } } = await supabase.auth.getUser()
@@ -105,6 +115,17 @@ export default function ProfilePage() {
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
+
+        {loadError && (
+          <div className="rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
+            style={{ background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)' }}>
+            <p className="text-xs font-medium" style={{ color: '#a32d2d' }}>Couldn&apos;t load your profile. Check your connection.</p>
+            <button onClick={retryFetch} className="text-xs font-semibold px-3 py-1.5 rounded-xl flex-shrink-0"
+              style={{ background: '#a32d2d', color: '#fff' }}>
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Favourite place */}
         <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
@@ -224,8 +245,7 @@ function PrivacyToggleRow({ label, sub, value, onChange }: { label: string; sub:
 }
 
 function PrivacyToggles() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const [memoriesPublic, setMemoriesPublic] = React.useState(false)
   const [wishlistPublic, setWishlistPublic] = React.useState(false)
   const [userId, setUserId] = React.useState<string | null>(null)
@@ -241,9 +261,10 @@ function PrivacyToggles() {
     load()
   }, [])
 
-  async function toggle(field: string, value: boolean) {
+  async function toggle(field: 'profile_public' | 'wishlist_public', value: boolean) {
     if (!userId) return
-    await supabase.from('users').update({ [field]: value }).eq('id', userId)
+    const patch = field === 'profile_public' ? { profile_public: value } : { wishlist_public: value }
+    await supabase.from('users').update(patch).eq('id', userId)
   }
 
   return (

@@ -21,8 +21,7 @@ interface FriendRequest {
 }
 
 export default function SocialPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any
+  const supabase = createClient()
   const [tab, setTab] = useState<'friends' | 'requests' | 'find'>('friends')
   const [friends, setFriends] = useState<FriendProfile[]>([])
   const [requests, setRequests] = useState<FriendRequest[]>([])
@@ -32,34 +31,34 @@ export default function SocialPage() {
   const [searchError, setSearchError] = useState('')
   const [searching, setSearching] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [selectedFriend, setSelectedFriend] = useState<FriendProfile | null>(null)
   const [copySuccess, setCopySuccess] = useState(false)
 
-  useEffect(() => { fetchAll() }, [])
-
   async function fetchAll() {
-    setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setLoading(false); return }
 
     const { data: profile } = await supabase.from('users').select('memora_id').eq('id', user.id).single()
     if (profile?.memora_id) setMyMimoraId(profile.memora_id)
 
-    const { data: friendReqs } = await supabase
+    const { data: friendReqs, error: reqError } = await supabase
       .from('friend_requests')
       .select('id, from_user_id, to_user_id, status')
       .eq('status', 'accepted')
       .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
 
+    if (reqError) { setLoadError(true); setLoading(false); return }
+
     if (friendReqs && friendReqs.length > 0) {
-      const friendIds = friendReqs.map((r: { from_user_id: string; to_user_id: string }) =>
+      const friendIds = friendReqs.map(r =>
         r.from_user_id === user.id ? r.to_user_id : r.from_user_id
       )
       const { data: profiles } = await supabase.from('users').select('id, memora_id, display_name, username').in('id', friendIds)
       if (profiles) {
-        const withCounts = await Promise.all(profiles.map(async (p: { id: string; memora_id: string; display_name: string | null; username: string | null }) => {
+        const withCounts = await Promise.all(profiles.map(async p => {
           const { count } = await supabase.from('memories').select('id', { count: 'exact', head: true }).eq('user_id', p.id).eq('is_public', true)
-          return { friend_id: p.id, memora_id: p.memora_id, display_name: p.display_name, username: p.username, avatar_url: null, memory_count: count ?? 0 }
+          return { friend_id: p.id, memora_id: p.memora_id ?? '', display_name: p.display_name, username: p.username, avatar_url: null, memory_count: count ?? 0 }
         }))
         setFriends(withCounts)
       }
@@ -71,15 +70,28 @@ export default function SocialPage() {
       .eq('to_user_id', user.id)
       .eq('status', 'pending')
 
-    if (incoming) setRequests(incoming)
+    if (incoming) {
+      setRequests(incoming.map(r => ({ ...r, from_user: { ...r.from_user, memora_id: r.from_user.memora_id ?? '' } })))
+    }
     setLoading(false)
   }
+
+  function retryFetch() {
+    setLoading(true)
+    setLoadError(false)
+    fetchAll()
+  }
+
+  useEffect(() => {
+    const load = async () => { await fetchAll() }
+    load()
+  }, [])
 
   async function handleSearch() {
     if (!searchId.trim()) return
     setSearching(true); setSearchError(''); setSearchResult(null)
     const { data } = await supabase.from('users').select('id, memora_id, display_name').eq('memora_id', searchId.trim().toUpperCase()).single()
-    if (data) setSearchResult(data)
+    if (data) setSearchResult({ ...data, memora_id: data.memora_id ?? '' })
     else setSearchError('No user found with that Mimora ID.')
     setSearching(false)
   }
@@ -139,6 +151,16 @@ export default function SocialPage() {
       <div className="px-4 pt-4 flex-1">
         {tab === 'friends' && (
           loading ? <div className="flex justify-center py-20"><p className="text-sm" style={{ color: '#7D878D' }}>Loading…</p></div> :
+          loadError ? (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+              <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>Couldn&apos;t load your friends</h2>
+              <p className="text-sm mb-4" style={{ color: '#7D878D' }}>Check your connection and try again</p>
+              <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
+                style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+                Retry
+              </button>
+            </div>
+          ) :
           friends.length === 0 ? (
             <div className="flex flex-col items-center py-20 text-center">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: '#0D4F57' }}>
