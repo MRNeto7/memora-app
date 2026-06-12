@@ -113,11 +113,12 @@ export default function BulkUploadPage() {
       else noLocation.push(item)
     }
 
-    // Reverse geocode the first photo of each likely group
-    const grouped = groupPhotos(photos)
+    // Group everything — photos without GPS still group by time and just
+    // need the location typed in, instead of being unimportable
+    const grouped = groupPhotos([...photos, ...noLocation])
 
-    // Try to get venue suggestions from EXIF coords
-    for (const group of grouped) {
+    // Venue suggestions from EXIF coords — all groups in parallel
+    await Promise.all(grouped.map(async group => {
       const firstWithLoc = group.photos.find(p => p.lat)
       if (firstWithLoc?.lat && firstWithLoc.lng) {
         try {
@@ -129,10 +130,11 @@ export default function BulkUploadPage() {
           }
         } catch { /* silent */ }
       }
-    }
+    }))
 
-    setGroups(grouped)
-    setUntagged(noLocation)
+    // Append so "Add more" never wipes details already entered
+    setGroups(prev => [...prev, ...grouped])
+    setUntagged(prev => [...prev, ...noLocation])
     setLoading(false)
     e.target.value = ''
     if (rejected.length > 0) alert(rejected.join('\n'))
@@ -190,15 +192,31 @@ export default function BulkUploadPage() {
 
       if (me) { updateGroup(group.id, { saving: false, error: me.message }); return }
 
-      for (const photo of group.photos) {
-        const upload = await compressImage(photo.file)
-        const ext = upload.name.split('.').pop()
-        const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
-        if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+      // Compress + upload in batches of 3 — parallel enough to be fast,
+      // small enough to not spike memory on phones
+      let uploaded = 0
+      for (let i = 0; i < group.photos.length; i += 3) {
+        const batch = group.photos.slice(i, i + 3)
+        const results = await Promise.all(batch.map(async photo => {
+          try {
+            const upload = await compressImage(photo.file)
+            const ext = upload.name.split('.').pop()
+            const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
+            const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
+            if (ue) return false
+            await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+            return true
+          } catch { return false }
+        }))
+        uploaded += results.filter(Boolean).length
       }
 
-      updateGroup(group.id, { saved: true, saving: false })
+      const failed = group.photos.length - uploaded
+      updateGroup(group.id, {
+        saved: true,
+        saving: false,
+        error: failed > 0 ? `${failed} photo${failed > 1 ? 's' : ''} failed to upload` : null,
+      })
     } catch (err) {
       console.error(err)
       updateGroup(group.id, { saving: false, error: 'Something went wrong' })
@@ -207,6 +225,16 @@ export default function BulkUploadPage() {
 
   const pending = groups.filter(g => !g.saved)
   const saved = groups.filter(g => g.saved)
+  const ready = pending.filter(g => g.locationQuery.trim() && !g.saving)
+  const [savingAll, setSavingAll] = useState(false)
+
+  async function saveAll() {
+    setSavingAll(true)
+    for (const group of ready) {
+      await saveGroup(group)
+    }
+    setSavingAll(false)
+  }
 
   return (
     <div className="page-enter min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
@@ -274,17 +302,26 @@ export default function BulkUploadPage() {
                 {pending.length} {pending.length === 1 ? 'group' : 'groups'} to save
                 {saved.length > 0 && <span style={{ color: '#7D878D' }}> · {saved.length} saved</span>}
               </p>
-              <button onClick={() => fileInputRef.current?.click()}
-                className="text-xs px-3 py-1.5 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>
-                Add more
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => fileInputRef.current?.click()}
+                  className="text-xs px-3 py-1.5 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                  Add more
+                </button>
+                {ready.length > 1 && (
+                  <button onClick={saveAll} disabled={savingAll}
+                    className="press text-xs px-3 py-1.5 rounded-lg font-semibold"
+                    style={{ background: '#0D4F57', color: '#EAE5DD', opacity: savingAll ? 0.6 : 1 }}>
+                    {savingAll ? 'Saving…' : `Save all (${ready.length})`}
+                  </button>
+                )}
+              </div>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
 
             {/* Untagged warning */}
             {untagged.length > 0 && (
               <div className="rounded-2xl px-4 py-3 mb-4 text-xs" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid #C9A86A' }}>
-                {untagged.length} photo{untagged.length > 1 ? 's' : ''} had no location data and weren&apos;t grouped — they may have been shared via WhatsApp or another app that strips metadata.
+                {untagged.length} photo{untagged.length > 1 ? 's' : ''} had no location data (often stripped by WhatsApp or screenshots) — they&apos;re grouped by time below, just type the location in.
               </div>
             )}
 
@@ -335,6 +372,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss }: {
         <div>
           <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>{(group.selectedPlace?.name ?? group.locationQuery) || 'Memory'} saved</p>
           <p className="text-xs" style={{ color: '#7D878D' }}>{group.photos.length} photo{group.photos.length > 1 ? 's' : ''} · {group.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
+          {group.error && <p className="text-xs mt-0.5" style={{ color: '#a32d2d' }}>{group.error}</p>}
         </div>
       </div>
     )
