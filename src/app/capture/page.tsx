@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import { filterMediaFiles } from '@/lib/uploads'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
 
@@ -49,8 +50,11 @@ export default function CapturePage() {
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
+    const { accepted, rejected } = await filterMediaFiles(Array.from(files), { allowVideo: true })
+    if (rejected.length > 0) alert(rejected.join('\n'))
+    if (accepted.length === 0) return
     const newPhotos: PhotoEntry[] = []
-    for (const file of Array.from(files)) {
+    for (const file of accepted) {
       const exif = await readPhotoExif(file)
       newPhotos.push({
         file,

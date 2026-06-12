@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import { filterMediaFiles } from '@/lib/uploads'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
 
@@ -51,18 +52,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
+    const { accepted, rejected } = await filterMediaFiles(files, { allowVideo: true })
+    if (rejected.length > 0) alert(rejected.join('\n'))
     const newPhotos: PhotoEntry[] = []
 
-    for (const file of files) {
-      // Enforce 15 second limit on videos
-      if (file.type.startsWith('video/')) {
-        const duration = await getVideoDuration(file)
-        if (duration > 15) {
-          alert(`"${file.name}" is ${Math.round(duration)}s — videos must be 15 seconds or under.`)
-          continue
-        }
-      }
-
+    for (const file of accepted) {
       const exif = await readPhotoExif(file)
       newPhotos.push({
         file,
@@ -77,16 +71,6 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
     setPhotos(prev => [...prev, ...newPhotos])
     e.target.value = ''
-  }
-
-  function getVideoDuration(file: File): Promise<number> {
-    return new Promise((resolve) => {
-      const video = document.createElement('video')
-      video.preload = 'metadata'
-      video.onloadedmetadata = () => { window.URL.revokeObjectURL(video.src); resolve(video.duration) }
-      video.onerror = () => resolve(0)
-      video.src = URL.createObjectURL(file)
-    })
   }
 
   async function handleSave() {

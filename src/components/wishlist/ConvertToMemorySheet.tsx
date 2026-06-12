@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage } from '@/lib/exif'
+import { filterMediaFiles } from '@/lib/uploads'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
 interface Venue {
@@ -44,8 +45,10 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
+    const { accepted, rejected } = await filterMediaFiles(files)
+    if (rejected.length > 0) alert(rejected.join('\n'))
     const newPhotos: PhotoEntry[] = []
-    for (const file of files) {
+    for (const file of accepted) {
       const exif = await readPhotoExif(file)
       newPhotos.push({ file, preview: URL.createObjectURL(file), lat: exif.lat, lng: exif.lng, takenAt: exif.takenAt, exifMessage: getExifMessage(exif) })
       if (exif.takenAt) setVisitDate(exif.takenAt.toISOString().split('T')[0])

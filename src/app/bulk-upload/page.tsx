@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif } from '@/lib/exif'
+import { validateMediaFile } from '@/lib/uploads'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
 
@@ -93,9 +94,11 @@ export default function BulkUploadPage() {
 
     const photos: PhotoItem[] = []
     const noLocation: PhotoItem[] = []
+    const rejected: string[] = []
 
     for (const file of files) {
-      if (!file.type.startsWith('image/')) continue
+      const reason = await validateMediaFile(file)
+      if (reason) { rejected.push(reason); continue }
       const exif = await readPhotoExif(file)
       const item: PhotoItem = {
         file,
@@ -131,6 +134,7 @@ export default function BulkUploadPage() {
     setUntagged(noLocation)
     setLoading(false)
     e.target.value = ''
+    if (rejected.length > 0) alert(rejected.join('\n'))
   }
 
   function updateGroup(id: string, updates: Partial<MemoryGroup>) {
