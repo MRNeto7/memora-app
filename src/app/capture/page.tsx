@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
+import { calcOverall, DetailRatings } from '@/lib/ratings'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
 
@@ -19,14 +20,6 @@ interface PhotoEntry {
   lng: number | null
   takenAt: Date | null
   exifMessage: string | null
-}
-
-interface DetailRatings { food: number; service: number; ambiance: number }
-
-function calcOverall(r: DetailRatings): number {
-  const vals = [r.food, r.service, r.ambiance].filter(v => v > 0)
-  if (!vals.length) return 0
-  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length / 10 * 5) * 10) / 10
 }
 
 export default function CapturePage() {
@@ -100,7 +93,10 @@ export default function CapturePage() {
       const { data: memory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId,
         dish_name: dishName || null, notes: notes || null,
-        rating: overall > 0 ? Math.round(overall) : null,
+        rating: overall > 0 ? overall : null,
+        rating_food: detailRatings.food || null,
+        rating_service: detailRatings.service || null,
+        rating_ambiance: detailRatings.ambiance || null,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
@@ -210,7 +206,7 @@ export default function CapturePage() {
             {overall > 0 && (
               <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
                 <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/5</span>
+                <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
               </div>
             )}
           </div>

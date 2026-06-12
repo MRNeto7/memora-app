@@ -7,6 +7,7 @@ import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
+import { calcOverall, DetailRatings } from '@/lib/ratings'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
 
@@ -16,18 +17,10 @@ interface PlaceSuggestion {
 interface PhotoEntry {
   file: File; preview: string; lat: number | null; lng: number | null; takenAt: Date | null; exifMessage: string | null
 }
-interface DetailRatings { food: number; service: number; ambiance: number }
-
 interface MemorySheetProps {
   memory: MemoryWithDetails | null
   onClose: () => void
   onUpdate: () => void
-}
-
-function calcOverall(r: DetailRatings): number {
-  const vals = [r.food, r.service, r.ambiance].filter(v => v > 0)
-  if (!vals.length) return 0
-  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length / 10 * 5) * 10) / 10
 }
 
 export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetProps) {
@@ -93,7 +86,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       const fuzzed = venueData.lat && venueData.lng ? fuzzCoordinates(venueData.lat, venueData.lng) : null
       const { data: newMemory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId, dish_name: dishName || null, notes: notes || null,
-        rating: overall > 0 ? Math.round(overall) : null, is_public: false,
+        rating: overall > 0 ? overall : null,
+        rating_food: detailRatings.food || null,
+        rating_service: detailRatings.service || null,
+        rating_ambiance: detailRatings.ambiance || null,
+        is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
       }).select().single()
@@ -210,7 +207,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 {overall > 0 && (
                   <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
                     <span className="text-xs font-semibold" style={{ color: '#0D4F57' }}>Overall</span>
-                    <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/5</span>
+                    <span className="text-sm font-semibold ml-auto" style={{ color: '#C9A86A' }}>{overall}/10</span>
                   </div>
                 )}
               </div>
@@ -285,7 +282,12 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
 
   const [editDish, setEditDish] = useState(memory.dish_name ?? '')
   const [editNotes, setEditNotes] = useState(memory.notes ?? '')
-  const [editRatings, setEditRatings] = useState<DetailRatings>({ food: 0, service: 0, ambiance: 0 })
+  // Start from the stored category ratings so editing doesn't wipe them
+  const [editRatings, setEditRatings] = useState<DetailRatings>({
+    food: memory.rating_food ?? 0,
+    service: memory.rating_service ?? 0,
+    ambiance: memory.rating_ambiance ?? 0,
+  })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -298,7 +300,14 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
   async function handleSaveEdit() {
     setSaving(true)
     const overall = calcOverall(editRatings)
-    await supabase.from('memories').update({ dish_name: editDish || null, notes: editNotes || null, rating: overall > 0 ? Math.round(overall) : memory.rating }).eq('id', memory.id)
+    await supabase.from('memories').update({
+      dish_name: editDish || null,
+      notes: editNotes || null,
+      rating: overall > 0 ? overall : memory.rating,
+      rating_food: editRatings.food || null,
+      rating_service: editRatings.service || null,
+      rating_ambiance: editRatings.ambiance || null,
+    }).eq('id', memory.id)
     setSaving(false); setEditing(false); onUpdate()
   }
 
@@ -394,12 +403,12 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           )}
         </div>
 
-        {/* Rating */}
+        {/* Rating — overall is out of 10; stars show it on a 5-star scale */}
         {memory.rating && (
           <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
             <div className="flex items-center gap-1.5 flex-1">
-              <StarRow value={memory.rating} max={5} />
-              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/5</span>
+              <StarRow value={memory.rating / 2} max={5} />
+              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/10</span>
             </div>
             {venueDetails?.rating && (
               <span className="text-xs" style={{ color: '#7D878D' }}>Google {venueDetails.rating}★</span>
@@ -407,24 +416,25 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           </div>
         )}
 
-        {/* Breakdown bars */}
-        {memory.rating && (
+        {/* Breakdown bars — only categories the user actually rated */}
+        {(memory.rating_food || memory.rating_service || memory.rating_ambiance) && (
           <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
             <p className="text-xs font-semibold mb-2" style={{ color: '#0D4F57' }}>Breakdown</p>
-            {(['Food & drink', 'Service', 'Ambiance'] as const).map((label, idx) => {
-              const vals = [8, 7, 9]
-              return (
-                <div key={label} className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xs w-20 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
-                  <div className="flex gap-0.5 flex-1">
-                    {Array.from({ length: 10 }, (_, i) => (
-                      <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < vals[idx] ? '#C9A86A' : '#d4cdc3', opacity: i < vals[idx] ? 1 : 0.4 }} />
-                    ))}
-                  </div>
-                  <span className="text-xs font-medium w-4 text-right" style={{ color: '#C9A86A' }}>{vals[idx]}</span>
+            {([
+              ['Food & drink', memory.rating_food],
+              ['Service', memory.rating_service],
+              ['Ambiance', memory.rating_ambiance],
+            ] as const).filter(([, val]) => val).map(([label, val]) => (
+              <div key={label} className="flex items-center gap-2 mb-1.5">
+                <span className="text-xs w-20 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
+                <div className="flex gap-0.5 flex-1">
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < val! ? '#C9A86A' : '#d4cdc3', opacity: i < val! ? 1 : 0.4 }} />
+                  ))}
                 </div>
-              )
-            })}
+                <span className="text-xs font-medium w-4 text-right" style={{ color: '#C9A86A' }}>{val}</span>
+              </div>
+            ))}
           </div>
         )}
 

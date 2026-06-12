@@ -94,6 +94,9 @@ export type Database = {
           dish_name: string | null
           notes: string | null
           rating: number | null
+          rating_food: number | null
+          rating_service: number | null
+          rating_ambiance: number | null
           is_public: boolean
           public_lat: number | null
           public_lng: number | null
@@ -107,6 +110,9 @@ export type Database = {
           dish_name?: string | null
           notes?: string | null
           rating?: number | null
+          rating_food?: number | null
+          rating_service?: number | null
+          rating_ambiance?: number | null
           is_public?: boolean
           public_lat?: number | null
           public_lng?: number | null
@@ -120,6 +126,9 @@ export type Database = {
           dish_name?: string | null
           notes?: string | null
           rating?: number | null
+          rating_food?: number | null
+          rating_service?: number | null
+          rating_ambiance?: number | null
           is_public?: boolean
           public_lat?: number | null
           public_lng?: number | null
