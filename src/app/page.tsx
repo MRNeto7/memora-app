@@ -34,6 +34,16 @@ export default function MapPage() {
   const [showMemories, setShowMemories] = useState(true)
   const [showWishlist, setShowWishlist] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [onThisDayDismissed, setOnThisDayDismissed] = useState(false)
+  const [today] = useState(() => new Date())
+
+  // Memories from this same day in a previous year — "1 year ago today"
+  const anniversaries = memories.filter(m => {
+    const d = new Date(m.visited_at)
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() < today.getFullYear()
+  })
+  const anniversary = anniversaries[0]
+  const yearsAgo = anniversary ? today.getFullYear() - new Date(anniversary.visited_at).getFullYear() : 0
 
   async function fetchWishlist() {
     const { data, error } = await supabase
@@ -116,6 +126,39 @@ export default function MapPage() {
             Retry
           </button>
         </div>
+      )}
+
+      {/* On this day */}
+      {!loadError && anniversary && !onThisDayDismissed && (
+        <button
+          onClick={() => { setSelected(anniversary); setShowAddSheet(false); setOnThisDayDismissed(true) }}
+          className="rise absolute left-4 right-4 z-20 flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
+          style={{
+            top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
+            background: 'rgba(13,79,87,0.88)',
+            backdropFilter: 'blur(20px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
+            border: '0.5px solid rgba(201,168,106,0.4)',
+            boxShadow: '0 8px 28px rgba(13,79,87,0.35)',
+          }}>
+          <span style={{ fontSize: 22 }}>📸</span>
+          <span className="flex-1">
+            <span className="block text-xs font-semibold" style={{ color: '#C9A86A' }}>
+              On this day · {yearsAgo} {yearsAgo === 1 ? 'year' : 'years'} ago
+            </span>
+            <span className="block text-sm font-semibold text-white">
+              {anniversary.venue?.name ?? anniversary.dish_name ?? 'A memory'}
+              {anniversaries.length > 1 && <span style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 400 }}> + {anniversaries.length - 1} more</span>}
+            </span>
+          </span>
+          <span
+            role="button"
+            onClick={e => { e.stopPropagation(); setOnThisDayDismissed(true) }}
+            className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
+            ✕
+          </span>
+        </button>
       )}
 
       {/* Unified header bar */}

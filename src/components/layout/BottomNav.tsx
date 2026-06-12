@@ -2,9 +2,30 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const supabase = createClient()
+  const [pendingRequests, setPendingRequests] = useState(0)
+
+  // Re-checked on every navigation so the badge stays fresh without polling
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+      const { count } = await supabase
+        .from('friend_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('to_user_id', user.id)
+        .eq('status', 'pending')
+      if (!cancelled) setPendingRequests(count ?? 0)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [pathname])
 
   const isActive = (href: string) => href === '/places' ? pathname.startsWith('/places') : pathname === href
 
@@ -63,7 +84,7 @@ export default function BottomNav() {
         </div>
 
         {/* RIGHT-CENTER: Social */}
-        <NavItem href="/social" label="Social" active={isActive('/social')}>
+        <NavItem href="/social" label="Social" active={isActive('/social')} badge={pendingRequests}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive('/social') ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
@@ -85,19 +106,31 @@ export default function BottomNav() {
   )
 }
 
-function NavItem({ href, label, active, children }: {
+function NavItem({ href, label, active, badge = 0, children }: {
   href: string
   label: string
   active: boolean
+  badge?: number
   children: React.ReactNode
 }) {
   return (
     <Link href={href} className="press flex flex-col items-center gap-0.5" style={{ textDecoration: 'none', minWidth: 48, padding: '2px 0' }}>
       <div style={{
+        position: 'relative',
         color: active ? '#0D4F57' : '#7D878D',
         transform: active ? 'translateY(-1px) scale(1.08)' : 'none',
         transition: 'transform 0.3s var(--spring), color 0.2s ease',
-      }}>{children}</div>
+      }}>
+        {badge > 0 && (
+          <span style={{
+            position: 'absolute', top: -4, right: -8, minWidth: 15, height: 15, padding: '0 4px',
+            borderRadius: 8, background: '#C9A86A', color: '#fff', fontSize: 9, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
+            boxShadow: '0 1px 4px rgba(201,168,106,0.5)',
+          }}>{badge > 9 ? '9+' : badge}</span>
+        )}
+        {children}
+      </div>
       <span style={{ fontSize: 10, color: active ? '#0D4F57' : '#7D878D', fontWeight: active ? 600 : 400, transition: 'color 0.2s ease' }}>{label}</span>
       <div style={{
         width: 4, height: 4, borderRadius: '50%', background: '#C9A86A', marginTop: 1,
