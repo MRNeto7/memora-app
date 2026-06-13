@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
+import Portal from '@/components/ui/Portal'
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -32,9 +33,9 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
   }
 
   return (
-    <div>
-      <div className="backdrop-enter fixed z-40" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
-      <div className="fixed z-50 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
+    <Portal>
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="fixed z-[70] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
         <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto" style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
 
           {/* Header */}
@@ -92,6 +93,6 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   )
 }

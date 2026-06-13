@@ -11,6 +11,7 @@ import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
+import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
 
@@ -30,7 +31,6 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const isNew = !memory
   const supabase = createClient()
   const isPro = useIsPro()
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [dishName, setDishName] = useState(memory?.dish_name ?? '')
@@ -128,12 +128,12 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const exifMessages = [...new Set(photos.map(p => p.exifMessage).filter(Boolean))]
 
   return (
-    <>
+    <Portal>
       {/* Backdrop */}
-      <div className="backdrop-enter fixed z-20" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
 
       {/* Centred modal card */}
-      <div className="fixed z-30 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
+      <div className="fixed z-[70] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
       <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
 
@@ -171,14 +171,13 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                         style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>✕</button>
                     </div>
                   ))}
-                  <div className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
-                    style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}
-                    onClick={() => fileInputRef.current?.click()}>
+                  <label className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
+                    style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}>
                     <Icon name="camera" size={photos.length === 0 ? 24 : 18} color="#C9A86A" />
                     <span className="text-xs mt-1 text-center px-1" style={{ color: '#C9A86A', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
-                  </div>
+                    <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handlePhotoSelect} />
+                  </label>
                 </div>
-                <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handlePhotoSelect} />
               </div>
 
               {exifMessages.map((msg, i) => (
@@ -233,7 +232,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         )}
       </div>
     </div>
-    </>
+    </Portal>
   )
 }
 

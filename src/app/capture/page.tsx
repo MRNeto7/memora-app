@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
@@ -27,8 +27,6 @@ interface PhotoEntry {
 
 export default function CapturePage() {
   const router = useRouter()
-  const cameraRef = useRef<HTMLInputElement>(null)
-  const galleryRef = useRef<HTMLInputElement>(null)
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
   const [stage, setStage] = useState<'prompt' | 'form'>('prompt')
   const [locationQuery, setLocationQuery] = useState('')
@@ -161,13 +159,12 @@ export default function CapturePage() {
                   style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 10 }}>✕</button>
               </div>
             ))}
-            <button onClick={() => galleryRef.current?.click()}
-              className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-1"
+            <label className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer"
               style={{ width: 90, height: 90, background: '#fff', border: '2px dashed #C9A86A' }}>
               <span style={{ fontSize: 22 }}>+</span>
               <span className="text-xs" style={{ color: '#C9A86A' }}>Add more</span>
-            </button>
-            <input ref={galleryRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+              <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+            </label>
           </div>
 
           {/* EXIF messages */}
@@ -244,27 +241,22 @@ export default function CapturePage() {
         Take a photo of your meal and we&apos;ll save it as a memory on your map.
       </p>
 
-      {/* Camera button — opens native camera */}
-      <button onClick={() => cameraRef.current?.click()}
-        className="w-full max-w-xs py-4 rounded-2xl text-white font-semibold text-sm mb-3 flex items-center justify-center gap-2"
+      {/* Camera — the input is tapped directly via the label; a JS .click()
+          on a file input crashes the Capacitor WebView */}
+      <label className="w-full max-w-xs py-4 rounded-2xl text-white font-semibold text-sm mb-3 flex items-center justify-center gap-2 cursor-pointer"
         style={{ background: '#0D4F57' }}>
         <Icon name="camera" size={17} color="#EAE5DD" /> Take a photo
-      </button>
+        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFiles(e.target.files)} />
+      </label>
 
-      {/* Gallery button */}
-      <button onClick={() => galleryRef.current?.click()}
-        className="w-full max-w-xs py-3.5 rounded-2xl font-semibold text-sm mb-4 flex items-center justify-center gap-2"
+      {/* Gallery */}
+      <label className="w-full max-w-xs py-3.5 rounded-2xl font-semibold text-sm mb-4 flex items-center justify-center gap-2 cursor-pointer"
         style={{ background: '#fff', color: '#0D4F57', border: '1.5px solid rgba(13,79,87,0.15)' }}>
         <Icon name="image" size={17} color="#0D4F57" /> Choose from library
-      </button>
+        <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+      </label>
 
       <p className="text-xs" style={{ color: '#b0babe' }}>Or tap the map tab and press &quot;Save memory&quot;</p>
-
-      {/* Hidden inputs */}
-      <input ref={cameraRef} type="file" accept="image/*" capture="user" className="hidden"
-        onChange={e => handleFiles(e.target.files)} />
-      <input ref={galleryRef} type="file" accept="image/*,video/*" multiple className="hidden"
-        onChange={e => handleFiles(e.target.files)} />
     </div>
   )
 }

@@ -116,6 +116,11 @@ export default function PersistentMapShell() {
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
       paddingTop: 'env(safe-area-inset-top, 0px)',
+      // When not on the map, slide the whole shell off-screen rather than
+      // overlaying invisibly — an invisible full-screen fixed element breaks
+      // body scrolling in the iOS WebView. The map instance stays mounted
+      // (no billed reload) and keeps its size, so returning is instant.
+      transform: visible ? 'none' : 'translateX(-100%)',
       visibility: visible ? 'visible' : 'hidden',
       pointerEvents: visible ? 'auto' : 'none',
       zIndex: visible ? 0 : -1,
@@ -149,6 +154,10 @@ export default function PersistentMapShell() {
             selected={selected}
             onSelect={(m) => { setSelected(m); setShowAddSheet(false) }}
           />
+          <FitToData points={[
+            ...memories.filter(m => m.venue).map(m => ({ lat: m.venue!.lat, lng: m.venue!.lng })),
+            ...wishlist.map(v => ({ lat: v.lat, lng: v.lng })),
+          ]} />
         </Map>
 
       {/* Load error banner */}
@@ -265,6 +274,26 @@ export default function PersistentMapShell() {
       )}
     </div>
   )
+}
+
+// Fits the map to the user's pins once they load (instead of staying on the
+// hardcoded London default). Runs once; the user can pan freely after.
+function FitToData({ points }: { points: { lat: number; lng: number }[] }) {
+  const map = useMap()
+  const fitted = useRef(false)
+  useEffect(() => {
+    if (!map || fitted.current || points.length === 0) return
+    if (points.length === 1) {
+      map.setCenter(points[0])
+      map.setZoom(14)
+    } else {
+      const bounds = new google.maps.LatLngBounds()
+      points.forEach(p => bounds.extend(p))
+      map.fitBounds(bounds, 80)
+    }
+    fitted.current = true
+  }, [map, points])
+  return null
 }
 
 // Clustered markers — groups overlapping pins

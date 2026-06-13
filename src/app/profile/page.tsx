@@ -9,6 +9,7 @@ import { useIsPro, FREE_MEMORY_LIMIT, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import NotificationCenter from '@/components/notifications/NotificationCenter'
 import ProUpsell from '@/components/pro/ProUpsell'
 import Icon from '@/components/ui/Icon'
+import Portal from '@/components/ui/Portal'
 
 interface Stats { totalMemories: number; totalVenues: number; avgRating: number }
 interface VenueOption { id: string; name: string; address: string | null }
@@ -271,9 +272,9 @@ export default function ProfilePage() {
       )}
 
       {showProInfo && (
-        <div>
-          <div className="backdrop-enter fixed z-40" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={() => setShowProInfo(false)} />
-          <div className="fixed z-50 flex items-center justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, padding: '16px' }}>
+        <Portal>
+          <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={() => setShowProInfo(false)} />
+          <div className="fixed z-[70] flex items-center justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, padding: '16px' }}>
             <div className="sheet-enter pointer-events-auto" style={{ width: 'min(420px, 100%)' }}>
               <ProUpsell />
               <button onClick={() => setShowProInfo(false)} className="w-full mt-3 py-3 rounded-2xl text-sm font-medium" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', color: '#0D4F57' }}>
@@ -281,7 +282,7 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   )
