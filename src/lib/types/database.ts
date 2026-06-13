@@ -322,24 +322,15 @@ export type Database = {
         }
         Relationships: []
       }
-      public_profiles: {
-        Row: {
-          id: string | null
-          memora_id: string | null
-          display_name: string | null
-          username: string | null
-          avatar_url: string | null
-          profile_public: boolean | null
-          wishlist_public: boolean | null
-          bio: string | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       generate_memora_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      are_friends: {
+        Args: { a: string; b: string }
+        Returns: boolean
       }
     }
     Enums: {
@@ -357,7 +348,6 @@ export type MemoryRow = Database['public']['Tables']['memories']['Row']
 export type MemoryPhotoRow = Database['public']['Tables']['memory_photos']['Row']
 export type WishlistRow = Database['public']['Tables']['wishlists']['Row']
 export type FriendRequestRow = Database['public']['Tables']['friend_requests']['Row']
-export type PublicProfileRow = Database['public']['Views']['public_profiles']['Row']
 
 export type MemoryWithDetails = MemoryRow & {
   venue: VenueRow | null
