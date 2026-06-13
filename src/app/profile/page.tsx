@@ -304,9 +304,9 @@ function PrivacyToggles() {
 
   return (
     <>
-      <PrivacyToggleRow label="Public memories" sub="Friends can see your public memories" value={memoriesPublic}
+      <PrivacyToggleRow label="Share memories with friends" sub="Only friends you’ve added can see memories you mark as shared" value={memoriesPublic}
         onChange={v => { setMemoriesPublic(v); toggle('profile_public', v) }} />
-      <PrivacyToggleRow label="Public wishlist" sub="Friends can see your wishlist" value={wishlistPublic}
+      <PrivacyToggleRow label="Share wishlist with friends" sub="Only friends you’ve added can see your wishlist" value={wishlistPublic}
         onChange={v => { setWishlistPublic(v); toggle('wishlist_public', v) }} />
     </>
   )

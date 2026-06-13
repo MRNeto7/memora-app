@@ -1,5 +1,5 @@
 export const MAX_IMAGE_BYTES = 20 * 1024 * 1024 // 20MB
-export const MAX_VIDEO_BYTES = 100 * 1024 * 1024 // 100MB
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50MB — caps Supabase storage; 15s cap below bounds it further
 export const MAX_VIDEO_SECONDS = 15
 export const MAX_FILES_PER_SELECTION = 20
 

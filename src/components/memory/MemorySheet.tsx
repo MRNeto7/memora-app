@@ -523,7 +523,7 @@ function PublicToggle({ memoryId, initialValue, venue, onUpdate }: { memoryId: s
         <div style={{ position: 'absolute', top: 2, left: isPublic ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
       </button>
       <span className="text-xs" style={{ color: isPublic ? '#0D4F57' : '#7D878D' }}>
-        {isPublic ? 'Public — visible to friends' : 'Private — only you can see this'}
+        {isPublic ? 'Shared — friends you’ve added can see this' : 'Private — only you can see this'}
       </span>
     </div>
   )
