@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useNotifications } from '@/lib/notifications'
+import NotificationCenter from '@/components/notifications/NotificationCenter'
 
 interface Stats { totalMemories: number; totalVenues: number; avgRating: number }
 interface VenueOption { id: string; name: string; address: string | null }
@@ -19,8 +21,15 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const { items: notifications, loading: notifLoading, unreadCount, reload: reloadNotifications, markAllSeen } = useNotifications()
   const router = useRouter()
   const supabase = createClient()
+
+  function openNotifications() {
+    setShowNotifications(true)
+    markAllSeen()
+  }
 
   async function fetchProfile() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -176,6 +185,25 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Notifications */}
+        <button onClick={openNotifications}
+          className="w-full rounded-2xl overflow-hidden flex items-center px-4 py-3.5"
+          style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mr-3" style={{ background: '#f5f2ed', fontSize: 16 }}>🔔</div>
+          <div className="flex-1 text-left">
+            <p className="text-sm" style={{ color: '#0D4F57' }}>Notifications</p>
+            <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>
+              {unreadCount > 0 ? `${unreadCount} new` : 'Friend requests & throwbacks'}
+            </p>
+          </div>
+          {unreadCount > 0 && (
+            <span className="flex items-center justify-center mr-2" style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: '#C9A86A', color: '#fff', fontSize: 11, fontWeight: 700 }}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0babe" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+
         {/* Settings */}
         <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
           <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: '#7D878D' }}>Settings</p>
@@ -225,7 +253,14 @@ export default function ProfilePage() {
         </button>
       </div>
 
-
+      {showNotifications && (
+        <NotificationCenter
+          items={notifications}
+          loading={notifLoading}
+          onClose={() => setShowNotifications(false)}
+          onChanged={reloadNotifications}
+        />
+      )}
     </div>
   )
 }
