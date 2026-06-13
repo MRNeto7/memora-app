@@ -33,9 +33,15 @@ body {
   color: var(--teal);
   margin: 0;
   padding: 0;
+  /* Lock the body — all page scrolling happens inside #scroll-root. Body-level
+     scrolling is unreliable in the iOS WebView (pages wouldn't scroll), so we
+     pin the body and use a dedicated scroll container instead. */
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  height: 100%;
 }
 
 .map-container {

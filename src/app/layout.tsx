@@ -3,6 +3,7 @@ import './globals.css'
 import NavWrapper from '@/components/layout/NavWrapper'
 import MapsProvider from '@/components/layout/MapsProvider'
 import SafeAreaProvider from '@/components/layout/SafeAreaProvider'
+import ScrollContainer from '@/components/layout/ScrollContainer'
 import PersistentMapShell from '@/components/map/PersistentMapShell'
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SafeAreaProvider />
         <MapsProvider>
           <PersistentMapShell />
-          {children}
+          <ScrollContainer>{children}</ScrollContainer>
           <NavWrapper />
         </MapsProvider>
       </body>
