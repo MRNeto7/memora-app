@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import PlacePhoto from '@/components/ui/PlacePhoto'
+import Icon from '@/components/ui/Icon'
 
 interface FriendProfile {
   friend_id: string
@@ -133,7 +134,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
                     <div className="flex-1 px-3 py-3">
                       <div className="flex items-start justify-between mb-0.5">
                         <p className="font-semibold text-sm" style={{ color: '#0D4F57' }}>{mem.venue?.name}</p>
-                        {mem.rating && <span className="text-xs font-semibold ml-2 flex-shrink-0" style={{ color: '#C9A86A' }}>⭐ {mem.rating}</span>}
+                        {mem.rating && <span className="inline-flex items-center gap-1 text-xs font-semibold ml-2 flex-shrink-0" style={{ color: '#C9A86A' }}><Icon name="star" size={11} color="#C9A86A" fill="#C9A86A" /> {mem.rating}</span>}
                       </div>
                       {mem.dish_name && <p className="text-xs italic mb-0.5" style={{ color: '#7D878D' }}>{mem.dish_name}</p>}
                       <p className="text-xs" style={{ color: '#b0babe' }}>{new Date(mem.visited_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>

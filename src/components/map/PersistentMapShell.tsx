@@ -7,6 +7,7 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { useNotifications, NotificationItem } from '@/lib/notifications'
+import Icon from '@/components/ui/Icon'
 import MemorySheet from '@/components/memory/MemorySheet'
 import WishlistSheet from '@/components/wishlist/WishlistSheet'
 import MemoryPin from '@/components/map/MemoryPin'
@@ -175,7 +176,8 @@ export default function PersistentMapShell() {
             border: '0.5px solid rgba(201,168,106,0.4)',
             boxShadow: '0 8px 28px rgba(13,79,87,0.35)',
           }}>
-          <span style={{ fontSize: 22 }}>{bannerItem.kind === 'friend_request' ? '👋' : '📸'}</span>
+          <Icon name={bannerItem.kind === 'friend_request' ? 'friend-add' : 'camera'} size={22} color="#C9A86A" strokeWidth={1.8} />
+
           <span className="flex-1">
             {bannerItem.kind === 'friend_request' && (
               <>

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotificationItem } from '@/lib/notifications'
+import Icon from '@/components/ui/Icon'
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -47,16 +48,18 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
             {loading ? (
               <p className="text-sm text-center py-12" style={{ color: '#7D878D' }}>Loading…</p>
             ) : items.length === 0 ? (
-              <div className="text-center py-14 px-6">
-                <p className="text-3xl mb-2">🔔</p>
+              <div className="flex flex-col items-center text-center py-14 px-6">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: '#f5f2ed' }}>
+                  <Icon name="bell" size={22} color="#C9A86A" />
+                </div>
                 <p className="text-sm font-semibold mb-1" style={{ color: '#0D4F57' }}>You&apos;re all caught up</p>
                 <p className="text-xs" style={{ color: '#7D878D' }}>Friend requests and memory throwbacks will show here.</p>
               </div>
             ) : (
               items.map(item => (
                 <div key={item.id} className="flex items-start gap-3 px-5 py-3.5" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.05)' }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#f5f2ed', fontSize: 16 }}>
-                    {item.kind === 'friend_request' ? '👋' : item.kind === 'friend_accepted' ? '🤝' : '📸'}
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#f5f2ed' }}>
+                    <Icon name={item.kind === 'friend_request' ? 'friend-add' : item.kind === 'friend_accepted' ? 'friend-check' : 'camera'} size={16} color="#0D4F57" />
                   </div>
 
                   <div className="flex-1 min-w-0">

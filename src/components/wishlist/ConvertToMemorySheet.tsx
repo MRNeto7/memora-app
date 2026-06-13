@@ -8,6 +8,7 @@ import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import Icon from '@/components/ui/Icon'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
 interface Venue {
@@ -156,7 +157,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
               <div className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
                 style={{ width: 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}
                 onClick={() => fileInputRef.current?.click()}>
-                <span style={{ fontSize: 20 }}>📷</span>
+                <Icon name="camera" size={20} color="#C9A86A" />
               </div>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoSelect} />

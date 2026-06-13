@@ -10,6 +10,7 @@ import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import Icon from '@/components/ui/Icon'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
 
@@ -173,7 +174,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                   <div className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
                     style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}
                     onClick={() => fileInputRef.current?.click()}>
-                    <span style={{ fontSize: photos.length === 0 ? 24 : 18 }}>📷</span>
+                    <Icon name="camera" size={photos.length === 0 ? 24 : 18} color="#C9A86A" />
                     <span className="text-xs mt-1 text-center px-1" style={{ color: '#C9A86A', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
                   </div>
                 </div>
@@ -185,8 +186,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               ))}
 
               <div className="flex gap-2 mb-4 flex-wrap">
-                <span className="text-xs px-3 py-1 rounded-full" style={{ background: '#f0ede8', color: '#0D4F57' }}>
-                  🕐 {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#f0ede8', color: '#0D4F57' }}>
+                  <Icon name="clock" size={12} color="#0D4F57" />
+                  {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   {detectedDate && <span className="ml-1 opacity-60">auto</span>}
                 </span>
               </div>

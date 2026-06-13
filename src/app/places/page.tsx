@@ -7,6 +7,7 @@ import { MemoryWithDetails } from '@/lib/types/database'
 import MemorySheet from '@/components/memory/MemorySheet'
 import WishlistSheet from '@/components/wishlist/WishlistSheet'
 import PlacePhoto from '@/components/ui/PlacePhoto'
+import Icon, { IconName } from '@/components/ui/Icon'
 import AddToWishlistButton from '@/components/wishlist/AddToWishlistButton'
 
 interface WishlistItem {
@@ -105,7 +106,7 @@ export default function PlacesPage() {
         {/* Sort bar */}
         {tab === 'memories' && memories.length > 1 && (
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-            {([['date', '📅 Date'], ['name', '🔤 Name'], ['rating', '⭐ Rating']] as const).map(([opt, label]) => (
+            {([['date', 'Date'], ['name', 'Name'], ['rating', 'Rating']] as const).map(([opt, label]) => (
               <button key={opt} onClick={() => setSortBy(opt)}
                 className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
                 style={{
@@ -134,7 +135,7 @@ export default function PlacesPage() {
         ) : tab === 'memories' ? (
           <>
             {memories.length === 0 ? (
-              <EmptyState icon="📍" title="No memories yet" sub="Go to the Map and save your first memory" />
+              <EmptyState icon="pin" title="No memories yet" sub="Go to the Map and save your first memory" />
             ) : (
               Object.entries(grouped).map(([month, items]) => (
                 <div key={month} className="mb-6">
@@ -156,7 +157,7 @@ export default function PlacesPage() {
           <>
             {/* Priority sections */}
             {wishlist.length === 0 ? (
-              <EmptyState icon="🔖" title="Your wishlist is empty" sub="Add restaurants from the map or search for places to visit" />
+              <EmptyState icon="bookmark" title="Your wishlist is empty" sub="Add restaurants from the map or search for places to visit" />
             ) : (
               <div className="flex flex-col gap-3">
                 {wishlist.map(item => (
@@ -227,8 +228,8 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
           <div className="flex items-start justify-between mb-0.5">
             <p className="font-semibold text-sm leading-tight flex-1 mr-2" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Unknown'}</p>
             {memory.rating && (
-              <div className="flex items-center gap-0.5 flex-shrink-0">
-                <span style={{ fontSize: 10 }}>⭐</span>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Icon name="star" size={10} color="#C9A86A" fill="#C9A86A" />
                 <span className="text-xs font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}</span>
               </div>
             )}
@@ -290,10 +291,12 @@ function WishlistCard({ item, onClick, onRemove }: {
   )
 }
 
-function EmptyState({ icon, title, sub }: { icon: string; title: string; sub: string }) {
+function EmptyState({ icon, title, sub }: { icon: IconName; title: string; sub: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <span style={{ fontSize: 48, marginBottom: 16 }}>{icon}</span>
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: '#fff', marginBottom: 16 }}>
+        <Icon name={icon} size={30} color="#C9A86A" strokeWidth={1.4} />
+      </div>
       <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>{title}</h2>
       <p className="text-sm" style={{ color: '#7D878D' }}>{sub}</p>
     </div>

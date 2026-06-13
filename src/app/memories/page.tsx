@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import { MemoryWithDetails } from '@/lib/types/database'
+import Icon from '@/components/ui/Icon'
 import MemorySheet from '@/components/memory/MemorySheet'
 
 export default function MemoriesPage() {
@@ -70,7 +71,9 @@ export default function MemoriesPage() {
         </div>
       ) : memories.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-          <span style={{ fontSize: 48, marginBottom: 16 }}>🗺️</span>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: '#fff', marginBottom: 16 }}>
+            <Icon name="map" size={30} color="#C9A86A" strokeWidth={1.4} />
+          </div>
           <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>No memories yet</h2>
           <p className="text-sm" style={{ color: '#7D878D' }}>Go to the Map tab and save your first memory</p>
         </div>
@@ -173,8 +176,8 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
               {memory.venue?.name ?? 'Unknown location'}
             </p>
             {memory.rating && (
-              <div className="flex items-center gap-0.5 ml-2 flex-shrink-0">
-                <span style={{ fontSize: 11 }}>⭐</span>
+              <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                <Icon name="star" size={11} color="#C9A86A" fill="#C9A86A" />
                 <span className="text-xs font-medium" style={{ color: '#C9A86A' }}>{memory.rating}</span>
               </div>
             )}

@@ -8,6 +8,7 @@ import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import Icon from '@/components/ui/Icon'
 import ProUpsell from '@/components/pro/ProUpsell'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
@@ -265,6 +266,12 @@ export default function BulkUploadPage() {
 
       <div className="px-4 pt-4">
 
+        {isPro === null && (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
+          </div>
+        )}
+
         {isPro === false && <ProUpsell feature="Bulk upload" />}
 
         {isPro === true && groups.length === 0 && !loading && (
@@ -353,8 +360,10 @@ export default function BulkUploadPage() {
             </div>
 
             {pending.length === 0 && saved.length > 0 && (
-              <div className="mt-4 rounded-2xl p-5 text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-                <p className="text-2xl mb-2">🎉</p>
+              <div className="mt-4 rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: '#0D4F57' }}>
+                  <Icon name="check" size={20} color="#C9A86A" strokeWidth={2.5} />
+                </div>
                 <p className="font-semibold" style={{ color: '#0D4F57' }}>All done!</p>
                 <p className="text-sm mt-1 mb-4" style={{ color: '#7D878D' }}>{saved.length} {saved.length === 1 ? 'memory' : 'memories'} saved to your map</p>
                 <Link href="/" className="inline-block px-6 py-3 rounded-2xl text-sm font-semibold no-underline" style={{ background: '#0D4F57', color: '#EAE5DD' }}>

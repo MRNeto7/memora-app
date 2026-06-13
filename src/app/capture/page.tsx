@@ -8,6 +8,7 @@ import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import Icon from '@/components/ui/Icon'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
 
@@ -176,8 +177,9 @@ export default function CapturePage() {
 
           {/* Date chip */}
           <div className="flex items-center gap-2">
-            <span className="text-xs px-3 py-1 rounded-full" style={{ background: '#fff', color: '#0D4F57', border: '0.5px solid rgba(13,79,87,0.1)' }}>
-              🕐 {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#fff', color: '#0D4F57', border: '0.5px solid rgba(13,79,87,0.1)' }}>
+              <Icon name="clock" size={12} color="#0D4F57" />
+              {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               {detectedDate && <span className="ml-1 opacity-50 text-xs">from photo</span>}
             </span>
           </div>
@@ -246,14 +248,14 @@ export default function CapturePage() {
       <button onClick={() => cameraRef.current?.click()}
         className="w-full max-w-xs py-4 rounded-2xl text-white font-semibold text-sm mb-3 flex items-center justify-center gap-2"
         style={{ background: '#0D4F57' }}>
-        📷 Take a photo
+        <Icon name="camera" size={17} color="#EAE5DD" /> Take a photo
       </button>
 
       {/* Gallery button */}
       <button onClick={() => galleryRef.current?.click()}
         className="w-full max-w-xs py-3.5 rounded-2xl font-semibold text-sm mb-4 flex items-center justify-center gap-2"
         style={{ background: '#fff', color: '#0D4F57', border: '1.5px solid rgba(13,79,87,0.15)' }}>
-        🖼️ Choose from library
+        <Icon name="image" size={17} color="#0D4F57" /> Choose from library
       </button>
 
       <p className="text-xs" style={{ color: '#b0babe' }}>Or tap the map tab and press &quot;Save memory&quot;</p>
