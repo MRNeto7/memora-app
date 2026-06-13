@@ -3,6 +3,7 @@ import './globals.css'
 import NavWrapper from '@/components/layout/NavWrapper'
 import MapsProvider from '@/components/layout/MapsProvider'
 import SafeAreaProvider from '@/components/layout/SafeAreaProvider'
+import PersistentMapShell from '@/components/map/PersistentMapShell'
 
 export const metadata: Metadata = {
   title: 'Mimora',
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SafeAreaProvider />
         <MapsProvider>
+          <PersistentMapShell />
           {children}
           <NavWrapper />
         </MapsProvider>
