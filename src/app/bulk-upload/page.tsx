@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
@@ -89,40 +89,59 @@ function makeGroup(photos: PhotoItem[]): MemoryGroup {
 }
 
 export default function BulkUploadPage() {
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
   const isPro = useIsPro()
   const [groups, setGroups] = useState<MemoryGroup[]>([])
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [untagged, setUntagged] = useState<PhotoItem[]>([])
 
-  async function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
-    if (!files.length) return
+    e.target.value = '' // allow re-selecting the same photos later
+    if (files.length) processFiles(files)
+  }
+
+  async function processFiles(files: File[]) {
     setLoading(true)
+    setProgress({ done: 0, total: files.length })
 
     const photos: PhotoItem[] = []
     const noLocation: PhotoItem[] = []
     const rejected: string[] = []
+    let done = 0
 
-    for (const file of files) {
-      const reason = await validateMediaFile(file)
-      if (reason) { rejected.push(reason); continue }
-      const exif = await readPhotoExif(file)
-      const item: PhotoItem = {
-        file,
-        preview: URL.createObjectURL(file),
-        lat: exif.lat,
-        lng: exif.lng,
-        takenAt: exif.takenAt,
-        name: file.name,
+    // Read metadata a few photos at a time so a large batch finishes quickly,
+    // updating the progress counter as each one completes.
+    const CONCURRENCY = 6
+    let cursor = 0
+    async function worker() {
+      while (cursor < files.length) {
+        const file = files[cursor++]
+        const reason = await validateMediaFile(file)
+        if (reason) {
+          rejected.push(reason)
+        } else {
+          const exif = await readPhotoExif(file)
+          const item: PhotoItem = {
+            file,
+            preview: URL.createObjectURL(file),
+            lat: exif.lat,
+            lng: exif.lng,
+            takenAt: exif.takenAt,
+            name: file.name,
+          }
+          if (exif.lat) photos.push(item)
+          else noLocation.push(item)
+        }
+        done++
+        setProgress({ done, total: files.length })
       }
-      if (exif.lat) photos.push(item)
-      else noLocation.push(item)
     }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, files.length) }, worker))
 
-    // Group everything — photos without GPS still group by time and just
-    // need the location typed in, instead of being unimportable
+    // Grouping + geocoding phase
+    setProgress(null)
     const grouped = groupPhotos([...photos, ...noLocation])
 
     // Venue suggestions from EXIF coords — all groups in parallel
@@ -144,7 +163,6 @@ export default function BulkUploadPage() {
     setGroups(prev => [...prev, ...grouped])
     setUntagged(prev => [...prev, ...noLocation])
     setLoading(false)
-    e.target.value = ''
     if (rejected.length > 0) alert(rejected.join('\n'))
   }
 
@@ -276,19 +294,19 @@ export default function BulkUploadPage() {
 
         {isPro === true && groups.length === 0 && !loading && (
           <>
-            {/* Upload area */}
-            <div
+            {/* Upload area — the input is tapped directly via the label;
+                a JS .click() on a file input is unreliable in the Capacitor WebView */}
+            <label
               className="rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4"
               style={{ background: '#fff', border: '2px dashed #C9A86A' }}
-              onClick={() => fileInputRef.current?.click()}
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: '#f5f2ed' }}>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </div>
               <p className="font-semibold text-base mb-1" style={{ color: '#0D4F57' }}>Select photos from camera roll</p>
               <p className="text-sm" style={{ color: '#7D878D', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
-            </div>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
+              <input type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
+            </label>
 
             {/* How it works */}
             <div className="rounded-2xl p-4" style={{ background: 'rgba(201,168,106,0.1)', border: '0.5px solid rgba(201,168,106,0.25)' }}>
@@ -309,9 +327,18 @@ export default function BulkUploadPage() {
         )}
 
         {loading && (
-          <div className="flex flex-col items-center py-20">
+          <div className="flex flex-col items-center py-20 px-8">
             <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
-            <p className="text-sm" style={{ color: '#7D878D' }}>Reading photo metadata…</p>
+            {progress ? (
+              <>
+                <p className="text-sm font-semibold mb-2.5" style={{ color: '#0D4F57' }}>Reading photos… {progress.done} of {progress.total}</p>
+                <div className="w-full rounded-full overflow-hidden" style={{ maxWidth: 240, height: 6, background: '#e5ded3' }}>
+                  <div style={{ width: `${Math.round((progress.done / progress.total) * 100)}%`, height: '100%', background: '#C9A86A', transition: 'width 0.25s ease' }} />
+                </div>
+              </>
+            ) : (
+              <p className="text-sm" style={{ color: '#7D878D' }}>Grouping your photos…</p>
+            )}
           </div>
         )}
 
@@ -324,10 +351,10 @@ export default function BulkUploadPage() {
                 {saved.length > 0 && <span style={{ color: '#7D878D' }}> · {saved.length} saved</span>}
               </p>
               <div className="flex gap-2">
-                <button onClick={() => fileInputRef.current?.click()}
-                  className="text-xs px-3 py-1.5 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                <label className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: '#f5f2ed', color: '#7D878D' }}>
                   Add more
-                </button>
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
+                </label>
                 {ready.length > 1 && (
                   <button onClick={saveAll} disabled={savingAll}
                     className="press text-xs px-3 py-1.5 rounded-lg font-semibold"
@@ -337,7 +364,6 @@ export default function BulkUploadPage() {
                 )}
               </div>
             </div>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
 
             {/* Untagged warning */}
             {untagged.length > 0 && (
