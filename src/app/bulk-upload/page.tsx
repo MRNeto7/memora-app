@@ -258,13 +258,20 @@ export default function BulkUploadPage() {
   const saved = groups.filter(g => g.saved)
   const ready = pending.filter(g => g.locationQuery.trim() && !g.saving)
   const [savingAll, setSavingAll] = useState(false)
+  const [saveProgress, setSaveProgress] = useState<{ done: number; total: number } | null>(null)
 
   async function saveAll() {
+    const toSave = ready
     setSavingAll(true)
-    for (const group of ready) {
+    setSaveProgress({ done: 0, total: toSave.length })
+    let done = 0
+    for (const group of toSave) {
       await saveGroup(group)
+      done++
+      setSaveProgress({ done, total: toSave.length })
     }
     setSavingAll(false)
+    setSaveProgress(null)
   }
 
   return (
@@ -359,7 +366,7 @@ export default function BulkUploadPage() {
                   <button onClick={saveAll} disabled={savingAll}
                     className="press text-xs px-3 py-1.5 rounded-lg font-semibold"
                     style={{ background: '#0D4F57', color: '#EAE5DD', opacity: savingAll ? 0.6 : 1 }}>
-                    {savingAll ? 'Saving…' : `Save all (${ready.length})`}
+                    {savingAll ? (saveProgress ? `Saving ${saveProgress.done} of ${saveProgress.total}…` : 'Saving…') : `Save all (${ready.length})`}
                   </button>
                 )}
               </div>
