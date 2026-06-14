@@ -10,6 +10,7 @@ import { useIsPro } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
 import ProUpsell from '@/components/pro/ProUpsell'
+import Portal from '@/components/ui/Portal'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
 
@@ -105,6 +106,9 @@ export default function BulkUploadPage() {
   async function processFiles(files: File[]) {
     setLoading(true)
     setProgress({ done: 0, total: files.length })
+    // Let the loading overlay actually paint before we hog the main thread
+    // with EXIF parsing — otherwise the screen freezes with no feedback.
+    await new Promise(r => setTimeout(r, 60))
 
     const photos: PhotoItem[] = []
     const noLocation: PhotoItem[] = []
@@ -136,6 +140,8 @@ export default function BulkUploadPage() {
         }
         done++
         setProgress({ done, total: files.length })
+        // Yield a macrotask so the progress bar repaints as it climbs
+        await new Promise(r => setTimeout(r, 0))
       }
     }
     await Promise.all(Array.from({ length: Math.min(CONCURRENCY, files.length) }, worker))
@@ -334,19 +340,23 @@ export default function BulkUploadPage() {
         )}
 
         {loading && (
-          <div className="flex flex-col items-center py-20 px-8">
-            <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
-            {progress ? (
-              <>
-                <p className="text-sm font-semibold mb-2.5" style={{ color: '#0D4F57' }}>Reading photos… {progress.done} of {progress.total}</p>
-                <div className="w-full rounded-full overflow-hidden" style={{ maxWidth: 240, height: 6, background: '#e5ded3' }}>
-                  <div style={{ width: `${Math.round((progress.done / progress.total) * 100)}%`, height: '100%', background: '#C9A86A', transition: 'width 0.25s ease' }} />
-                </div>
-              </>
-            ) : (
-              <p className="text-sm" style={{ color: '#7D878D' }}>Grouping your photos…</p>
-            )}
-          </div>
+          <Portal>
+            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
+              <div className="rounded-3xl px-8 py-7 flex flex-col items-center" style={{ background: '#fff', width: 'min(300px, 85%)', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
+                <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
+                {progress ? (
+                  <>
+                    <p className="text-sm font-semibold mb-2.5" style={{ color: '#0D4F57' }}>Reading photos… {progress.done} of {progress.total}</p>
+                    <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#e5ded3' }}>
+                      <div style={{ width: `${Math.round((progress.done / progress.total) * 100)}%`, height: '100%', background: '#C9A86A', transition: 'width 0.25s ease' }} />
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm" style={{ color: '#7D878D' }}>Grouping your photos…</p>
+                )}
+              </div>
+            </div>
+          </Portal>
         )}
 
         {groups.length > 0 && (
