@@ -4,6 +4,12 @@
 <dict>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Mimora uses the camera so you can take a photo of your food and drink to save as a memory on your map.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mimora needs access to your photos so you can choose pictures of your food and drink to save as memories.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Mimora can save photos you take back to your photo library.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
