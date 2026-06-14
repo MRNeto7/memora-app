@@ -9,6 +9,7 @@ import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
+import CameraCapture from '@/components/capture/CameraCapture'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import { createClient } from '@/lib/supabase/client'
 
@@ -44,9 +45,14 @@ export default function CapturePage() {
 
   // Note: don't auto-trigger — programmatic file input clicks crash Capacitor WebViews
 
-  async function handleFiles(files: FileList | null) {
+  function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
-    const { accepted: allAccepted, rejected } = await filterMediaFiles(Array.from(files), {
+    addPhotos(Array.from(files))
+  }
+
+  async function addPhotos(incoming: File[]) {
+    if (incoming.length === 0) return
+    const { accepted: allAccepted, rejected } = await filterMediaFiles(incoming, {
       allowVideo: isPro === true,
       videoRejectionMessage: 'Video memories are part of Mimora Pro — coming soon.',
     })
@@ -225,38 +231,12 @@ export default function CapturePage() {
     )
   }
 
+  // Default: open straight into the live in-app camera
   return (
-    <div className="page-enter min-h-screen flex flex-col items-center justify-center px-6 text-center"
-      style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
-
-      <div className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6" style={{ background: '#0D4F57' }}>
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
-      </div>
-
-      <h1 className="text-xl font-semibold mb-2" style={{ color: '#0D4F57' }}>Capture a memory</h1>
-      <p className="text-sm mb-8 leading-relaxed" style={{ color: '#7D878D', maxWidth: 280 }}>
-        Take a photo of your meal and we&apos;ll save it as a memory on your map.
-      </p>
-
-      {/* Camera — the input is tapped directly via the label; a JS .click()
-          on a file input crashes the Capacitor WebView */}
-      <label className="w-full max-w-xs py-4 rounded-2xl text-white font-semibold text-sm mb-3 flex items-center justify-center gap-2 cursor-pointer"
-        style={{ background: '#0D4F57' }}>
-        <Icon name="camera" size={17} color="#EAE5DD" /> Take a photo
-        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFiles(e.target.files)} />
-      </label>
-
-      {/* Gallery */}
-      <label className="w-full max-w-xs py-3.5 rounded-2xl font-semibold text-sm mb-4 flex items-center justify-center gap-2 cursor-pointer"
-        style={{ background: '#fff', color: '#0D4F57', border: '1.5px solid rgba(13,79,87,0.15)' }}>
-        <Icon name="image" size={17} color="#0D4F57" /> Choose from library
-        <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
-      </label>
-
-      <p className="text-xs" style={{ color: '#b0babe' }}>Or tap the map tab and press &quot;Save memory&quot;</p>
-    </div>
+    <CameraCapture
+      onCapture={file => addPhotos([file])}
+      onFiles={handleFiles}
+      onClose={() => router.push('/')}
+    />
   )
 }
