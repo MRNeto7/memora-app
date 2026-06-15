@@ -306,12 +306,8 @@ function ClusteredMarkers({
 }) {
   const map = useMap()
   const clusterer = useRef<MarkerClusterer | null>(null)
-  const [markers, setMarkers] = useState<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
+  const markerRefs = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
 
-  // One effect creates the clusterer once the map is ready AND keeps it in
-  // sync with the mounted markers. Combining them (vs two separate effects)
-  // avoids the race where markers populate before the clusterer exists — which
-  // left the pins hidden until the filter was toggled.
   useEffect(() => {
     if (!map) return
     if (!clusterer.current) {
@@ -334,22 +330,13 @@ function ClusteredMarkers({
         },
       })
     }
-    clusterer.current.clearMarkers()
-    clusterer.current.addMarkers(Object.values(markers) as unknown as google.maps.Marker[])
-  }, [map, markers])
+  }, [map])
 
-  function setMarkerRef(marker: google.maps.marker.AdvancedMarkerElement | null, id: string) {
-    setMarkers(prev => {
-      if (marker) {
-        if (prev[id] === marker) return prev
-        return { ...prev, [id]: marker }
-      }
-      if (!(id in prev)) return prev
-      const next = { ...prev }
-      delete next[id]
-      return next
-    })
-  }
+  useEffect(() => {
+    if (!clusterer.current) return
+    clusterer.current.clearMarkers()
+    markerRefs.current = {}
+  }, [memories])
 
   return (
     <>
@@ -360,7 +347,12 @@ function ClusteredMarkers({
             key={memory.id}
             position={{ lat: memory.venue.lat, lng: memory.venue.lng }}
             onClick={() => onSelect(memory)}
-            ref={marker => setMarkerRef(marker as google.maps.marker.AdvancedMarkerElement | null, memory.id)}
+            ref={(marker) => {
+              if (marker && clusterer.current) {
+                markerRefs.current[memory.id] = marker
+                clusterer.current.addMarker(marker as unknown as google.maps.Marker)
+              }
+            }}
           >
             <MemoryPin memory={memory} isSelected={selected?.id === memory.id} />
           </AdvancedMarker>
