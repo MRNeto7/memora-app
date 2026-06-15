@@ -308,6 +308,10 @@ function ClusteredMarkers({
   const clusterer = useRef<MarkerClusterer | null>(null)
   const [markers, setMarkers] = useState<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
 
+  // One effect creates the clusterer once the map is ready AND keeps it in
+  // sync with the mounted markers. Combining them (vs two separate effects)
+  // avoids the race where markers populate before the clusterer exists — which
+  // left the pins hidden until the filter was toggled.
   useEffect(() => {
     if (!map) return
     if (!clusterer.current) {
@@ -330,17 +334,9 @@ function ClusteredMarkers({
         },
       })
     }
-  }, [map])
-
-  // Keep the clusterer in sync with whatever markers are currently mounted.
-  // (The old code cleared markers in an effect but re-added them only via the
-  // ref callback, so a data refetch wiped the pins until the filter was toggled.)
-  useEffect(() => {
-    const c = clusterer.current
-    if (!c) return
-    c.clearMarkers()
-    c.addMarkers(Object.values(markers) as unknown as google.maps.Marker[])
-  }, [markers])
+    clusterer.current.clearMarkers()
+    clusterer.current.addMarkers(Object.values(markers) as unknown as google.maps.Marker[])
+  }, [map, markers])
 
   function setMarkerRef(marker: google.maps.marker.AdvancedMarkerElement | null, id: string) {
     setMarkers(prev => {
