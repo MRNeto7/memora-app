@@ -231,10 +231,9 @@ export default function CapturePage() {
     )
   }
 
-  // Default: open straight into the live in-app camera
+  // Default: the camera-first capture screen
   return (
     <CameraCapture
-      onCapture={file => addPhotos([file])}
       onFiles={handleFiles}
       onClose={() => router.push('/')}
     />
