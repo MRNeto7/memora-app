@@ -306,7 +306,7 @@ function ClusteredMarkers({
 }) {
   const map = useMap()
   const clusterer = useRef<MarkerClusterer | null>(null)
-  const markerRefs = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
+  const [markers, setMarkers] = useState<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
 
   useEffect(() => {
     if (!map) return
@@ -332,11 +332,28 @@ function ClusteredMarkers({
     }
   }, [map])
 
+  // Keep the clusterer in sync with whatever markers are currently mounted.
+  // (The old code cleared markers in an effect but re-added them only via the
+  // ref callback, so a data refetch wiped the pins until the filter was toggled.)
   useEffect(() => {
-    if (!clusterer.current) return
-    clusterer.current.clearMarkers()
-    markerRefs.current = {}
-  }, [memories])
+    const c = clusterer.current
+    if (!c) return
+    c.clearMarkers()
+    c.addMarkers(Object.values(markers) as unknown as google.maps.Marker[])
+  }, [markers])
+
+  function setMarkerRef(marker: google.maps.marker.AdvancedMarkerElement | null, id: string) {
+    setMarkers(prev => {
+      if (marker) {
+        if (prev[id] === marker) return prev
+        return { ...prev, [id]: marker }
+      }
+      if (!(id in prev)) return prev
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
 
   return (
     <>
@@ -347,12 +364,7 @@ function ClusteredMarkers({
             key={memory.id}
             position={{ lat: memory.venue.lat, lng: memory.venue.lng }}
             onClick={() => onSelect(memory)}
-            ref={(marker) => {
-              if (marker && clusterer.current) {
-                markerRefs.current[memory.id] = marker
-                clusterer.current.addMarker(marker as unknown as google.maps.Marker)
-              }
-            }}
+            ref={marker => setMarkerRef(marker as google.maps.marker.AdvancedMarkerElement | null, memory.id)}
           >
             <MemoryPin memory={memory} isSelected={selected?.id === memory.id} />
           </AdvancedMarker>

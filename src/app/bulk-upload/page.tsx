@@ -180,6 +180,22 @@ export default function BulkUploadPage() {
     setGroups(prev => prev.filter(g => g.id !== id))
   }
 
+  // Pull one photo out of a group into its own new memory (for when the
+  // auto-grouping lumped together photos that belong to separate visits).
+  function splitPhoto(groupId: string, photoIndex: number) {
+    setGroups(prev => {
+      const idx = prev.findIndex(g => g.id === groupId)
+      if (idx === -1) return prev
+      const group = prev[idx]
+      if (group.photos.length <= 1) return prev
+      const photo = group.photos[photoIndex]
+      const next = [...prev]
+      next[idx] = { ...group, photos: group.photos.filter((_, i) => i !== photoIndex) }
+      next.splice(idx + 1, 0, makeGroup([photo]))
+      return next
+    })
+  }
+
   async function saveGroup(group: MemoryGroup) {
     updateGroup(group.id, { saving: true, error: null })
     try {
@@ -398,6 +414,7 @@ export default function BulkUploadPage() {
                   onUpdate={updates => updateGroup(group.id, updates)}
                   onSave={() => saveGroup(group)}
                   onDismiss={() => dismissGroup(group.id)}
+                  onSplit={i => splitPhoto(group.id, i)}
                 />
               ))}
             </div>
@@ -421,11 +438,12 @@ export default function BulkUploadPage() {
   )
 }
 
-function GroupCard({ group, onUpdate, onSave, onDismiss }: {
+function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
   group: MemoryGroup
   onUpdate: (u: Partial<MemoryGroup>) => void
   onSave: () => void
   onDismiss: () => void
+  onSplit: (photoIndex: number) => void
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -451,6 +469,13 @@ function GroupCard({ group, onUpdate, onSave, onDismiss }: {
         {group.photos.slice(0, 6).map((photo, i) => (
           <div key={i} className="relative flex-shrink-0 rounded-xl overflow-hidden" style={{ width: 72, height: 72 }}>
             <img src={photo.preview} className="w-full h-full object-cover" />
+            {group.photos.length > 1 && (
+              <button onClick={() => onSplit(i)} title="Move to its own memory"
+                className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(0,0,0,0.55)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 3l-7 7M21 9V3h-6M3 21l7-7M3 15v6h6"/></svg>
+              </button>
+            )}
           </div>
         ))}
         {group.photos.length > 6 && (
@@ -459,6 +484,10 @@ function GroupCard({ group, onUpdate, onSave, onDismiss }: {
           </div>
         )}
       </div>
+
+      {group.photos.length > 1 && (
+        <p className="px-3 -mt-0.5 mb-1 text-xs" style={{ color: '#b0babe' }}>Wrong group? Tap the ⤢ on a photo to move it to its own memory.</p>
+      )}
 
       <div className="px-4 pb-2">
         {/* Date + count */}
