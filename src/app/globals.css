@@ -110,16 +110,9 @@ body {
    tuned variants. All lift via the elevation tokens —
    no ad-hoc shadows. */
 
-/* Canonical frosted material — light card on the stone bg */
-.glass {
-  background: rgba(255, 255, 255, 0.66);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  backdrop-filter: blur(20px) saturate(1.5);
-  border: 0.5px solid rgba(255, 255, 255, 0.65);
-  box-shadow: var(--shadow-resting);
-}
-
-/* Frosted card on the stone background */
+/* Canonical frosted material — light card on the stone bg.
+   .glass-card is a legacy alias for the same material. */
+.glass,
 .glass-card {
   background: rgba(255, 255, 255, 0.66);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
@@ -191,9 +184,15 @@ body {
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 .backdrop-enter { animation: fade-in 0.25s ease-out both; }
 
-/* Tactile press — anything tappable */
+/* Tactile press — anything tappable. Unlayered CSS beats Tailwind's
+   layered utilities, so this must also carry the colour transitions
+   that `transition-all` was providing on toggle buttons. */
 .press {
-  transition: transform var(--dur-fast) var(--spring), opacity var(--dur-fast) ease;
+  transition:
+    transform var(--dur-fast) var(--spring),
+    opacity var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
 }
 .press:active { transform: scale(0.96); }
 
