@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import FriendMemories from '@/components/social/FriendMemories'
+import { toast } from '@/lib/toast'
 
 interface FriendProfile {
   friend_id: string
@@ -100,7 +101,13 @@ export default function SocialPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { error } = await supabase.from('friend_requests').insert({ from_user_id: user.id, to_user_id: toUserId })
-    if (!error) { setSearchResult(null); setSearchId(''); alert('Friend request sent!') }
+    if (error) {
+      // 23505 = unique violation — a request between these users already exists
+      toast(error.code === '23505' ? 'Request already sent' : 'Could not send request', 'error')
+      return
+    }
+    setSearchResult(null); setSearchId('')
+    toast('Friend request sent')
   }
 
   async function respondRequest(id: string, accept: boolean) {

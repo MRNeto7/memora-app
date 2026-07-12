@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { toast } from '@/lib/toast'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
@@ -103,6 +104,15 @@ export default function BulkUploadPage() {
   const pickerArmed = useRef(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const waitTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Release preview blobs when leaving the page — a 100-photo import
+  // otherwise holds ~hundreds of MB of decoded image data in memory.
+  useEffect(() => {
+    return () => {
+      setGroups(prev => { prev.forEach(g => g.photos.forEach(p => URL.revokeObjectURL(p.preview))); return prev })
+      setUntagged(prev => { prev.forEach(p => URL.revokeObjectURL(p.preview)); return prev })
+    }
+  }, [])
 
   useEffect(() => {
     function onFocus() {
@@ -213,7 +223,7 @@ export default function BulkUploadPage() {
     setGroups(prev => [...prev, ...grouped])
     setUntagged(prev => [...prev, ...noLocation])
     setLoading(false)
-    if (rejected.length > 0) alert(rejected.join('\n'))
+    if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
   }
 
   function updateGroup(id: string, updates: Partial<MemoryGroup>) {
@@ -221,7 +231,11 @@ export default function BulkUploadPage() {
   }
 
   function dismissGroup(id: string) {
-    setGroups(prev => prev.filter(g => g.id !== id))
+    setGroups(prev => {
+      const target = prev.find(g => g.id === id)
+      target?.photos.forEach(p => URL.revokeObjectURL(p.preview))
+      return prev.filter(g => g.id !== id)
+    })
   }
 
   // Pull one photo out of a group into its own new memory (for when the

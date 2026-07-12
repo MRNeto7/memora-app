@@ -3,6 +3,7 @@ import './globals.css'
 import NavWrapper from '@/components/layout/NavWrapper'
 import MapsProvider from '@/components/layout/MapsProvider'
 import SafeAreaProvider from '@/components/layout/SafeAreaProvider'
+import { Toaster } from '@/lib/toast'
 import ScrollContainer from '@/components/layout/ScrollContainer'
 import PersistentMapShell from '@/components/map/PersistentMapShell'
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <SafeAreaProvider />
+        <Toaster />
         <MapsProvider>
           <PersistentMapShell />
           <ScrollContainer>{children}</ScrollContainer>

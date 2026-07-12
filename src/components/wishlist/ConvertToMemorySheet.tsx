@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from '@/lib/toast'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { filterMediaFiles } from '@/lib/uploads'
@@ -49,7 +50,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
       accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
       rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
     }
-    if (rejected.length > 0) alert(rejected.join('\n'))
+    if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
     const newPhotos: PhotoEntry[] = []
     for (const file of accepted) {
       const exif = await readPhotoExif(file)

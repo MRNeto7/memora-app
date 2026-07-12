@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrl } from '@/lib/storage'
 import PlacePhoto from '@/components/ui/PlacePhoto'
+import { toast } from '@/lib/toast'
 import Icon from '@/components/ui/Icon'
 
 interface FriendProfile {
@@ -76,7 +77,8 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
 
     // The venue row already exists — it came from the venues join
     const { error } = await supabase.from('wishlists').insert({ user_id: user.id, venue_id: venue.id, priority: 2 })
-    if (!error) alert(`${venue.name} added to your wishlist!`)
+    if (error) toast('Could not add to wishlist', 'error')
+    else toast(`${venue.name} added to your wishlist`)
     setAddingToWishlist(null)
   }
 

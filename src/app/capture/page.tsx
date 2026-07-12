@@ -160,7 +160,7 @@ export default function CapturePage() {
             {photos.map((p, i) => (
               <div key={i} className="relative flex-shrink-0 rounded-2xl overflow-hidden" style={{ width: 90, height: 90 }}>
                 <img src={p.preview} className="w-full h-full object-cover" />
-                <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
+                <button onClick={() => setPhotos(prev => { URL.revokeObjectURL(prev[i].preview); return prev.filter((_, j) => j !== i) })}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 10 }}>✕</button>
               </div>

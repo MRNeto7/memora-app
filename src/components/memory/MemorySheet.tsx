@@ -14,6 +14,7 @@ import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
 import Lightbox from '@/components/media/Lightbox'
+import { toast } from '@/lib/toast'
 
 interface PlaceSuggestion {
   placeId: string; name: string; address: string; lat: number; lng: number; rating?: number
@@ -60,7 +61,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
       rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
     }
-    if (rejected.length > 0) alert(rejected.join('\n'))
+    if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
     const newPhotos: PhotoEntry[] = []
 
     for (const file of accepted) {
@@ -147,7 +148,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
               </div>
-              <MemoryDetailView memory={memory} onUpdate={onUpdate} />
+              <MemoryDetailView memory={memory} onUpdate={onUpdate} onClose={onClose} />
             </>
           )}
 
@@ -166,7 +167,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                   {photos.map((p, i) => (
                     <div key={i} className="relative flex-shrink-0" style={{ width: 80, height: 80 }}>
                       <img src={p.preview} className="w-full h-full object-cover rounded-xl" />
-                      <button onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
+                      <button onClick={() => setPhotos(prev => { URL.revokeObjectURL(prev[i].preview); return prev.filter((_, j) => j !== i) })}
                         className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
                         style={{ background: 'rgba(0,0,0,0.5)', fontSize: 10 }}>✕</button>
                     </div>
@@ -258,7 +259,7 @@ function StarRow({ value, max = 5 }: { value: number; max?: number }) {
 // ── Rich memory detail view ──
 interface VenueDetails { website: string | null; phone: string | null; openNow: boolean | null; rating: number | null; totalRatings: number | null; priceLevel: number | null }
 
-function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onUpdate: () => void }) {
+function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDetails; onUpdate: () => void; onClose: () => void }) {
   const [currentPhoto, setCurrentPhoto] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
@@ -449,6 +450,11 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
             {venueDetails?.website ? 'Website' : 'Search'}
           </a>
         </div>
+
+        {/* Delete — quiet, below everything, confirm inline */}
+        <div className="mt-3 pb-1">
+          <DeleteMemoryButton memoryId={memory.id} onDeleted={() => { onUpdate(); onClose() }} />
+        </div>
       </div>
 
     {/* Fullscreen lightbox */}
@@ -527,5 +533,48 @@ function PublicToggle({ memoryId, initialValue, venue, onUpdate }: { memoryId: s
         {isPublic ? 'Shared — friends you’ve added can see this' : 'Private — only you can see this'}
       </span>
     </div>
+  )
+}
+
+function DeleteMemoryButton({ memoryId, onDeleted }: { memoryId: string; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const supabase = createClient()
+
+  async function handleDelete() {
+    setDeleting(true)
+    try {
+      // Remove photo files from storage first so nothing is orphaned
+      const { data: photos } = await supabase.from('memory_photos').select('storage_path').eq('memory_id', memoryId)
+      const paths = (photos ?? []).map((p: { storage_path: string }) => p.storage_path)
+      if (paths.length) await supabase.storage.from('memory-photos').remove(paths)
+      const { error } = await supabase.from('memories').delete().eq('id', memoryId)
+      if (error) { toast('Could not delete memory', 'error'); setDeleting(false); return }
+      toast('Memory deleted')
+      onDeleted()
+    } catch {
+      toast('Could not delete memory', 'error')
+      setDeleting(false)
+    }
+  }
+
+  if (confirming) {
+    return (
+      <div className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)' }}>
+        <p className="text-xs flex-1" style={{ color: '#a32d2d' }}>Delete this memory and its photos?</p>
+        <button onClick={() => setConfirming(false)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>Cancel</button>
+        <button onClick={handleDelete} disabled={deleting} className="text-xs px-2.5 py-1.5 rounded-lg font-semibold" style={{ background: '#a32d2d', color: '#fff', opacity: deleting ? 0.6 : 1 }}>
+          {deleting ? '…' : 'Delete'}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button onClick={() => setConfirming(true)} className="w-full py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5"
+      style={{ background: 'rgba(163,45,45,0.06)', color: '#a32d2d', border: '0.5px solid rgba(163,45,45,0.15)' }}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a32d2d" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      Delete memory
+    </button>
   )
 }
