@@ -217,8 +217,7 @@ export default function PersistentMapShell() {
       <div className="rise absolute left-0 right-0 z-10 flex items-center justify-between px-4"
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', pointerEvents: 'none' }}>
         {/* Logo + count */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl pointer-events-auto"
-          style={{ background: 'rgba(234,229,221,0.78)', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', border: '0.5px solid rgba(255,255,255,0.55)', boxShadow: '0 4px 16px rgba(13,79,87,0.12)' }}>
+        <div className="glass-pill flex items-center gap-2 px-3 py-1.5 rounded-2xl pointer-events-auto">
           <img src="/logo.png" alt="Mimora" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover' }} />
           <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Mimora</span>
           <span className="text-xs" style={{ color: '#7D878D' }}>· {memories.length}</span>
@@ -226,14 +225,14 @@ export default function PersistentMapShell() {
         {/* Toggles */}
         <div className="flex gap-1.5 pointer-events-auto">
           <button onClick={() => setShowMemories(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showMemories ? '#0D4F57' : 'rgba(234,229,221,0.78)', color: showMemories ? '#EAE5DD' : '#7D878D', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', border: '0.5px solid rgba(255,255,255,0.55)', boxShadow: '0 4px 16px rgba(13,79,87,0.12)' }}>
+            className="glass-pill flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            style={{ background: showMemories ? '#0D4F57' : undefined, color: showMemories ? '#EAE5DD' : '#7D878D' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
             Memories
           </button>
           <button onClick={() => setShowWishlist(v => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showWishlist ? '#C9A86A' : 'rgba(234,229,221,0.78)', color: showWishlist ? '#fff' : '#7D878D', backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)', border: '0.5px solid rgba(255,255,255,0.55)', boxShadow: '0 4px 16px rgba(13,79,87,0.12)' }}>
+            className="glass-pill flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            style={{ background: showWishlist ? '#C9A86A' : undefined, color: showWishlist ? '#fff' : '#7D878D' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
             Wishlist
           </button>
