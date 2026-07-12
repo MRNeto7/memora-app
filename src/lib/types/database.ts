@@ -103,6 +103,7 @@ export type Database = {
           is_public: boolean
           public_lat: number | null
           public_lng: number | null
+          origin_memory_id: string | null
           visited_at: string
           created_at: string
         }
@@ -119,6 +120,7 @@ export type Database = {
           is_public?: boolean
           public_lat?: number | null
           public_lng?: number | null
+          origin_memory_id?: string | null
           visited_at?: string
           created_at?: string
         }
@@ -135,6 +137,7 @@ export type Database = {
           is_public?: boolean
           public_lat?: number | null
           public_lng?: number | null
+          origin_memory_id?: string | null
           visited_at?: string
           created_at?: string
         }
@@ -151,6 +154,13 @@ export type Database = {
             columns: ['venue_id']
             isOneToOne: false
             referencedRelation: 'venues'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'memories_origin_memory_id_fkey'
+            columns: ['origin_memory_id']
+            isOneToOne: false
+            referencedRelation: 'memories'
             referencedColumns: ['id']
           },
         ]
@@ -271,6 +281,55 @@ export type Database = {
           },
         ]
       }
+      memory_tags: {
+        Row: {
+          id: string
+          memory_id: string
+          tagger_id: string
+          tagged_user_id: string
+          status: 'pending' | 'saved' | 'dismissed'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          memory_id: string
+          tagger_id: string
+          tagged_user_id: string
+          status?: 'pending' | 'saved' | 'dismissed'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          memory_id?: string
+          tagger_id?: string
+          tagged_user_id?: string
+          status?: 'pending' | 'saved' | 'dismissed'
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'memory_tags_memory_id_fkey'
+            columns: ['memory_id']
+            isOneToOne: false
+            referencedRelation: 'memories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'memory_tags_tagger_id_fkey'
+            columns: ['tagger_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'memory_tags_tagged_user_id_fkey'
+            columns: ['tagged_user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       friend_requests: {
         Row: {
           id: string
@@ -332,6 +391,10 @@ export type Database = {
         Args: { a: string; b: string }
         Returns: boolean
       }
+      is_memory_linked: {
+        Args: { mem_id: string; viewer: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
@@ -348,6 +411,7 @@ export type MemoryRow = Database['public']['Tables']['memories']['Row']
 export type MemoryPhotoRow = Database['public']['Tables']['memory_photos']['Row']
 export type WishlistRow = Database['public']['Tables']['wishlists']['Row']
 export type FriendRequestRow = Database['public']['Tables']['friend_requests']['Row']
+export type MemoryTagRow = Database['public']['Tables']['memory_tags']['Row']
 
 export type MemoryWithDetails = MemoryRow & {
   venue: VenueRow | null
