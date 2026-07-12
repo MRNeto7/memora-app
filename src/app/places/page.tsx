@@ -108,11 +108,11 @@ export default function PlacesPage() {
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             {([['date', 'Date'], ['name', 'Name'], ['rating', 'Rating']] as const).map(([opt, label]) => (
               <button key={opt} onClick={() => setSortBy(opt)}
-                className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
+                className="glass flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
                 style={{
-                  background: sortBy === opt ? '#0D4F57' : '#fff',
+                  background: sortBy === opt ? '#0D4F57' : undefined,
                   color: sortBy === opt ? '#EAE5DD' : '#7D878D',
-                  border: `0.5px solid ${sortBy === opt ? '#0D4F57' : 'rgba(13,79,87,0.12)'}`,
+                  border: sortBy === opt ? '0.5px solid #0D4F57' : undefined,
                 }}>
                 {label}
               </button>
@@ -206,8 +206,7 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
   }, [firstPhoto?.storage_path])
 
   return (
-    <button onClick={onClick} className="w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform"
-      style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <button onClick={onClick} className="glass-card w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform">
       <div className="flex">
         <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
@@ -259,7 +258,7 @@ function WishlistCard({ item, onClick, onRemove }: {
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <div className="glass-card rounded-2xl overflow-hidden">
       <button onClick={onClick} className="w-full text-left">
         <div className="flex">
           {/* Restaurant photo */}
