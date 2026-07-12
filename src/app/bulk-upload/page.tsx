@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
-import { useIsPro } from '@/lib/pro'
+import { useIsPro, FREE_BULK_LIMIT } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
 import ProUpsell from '@/components/pro/ProUpsell'
@@ -96,11 +96,55 @@ export default function BulkUploadPage() {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [untagged, setUntagged] = useState<PhotoItem[]>([])
+  // Feedback for the silent gap while iOS copies the selection (iCloud photos
+  // can take several seconds before the change event fires).
+  const [pickerWaiting, setPickerWaiting] = useState(false)
+  const [freeCapped, setFreeCapped] = useState<number | null>(null)
+  const pickerArmed = useRef(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const waitTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    function onFocus() {
+      if (!pickerArmed.current) return
+      // Picker just dismissed — files may still be transferring. Show feedback
+      // until change/cancel fires, with a failsafe so it can't get stuck.
+      setPickerWaiting(true)
+      if (waitTimeout.current) clearTimeout(waitTimeout.current)
+      waitTimeout.current = setTimeout(() => { pickerArmed.current = false; setPickerWaiting(false) }, 30000)
+    }
+    function clearWaiting() {
+      pickerArmed.current = false
+      if (waitTimeout.current) clearTimeout(waitTimeout.current)
+      setPickerWaiting(false)
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onFocus)
+    const input = fileInputRef.current
+    input?.addEventListener('cancel', clearWaiting)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onFocus)
+      input?.removeEventListener('cancel', clearWaiting)
+      if (waitTimeout.current) clearTimeout(waitTimeout.current)
+    }
+  }, [])
 
   function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? [])
+    pickerArmed.current = false
+    if (waitTimeout.current) clearTimeout(waitTimeout.current)
+    setPickerWaiting(false)
+    let files = Array.from(e.target.files ?? [])
     e.target.value = '' // allow re-selecting the same photos later
-    if (files.length) processFiles(files)
+    if (!files.length) return
+    // Free tier: cap each bulk import, but load the first batch rather than block
+    if (isPro === false && files.length > FREE_BULK_LIMIT) {
+      setFreeCapped(files.length)
+      files = files.slice(0, FREE_BULK_LIMIT)
+    } else {
+      setFreeCapped(null)
+    }
+    processFiles(files)
   }
 
   async function processFiles(files: File[]) {
@@ -319,13 +363,12 @@ export default function BulkUploadPage() {
           </div>
         )}
 
-        {isPro === false && <ProUpsell feature="Bulk upload" />}
-
-        {isPro === true && groups.length === 0 && !loading && (
+        {isPro !== null && groups.length === 0 && !loading && (
           <>
             {/* Upload area — the input is tapped directly via the label;
                 a JS .click() on a file input is unreliable in the Capacitor WebView */}
             <label
+              htmlFor="bulk-file-input"
               className="rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4"
               style={{ background: '#fff', border: '2px dashed #C9A86A' }}
             >
@@ -334,7 +377,11 @@ export default function BulkUploadPage() {
               </div>
               <p className="font-semibold text-base mb-1" style={{ color: '#0D4F57' }}>Select photos from camera roll</p>
               <p className="text-sm" style={{ color: '#7D878D', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
-              <input type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
+              {isPro === false && (
+                <p className="text-xs mt-2 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.12)', color: '#a8863e' }}>
+                  Free includes {FREE_BULK_LIMIT} photos per import · Pro is unlimited
+                </p>
+              )}
             </label>
 
             {/* How it works */}
@@ -353,6 +400,34 @@ export default function BulkUploadPage() {
               ))}
             </div>
           </>
+        )}
+
+        {/* One shared input for both entry points; onClick arms the transfer feedback */}
+        <input
+          id="bulk-file-input"
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onClick={() => { pickerArmed.current = true }}
+          onChange={handleFilesSelected}
+        />
+
+        {pickerWaiting && !loading && (
+          <Portal>
+            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
+              <div className="rounded-3xl px-8 py-7 flex flex-col items-center" style={{ background: '#fff', width: 'min(300px, 85%)', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
+                <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
+                <p className="text-sm font-semibold mb-1" style={{ color: '#0D4F57' }}>Preparing your photos…</p>
+                <p className="text-xs text-center mb-4" style={{ color: '#7D878D' }}>Large selections and iCloud photos can take a few seconds</p>
+                <button onClick={() => { pickerArmed.current = false; setPickerWaiting(false) }}
+                  className="text-xs px-4 py-2 rounded-xl" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Portal>
         )}
 
         {loading && (
@@ -377,6 +452,20 @@ export default function BulkUploadPage() {
 
         {groups.length > 0 && (
           <>
+            {freeCapped !== null && (
+              <div className="rounded-2xl px-4 py-3 mb-4 flex items-start gap-3" style={{ background: 'rgba(201,168,106,0.1)', border: '0.5px solid rgba(201,168,106,0.3)' }}>
+                <Icon name="sparkle" size={16} color="#C9A86A" strokeWidth={1.8} />
+                <div className="flex-1">
+                  <p className="text-xs font-semibold mb-0.5" style={{ color: '#a8863e' }}>
+                    First {FREE_BULK_LIMIT} of {freeCapped} photos loaded
+                  </p>
+                  <p className="text-xs" style={{ color: '#7D878D' }}>
+                    Free includes {FREE_BULK_LIMIT} photos per import — Mimora Pro imports your whole camera roll at once.
+                  </p>
+                </div>
+                <button onClick={() => setFreeCapped(null)} className="flex-shrink-0" style={{ color: '#b0babe', fontSize: 14, lineHeight: 1 }}>✕</button>
+              </div>
+            )}
             {/* Summary bar */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>
@@ -384,9 +473,8 @@ export default function BulkUploadPage() {
                 {saved.length > 0 && <span style={{ color: '#7D878D' }}> · {saved.length} saved</span>}
               </p>
               <div className="flex gap-2">
-                <label className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: '#f5f2ed', color: '#7D878D' }}>
                   Add more
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleFilesSelected} />
                 </label>
                 {ready.length > 1 && (
                   <button onClick={saveAll} disabled={savingAll}

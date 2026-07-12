@@ -6,9 +6,10 @@ type Supabase = ReturnType<typeof createClient>
 // Free-tier limits. Pro (is_pro on the users row) removes all of them.
 export const FREE_MEMORY_LIMIT = 50
 export const FREE_PHOTOS_PER_MEMORY = 3
+export const FREE_BULK_LIMIT = 10
 
 export const PRO_BENEFITS = [
-  'Bulk upload — import your whole camera roll at once',
+  `Unlimited bulk upload (free includes ${FREE_BULK_LIMIT} photos at a time)`,
   'Video memories and unlimited photos per memory',
   `Unlimited memories (free includes ${FREE_MEMORY_LIMIT})`,
   'Insights & Year in Food — your taste, wrapped',
