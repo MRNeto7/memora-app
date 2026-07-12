@@ -8,6 +8,7 @@ export type NotificationItem =
   | { id: string; kind: 'friend_request'; requestId: string; fromUserId: string; name: string; at: string }
   | { id: string; kind: 'friend_accepted'; name: string; at: string }
   | { id: string; kind: 'anniversary'; memoryId: string; title: string; yearsAgo: number; at: string }
+  | { id: string; kind: 'tagged'; tagId: string; memoryId: string; taggerName: string; venueName: string | null; at: string }
 
 const SEEN_KEY = 'mimora_seen_notifications_v1'
 
@@ -24,10 +25,10 @@ function addSeen(ids: string[]) {
   try { window.localStorage.setItem(SEEN_KEY, JSON.stringify([...seen])) } catch { /* storage full */ }
 }
 
-// A pending friend request is always "unread" — it needs a response.
-// Everything else is unread until the user opens the notification center.
+// A pending friend request or memory tag is always "unread" — it needs a
+// response. Everything else is unread until the user opens the center.
 function isUnread(item: NotificationItem, seen: Set<string>): boolean {
-  return item.kind === 'friend_request' || !seen.has(item.id)
+  return item.kind === 'friend_request' || item.kind === 'tagged' || !seen.has(item.id)
 }
 
 export function useNotifications() {
@@ -74,6 +75,26 @@ export function useNotifications() {
         result.push({ id: `acc_${r.id}`, kind: 'friend_accepted', name, at: r.updated_at })
       }
 
+      // Pending memory tags — a friend tagged you; you can save your own copy.
+      // Errors are ignored so this no-ops until migration 007 is applied.
+      const { data: tagRows } = await supabase
+        .from('memory_tags')
+        .select('id, memory_id, created_at, tagger:users!tagger_id(display_name, memora_id), memory:memories!memory_id(venue:venues(name))')
+        .eq('tagged_user_id', user.id)
+        .eq('status', 'pending')
+      for (const t of tagRows ?? []) {
+        const taggerName = t.tagger?.display_name || t.tagger?.memora_id || 'A friend'
+        result.push({
+          id: `tag_${t.id}`,
+          kind: 'tagged',
+          tagId: t.id,
+          memoryId: t.memory_id,
+          taggerName,
+          venueName: t.memory?.venue?.name ?? null,
+          at: t.created_at,
+        })
+      }
+
       // On this day — memories from the same calendar day in a previous year
       const { data: memories } = await supabase
         .from('memories')
@@ -105,7 +126,7 @@ export function useNotifications() {
   const unreadCount = items.filter(i => isUnread(i, seen)).length
 
   const markAllSeen = useCallback(() => {
-    addSeen(items.filter(i => i.kind !== 'friend_request').map(i => i.id))
+    addSeen(items.filter(i => i.kind !== 'friend_request' && i.kind !== 'tagged').map(i => i.id))
     setSeenVersion(v => v + 1)
   }, [items])
 

@@ -1,10 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
+import TaggedMemorySheet from '@/components/memory/TaggedMemorySheet'
+
+type TaggedItem = Extract<NotificationItem, { kind: 'tagged' }>
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -26,6 +30,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
 }) {
   const router = useRouter()
   const supabase = createClient()
+  const [viewTag, setViewTag] = useState<TaggedItem | null>(null)
 
   async function respond(requestId: string, accept: boolean) {
     await supabase.from('friend_requests').update({ status: accept ? 'accepted' : 'declined' }).eq('id', requestId)
@@ -60,7 +65,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
               items.map(item => (
                 <div key={item.id} className="flex items-start gap-3 px-5 py-3.5" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.05)' }}>
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#f5f2ed' }}>
-                    <Icon name={item.kind === 'friend_request' ? 'friend-add' : item.kind === 'friend_accepted' ? 'friend-check' : 'camera'} size={16} color="#0D4F57" />
+                    <Icon name={item.kind === 'friend_request' ? 'friend-add' : item.kind === 'friend_accepted' ? 'friend-check' : item.kind === 'tagged' ? 'pin' : 'camera'} size={16} color="#0D4F57" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -86,6 +91,15 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
                         <p className="text-sm" style={{ color: '#0D4F57' }}>{item.title}</p>
                       </button>
                     )}
+                    {item.kind === 'tagged' && (
+                      <button onClick={() => setViewTag(item)} className="text-left w-full">
+                        <p className="text-sm" style={{ color: '#0D4F57' }}>
+                          <span className="font-semibold">{item.taggerName}</span> tagged you in a memory{item.venueName ? <> at <span className="font-semibold">{item.venueName}</span></> : ''}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: '#b0babe' }}>{timeAgo(item.at)}</p>
+                        <p className="text-xs mt-1 font-semibold" style={{ color: '#C9A86A' }}>Tap to view and save your copy</p>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -93,6 +107,17 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
           </div>
         </div>
       </div>
+
+      {/* Tagged-memory preview + save-a-copy flow */}
+      {viewTag && (
+        <TaggedMemorySheet
+          tagId={viewTag.tagId}
+          memoryId={viewTag.memoryId}
+          taggerName={viewTag.taggerName}
+          onClose={() => setViewTag(null)}
+          onChanged={() => { setViewTag(null); onChanged() }}
+        />
+      )}
     </Portal>
   )
 }
