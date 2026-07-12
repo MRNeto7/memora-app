@@ -18,6 +18,49 @@
   --accent:     var(--gold);
 
   --nav-height: 80px;
+
+  /* ── Tonal ramps ─────────────────────────────────
+     Same brand hues, no new colors — these just name
+     the tints/shades already hardcoded across the app
+     (#0a3d44, #f5f2ed, #fafaf9, #f0ede8, …) so surfaces
+     can reference one source of truth. */
+  --teal-900: #072e33;
+  --teal-800: #0a3d44;  /* == --brand-dark */
+  --teal-700: #0b454c;
+  --teal-600: #0D4F57;  /* == --teal (base) */
+  --teal-500: #136570;
+  --teal-400: #1a6b75;  /* == --teal-light */
+  --teal-300: #4a8a91;
+  --teal-200: #9cc0c4;
+  --teal-100: #e8f2f3;  /* == --teal-pale */
+
+  --gold-900: #7d6329;
+  --gold-700: #a8863e;  /* == --gold-dark */
+  --gold-500: #C9A86A;  /* == --gold (base) */
+  --gold-300: #e8d5a8;  /* == --gold-light */
+  --gold-100: #f6ecd6;
+
+  --stone-500: #d4cdc3; /* == --stone-dark */
+  --stone-400: #EAE5DD; /* == --stone (base) */
+  --stone-300: #f0ede8;
+  --stone-200: #f5f2ed;
+  --stone-100: #fafaf9;
+
+  /* ── Elevation scale ─────────────────────────────
+     Three tiers of lift, tuned in the brand teal so
+     shadows read as depth, not grey. */
+  --shadow-resting:  0 1px 2px rgba(13,79,87,0.04), 0 2px 8px rgba(13,79,87,0.06);
+  --shadow-raised:   0 2px 4px rgba(13,79,87,0.06), 0 8px 20px rgba(13,79,87,0.12);
+  --shadow-floating: 0 4px 12px rgba(7,46,51,0.10), 0 24px 48px rgba(7,46,51,0.22);
+
+  /* ── Motion ──────────────────────────────────────
+     One expressive spring, one soft iOS-sheet spring,
+     and a standard duration scale. */
+  --spring:      cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 0.2s;
+  --dur-base: 0.3s;
+  --dur-slow: 0.45s;
 }
 
 * { box-sizing: border-box; }
@@ -62,7 +105,19 @@ body {
   padding: 16px 20px 0;
 }
 
-/* ── Glass materials ─────────────────────────────── */
+/* ── Glass materials ───────────────────────────────
+   One reusable frosted material (.glass) plus three
+   tuned variants. All lift via the elevation tokens —
+   no ad-hoc shadows. */
+
+/* Canonical frosted material — light card on the stone bg */
+.glass {
+  background: rgba(255, 255, 255, 0.66);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 0.5px solid rgba(255, 255, 255, 0.65);
+  box-shadow: var(--shadow-resting);
+}
 
 /* Frosted card on the stone background */
 .glass-card {
@@ -70,7 +125,7 @@ body {
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   backdrop-filter: blur(20px) saturate(1.5);
   border: 0.5px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 2px 12px rgba(13, 79, 87, 0.06), 0 0.5px 0 rgba(13, 79, 87, 0.04);
+  box-shadow: var(--shadow-resting);
 }
 
 /* Frosted chip/panel on dark teal surfaces (headers) */
@@ -87,33 +142,50 @@ body {
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
   backdrop-filter: blur(24px) saturate(1.6);
   border: 0.5px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 0 8px 32px rgba(13, 79, 87, 0.18), 0 1px 2px rgba(13, 79, 87, 0.08);
+  box-shadow: var(--shadow-raised);
+}
+
+/* Near-opaque frost for modal/sheet cards — depth without
+   sacrificing text legibility over the blurred backdrop */
+.glass-modal {
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  border: 0.5px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-floating);
 }
 
 /* ── Motion ──────────────────────────────────────── */
-
-/* Springy ease used everywhere */
-:root { --spring: cubic-bezier(0.22, 1, 0.36, 1); }
+/* Spring curves + durations live in :root above. */
 
 /* Content rising into place on page load */
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(14px) scale(0.985); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.page-enter { animation: rise-in 0.45s var(--spring) both; }
+.page-enter { animation: rise-in var(--dur-slow) var(--spring) both; }
 
-/* Staggered list/card entrances */
+/* Staggered list/card entrances. For dynamic lists, keep the
+   .rise class and set `animation-delay` inline per index
+   (see the Places list — ~30ms apart). */
 .rise { animation: rise-in 0.5s var(--spring) both; }
 .rise-1 { animation: rise-in 0.5s var(--spring) 0.04s both; }
 .rise-2 { animation: rise-in 0.5s var(--spring) 0.08s both; }
 .rise-3 { animation: rise-in 0.5s var(--spring) 0.12s both; }
 
-/* Sheets/modals springing up */
+/* Sheets springing up — soft iOS spring, a touch more travel */
 @keyframes sheet-up {
-  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  from { opacity: 0; transform: translateY(32px) scale(0.955); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.sheet-enter { animation: sheet-up 0.4s var(--spring) both; }
+.sheet-enter { animation: sheet-up var(--dur-slow) var(--spring-soft) both; }
+
+/* Modals — fade + subtle scale up from centre */
+@keyframes fade-scale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.modal-enter { animation: fade-scale var(--dur-base) var(--spring) both; }
 
 /* Backdrop fading in */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -121,12 +193,13 @@ body {
 
 /* Tactile press — anything tappable */
 .press {
-  transition: transform 0.25s var(--spring), opacity 0.2s ease;
+  transition: transform var(--dur-fast) var(--spring), opacity var(--dur-fast) ease;
 }
 .press:active { transform: scale(0.96); }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter, .rise, .rise-1, .rise-2, .rise-3, .sheet-enter, .backdrop-enter { animation: none; }
+  .page-enter, .rise, .rise-1, .rise-2, .rise-3,
+  .sheet-enter, .modal-enter, .backdrop-enter { animation: none; }
   .press, .press:active { transition: none; transform: none; }
 }
 
