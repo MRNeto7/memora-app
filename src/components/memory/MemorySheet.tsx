@@ -13,6 +13,7 @@ import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
+import TagFriendsSection, { useFriends, FriendChips } from './TagFriends'
 import Lightbox from '@/components/media/Lightbox'
 
 interface PlaceSuggestion {
@@ -45,6 +46,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [detectedDate, setDetectedDate] = useState<Date | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const friends = useFriends()
+  const [tagIds, setTagIds] = useState<Set<string>>(new Set())
   void debounceRef
 
   const overall = calcOverall(detailRatings)
@@ -111,6 +114,15 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       }).select().single()
 
       if (me) { setSaveError(`Error: ${me.message}`); setSaving(false); return }
+
+      // Tag selected friends (friends-only enforced by RLS). Non-fatal:
+      // the memory is already saved either way.
+      if (tagIds.size > 0) {
+        const { error: te } = await supabase.from('memory_tags').insert(
+          [...tagIds].map(fid => ({ memory_id: newMemory.id, tagger_id: user.id, tagged_user_id: fid }))
+        )
+        if (te) alert('Memory saved, but tagging didn’t go through — you can tag from the memory.')
+      }
 
       // Optimistic: the memory row is saved — close the sheet now and let
       // photos compress + upload in the background, refreshing again when
@@ -230,6 +242,20 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 <textarea placeholder="What made it special?" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
                   className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
               </div>
+
+              {/* Tag friends — they'll be invited to save their own copy */}
+              {friends.length > 0 && (
+                <div className="mb-4">
+                  <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Who was there? <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                  <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
+                    setTagIds(prev => {
+                      const next = new Set(prev)
+                      if (next.has(id)) next.delete(id); else next.add(id)
+                      return next
+                    })
+                  }} />
+                </div>
+              )}
 
               {saveError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>{saveError}</div>}
             </div>
@@ -449,6 +475,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
             {shown.notes && <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>{shown.notes}</p>}
           </div>
         )}
+
+        {/* Tag friends — invites them to save their own linked copy */}
+        <TagFriendsSection memoryId={memory.id} />
 
         {/* Action buttons */}
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
