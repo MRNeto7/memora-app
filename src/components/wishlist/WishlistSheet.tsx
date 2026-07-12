@@ -26,23 +26,28 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
   const [converting, setConverting] = useState(false)
   const [notes, setNotes] = useState(item.notes ?? '')
   const [priority, setPriority] = useState(item.priority)
-  const [saving, setSaving] = useState(false)
 
   const priorityColors = ['', '#7D878D', '#C9A86A', '#0D4F57']
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
-  async function handleSave() {
-    setSaving(true)
-    await supabase.from('wishlists').update({ notes: notes || null, priority }).eq('id', item.id)
-    setSaving(false)
+  function handleSave() {
+    // Optimistic: the view reads notes/priority state, so closing the
+    // edit form shows the new values immediately; revert on failure.
+    const previous = { notes: item.notes ?? '', priority: item.priority }
     setEditing(false)
-    onUpdate()
+    supabase.from('wishlists').update({ notes: notes || null, priority }).eq('id', item.id).then(({ error }) => {
+      if (error) { setNotes(previous.notes); setPriority(previous.priority); alert('Couldn’t save your changes — please try again.') }
+      else onUpdate()
+    })
   }
 
-  async function handleRemove() {
-    await supabase.from('wishlists').delete().eq('id', item.id)
-    onUpdate()
+  function handleRemove() {
+    // Optimistic: close now; a failed delete resurfaces on the refetch
     onClose()
+    supabase.from('wishlists').delete().eq('id', item.id).then(({ error }) => {
+      if (error) alert('Couldn’t remove this place — please try again.')
+      onUpdate()
+    })
   }
 
   if (converting) {
@@ -93,22 +98,22 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
               Added {new Date(item.added_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
 
-            {/* Priority badge */}
-            {item.priority > 0 && !editing && (
+            {/* Priority badge — reads state so optimistic edits show instantly */}
+            {priority > 0 && !editing && (
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-4"
-                style={{ background: `${priorityColors[item.priority]}15`, border: `0.5px solid ${priorityColors[item.priority]}40` }}>
-                <div className="w-2 h-2 rounded-full" style={{ background: priorityColors[item.priority] }} />
-                <span className="text-xs font-semibold" style={{ color: priorityColors[item.priority] }}>
-                  {priorityLabels[item.priority]}
+                style={{ background: `${priorityColors[priority]}15`, border: `0.5px solid ${priorityColors[priority]}40` }}>
+                <div className="w-2 h-2 rounded-full" style={{ background: priorityColors[priority] }} />
+                <span className="text-xs font-semibold" style={{ color: priorityColors[priority] }}>
+                  {priorityLabels[priority]}
                 </span>
               </div>
             )}
 
-            {/* Notes */}
-            {!editing && item.notes && (
+            {/* Notes — reads state so optimistic edits show instantly */}
+            {!editing && notes && (
               <div className="rounded-2xl px-4 py-3 mb-4" style={{ background: '#f5f2ed', borderLeft: '3px solid #C9A86A' }}>
                 <p className="text-xs mb-1" style={{ color: '#7D878D' }}>Why I want to go</p>
-                <p className="text-sm leading-relaxed" style={{ color: '#0D4F57' }}>{item.notes}</p>
+                <p className="text-sm leading-relaxed" style={{ color: '#0D4F57' }}>{notes}</p>
               </div>
             )}
 
@@ -163,10 +168,10 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
                 Edit
               </button>
             ) : (
-              <button onClick={handleSave} disabled={saving}
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold"
+              <button onClick={handleSave}
+                className="press flex-1 py-2.5 rounded-xl text-xs font-semibold"
                 style={{ background: '#C9A86A', color: '#fff' }}>
-                {saving ? 'Saving…' : 'Save changes'}
+                Save changes
               </button>
             )}
             <button onClick={handleRemove}

@@ -112,14 +112,30 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
       if (me) { setSaveError(`Error: ${me.message}`); setSaving(false); return }
 
-      for (const photo of photos) {
-        const upload = await compressImage(photo.file)
-        const ext = upload.name.split('.').pop()
-        const path = `${user.id}/${newMemory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
-        if (!ue) await supabase.from('memory_photos').insert({ memory_id: newMemory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
-      }
+      // Optimistic: the memory row is saved — close the sheet now and let
+      // photos compress + upload in the background, refreshing again when
+      // they land. Capture what the closure needs; the component unmounts.
+      const pending = [...photos]
+      const userId = user.id
+      const memoryId = newMemory.id
       onUpdate()
+      if (pending.length > 0) {
+        void (async () => {
+          let failed = 0
+          for (const photo of pending) {
+            try {
+              const upload = await compressImage(photo.file)
+              const ext = upload.name.split('.').pop()
+              const path = `${userId}/${memoryId}/${crypto.randomUUID()}.${ext}`
+              const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
+              if (ue) { failed++; continue }
+              await supabase.from('memory_photos').insert({ memory_id: memoryId, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+            } catch { failed++ }
+          }
+          if (failed > 0) alert(`${failed === 1 ? 'A photo' : `${failed} photos`} didn't upload — open the memory and try adding ${failed === 1 ? 'it' : 'them'} again.`)
+          onUpdate()
+        })()
+      }
     } catch (err) { console.error(err); setSaveError('Something went wrong.') }
     finally { setSaving(false) }
   }
@@ -273,7 +289,11 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
     service: memory.rating_service ?? 0,
     ambiance: memory.rating_ambiance ?? 0,
   })
-  const [saving, setSaving] = useState(false)
+  // Optimistic edits — applied to the view immediately, reverted on failure.
+  // Also keeps the open sheet current: parents refetch the list on update
+  // but never refresh the `memory` object they're holding.
+  const [overrides, setOverrides] = useState<Partial<MemoryWithDetails>>({})
+  const shown = { ...memory, ...overrides }
 
   useEffect(() => {
     if (memory.venue?.google_place_id) {
@@ -282,18 +302,24 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
     }
   }, [memory.venue?.google_place_id])
 
-  async function handleSaveEdit() {
-    setSaving(true)
+  function handleSaveEdit() {
     const overall = calcOverall(editRatings)
-    await supabase.from('memories').update({
+    const patch = {
       dish_name: editDish || null,
       notes: editNotes || null,
       rating: overall > 0 ? overall : memory.rating,
       rating_food: editRatings.food || null,
       rating_service: editRatings.service || null,
       rating_ambiance: editRatings.ambiance || null,
-    }).eq('id', memory.id)
-    setSaving(false); setEditing(false); onUpdate()
+    }
+    // Optimistic: show the edits immediately, revert if the write fails
+    const previous = overrides
+    setOverrides(o => ({ ...o, ...patch }))
+    setEditing(false)
+    supabase.from('memories').update(patch).eq('id', memory.id).then(({ error }) => {
+      if (error) { setOverrides(previous); alert('Couldn’t save your edits — please try again.') }
+      else onUpdate()
+    })
   }
 
   const photos = memory.memory_photos
@@ -320,8 +346,8 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         <div className="mb-5 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
-        <button onClick={handleSaveEdit} disabled={saving} className="w-full py-3 rounded-2xl text-white font-semibold text-sm"
-          style={{ background: '#0D4F57', opacity: saving ? 0.6 : 1 }}>{saving ? 'Saving…' : 'Save changes'}</button>
+        <button onClick={handleSaveEdit} className="press w-full py-3 rounded-2xl text-white font-semibold text-sm"
+          style={{ background: '#0D4F57' }}>Save changes</button>
       </div>
     )
   }
@@ -382,11 +408,11 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         </div>
 
         {/* Rating — overall is out of 10; stars show it on a 5-star scale */}
-        {memory.rating && (
+        {shown.rating && (
           <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
             <div className="flex items-center gap-1.5 flex-1">
-              <StarRow value={memory.rating / 2} max={5} />
-              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/10</span>
+              <StarRow value={shown.rating / 2} max={5} />
+              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{shown.rating}/10</span>
             </div>
             {venueDetails?.rating && (
               <span className="text-xs" style={{ color: '#7D878D' }}>Google {venueDetails.rating}★</span>
@@ -395,13 +421,13 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         )}
 
         {/* Breakdown bars — only categories the user actually rated */}
-        {(memory.rating_food || memory.rating_service || memory.rating_ambiance) && (
+        {(shown.rating_food || shown.rating_service || shown.rating_ambiance) && (
           <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
             <p className="text-xs font-semibold mb-2" style={{ color: '#0D4F57' }}>Breakdown</p>
             {([
-              ['Food & drink', memory.rating_food],
-              ['Service', memory.rating_service],
-              ['Ambiance', memory.rating_ambiance],
+              ['Food & drink', shown.rating_food],
+              ['Service', shown.rating_service],
+              ['Ambiance', shown.rating_ambiance],
             ] as const).filter(([, val]) => val).map(([label, val]) => (
               <div key={label} className="flex items-center gap-2 mb-1.5">
                 <span className="text-xs w-20 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
@@ -417,10 +443,10 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         )}
 
         {/* Dish + notes inline */}
-        {(memory.dish_name || memory.notes) && (
+        {(shown.dish_name || shown.notes) && (
           <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
-            {memory.dish_name && <p className="text-xs font-semibold mb-0.5" style={{ color: '#0D4F57' }}>{memory.dish_name}</p>}
-            {memory.notes && <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>{memory.notes}</p>}
+            {shown.dish_name && <p className="text-xs font-semibold mb-0.5" style={{ color: '#0D4F57' }}>{shown.dish_name}</p>}
+            {shown.notes && <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>{shown.notes}</p>}
           </div>
         )}
 
