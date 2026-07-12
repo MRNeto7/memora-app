@@ -9,6 +9,7 @@ interface PlaceSuggestion {
   lat: number
   lng: number
   rating?: number
+  googleTypes?: string[]
 }
 
 interface PlacesSearchProps {
@@ -54,6 +55,7 @@ export default function PlacesSearch({ value, onChange, onSelect, selectedPlace 
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
         rating: place.rating,
+        googleTypes: place.types,
       })
     })
   }, [ready, onSelect])

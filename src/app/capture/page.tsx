@@ -8,6 +8,8 @@ import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import CategoryPicker from '@/components/ui/CategoryPicker'
+import { VenueType, MealType, venueTypeFromGoogle, mealTypeFromDate } from '@/lib/categories'
 import Icon from '@/components/ui/Icon'
 import CameraCapture from '@/components/capture/CameraCapture'
 import PlacesSearch from '@/components/memory/PlacesSearch'
@@ -38,6 +40,8 @@ export default function CapturePage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [detectedDate, setDetectedDate] = useState<Date | null>(null)
+  const [venueType, setVenueType] = useState<VenueType | null>(null)
+  const [mealType, setMealType] = useState<MealType | null>(null)
   const [detectedLat, setDetectedLat] = useState<number | null>(null)
   const [detectedLng, setDetectedLng] = useState<number | null>(null)
   const supabase = createClient()
@@ -74,7 +78,7 @@ export default function CapturePage() {
         exifMessage: getExifMessage(exif),
       })
       if (exif.lat && !detectedLat) { setDetectedLat(exif.lat); setDetectedLng(exif.lng) }
-      if (exif.takenAt && !detectedDate) setDetectedDate(exif.takenAt)
+      if (exif.takenAt && !detectedDate) { setDetectedDate(exif.takenAt); setMealType(prev => prev ?? mealTypeFromDate(exif.takenAt)) }
     }
     setPhotos(prev => [...prev, ...newPhotos])
     setStage('form')
@@ -116,6 +120,8 @@ export default function CapturePage() {
         rating_food: detailRatings.food || null,
         rating_service: detailRatings.service || null,
         rating_ambiance: detailRatings.ambiance || null,
+        venue_type: venueType,
+        meal_type: mealType,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
@@ -193,7 +199,7 @@ export default function CapturePage() {
             <PlacesSearch
               value={locationQuery}
               onChange={v => { setLocationQuery(v); setSelectedPlace(null) }}
-              onSelect={p => { setSelectedPlace(p); setLocationQuery(p.name); setDetectedLat(p.lat); setDetectedLng(p.lng) }}
+              onSelect={p => { setSelectedPlace(p); setLocationQuery(p.name); setDetectedLat(p.lat); setDetectedLng(p.lng); setVenueType(prev => prev ?? venueTypeFromGoogle(p.googleTypes)) }}
               selectedPlace={selectedPlace}
             />
           </div>
@@ -208,6 +214,10 @@ export default function CapturePage() {
 
           {/* Ratings */}
           <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+            <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+              <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Category</label>
+              <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} />
+            </div>
             <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
           </div>
 

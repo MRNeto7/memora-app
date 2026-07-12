@@ -9,6 +9,7 @@ import WishlistSheet from '@/components/wishlist/WishlistSheet'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 import Icon, { IconName } from '@/components/ui/Icon'
 import AddToWishlistButton from '@/components/wishlist/AddToWishlistButton'
+import { VENUE_TYPES, MEAL_TYPES, VenueType, MealType } from '@/lib/categories'
 
 interface WishlistItem {
   id: string
@@ -28,6 +29,8 @@ interface WishlistItem {
 export default function PlacesPage() {
   const [tab, setTab] = useState<'memories' | 'wishlist'>('memories')
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'rating'>('date')
+  const [venueFilter, setVenueFilter] = useState<VenueType | null>(null)
+  const [mealFilter, setMealFilter] = useState<MealType | null>(null)
   const [memories, setMemories] = useState<MemoryWithDetails[]>([])
   const [wishlist, setWishlist] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,8 +62,12 @@ export default function PlacesPage() {
     load()
   }, [])
 
-  // Sort and group memories
-  const sortedMemories = [...memories].sort((a, b) => {
+  // Filter, then sort and group
+  const filteredMemories = memories.filter(m =>
+    (!venueFilter || m.venue_type === venueFilter) &&
+    (!mealFilter || m.meal_type === mealFilter)
+  )
+  const sortedMemories = [...filteredMemories].sort((a, b) => {
     if (sortBy === 'name') return (a.venue?.name ?? '').localeCompare(b.venue?.name ?? '')
     if (sortBy === 'rating') return (b.rating ?? 0) - (a.rating ?? 0)
     return new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime()
@@ -117,6 +124,44 @@ export default function PlacesPage() {
                 {label}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Category filters — venue type + meal, single-select toggles */}
+        {tab === 'memories' && memories.length > 1 && (
+          <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {VENUE_TYPES.map(t => (
+              <button key={t.value} onClick={() => setVenueFilter(venueFilter === t.value ? null : t.value)}
+                className="flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1"
+                style={{
+                  background: venueFilter === t.value ? '#0D4F57' : '#fff',
+                  color: venueFilter === t.value ? '#EAE5DD' : '#7D878D',
+                  border: `0.5px solid ${venueFilter === t.value ? '#0D4F57' : 'rgba(13,79,87,0.12)'}`,
+                }}>
+                <span style={{ fontSize: 11 }}>{t.emoji}</span>{t.label}
+              </button>
+            ))}
+            <div className="flex-shrink-0" style={{ width: 1, height: 18, background: 'rgba(13,79,87,0.15)' }} />
+            {MEAL_TYPES.map(t => (
+              <button key={t.value} onClick={() => setMealFilter(mealFilter === t.value ? null : t.value)}
+                className="flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1"
+                style={{
+                  background: mealFilter === t.value ? '#C9A86A' : '#fff',
+                  color: mealFilter === t.value ? '#fff' : '#7D878D',
+                  border: `0.5px solid ${mealFilter === t.value ? '#C9A86A' : 'rgba(13,79,87,0.12)'}`,
+                }}>
+                <span style={{ fontSize: 11 }}>{t.emoji}</span>{t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {(venueFilter || mealFilter) && filteredMemories.length === 0 && !loading && (
+          <div className="rounded-2xl p-6 text-center" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+            <p className="text-sm mb-1" style={{ color: '#0D4F57' }}>No memories match these filters</p>
+            <button onClick={() => { setVenueFilter(null); setMealFilter(null) }} className="text-xs font-semibold" style={{ color: '#C9A86A' }}>
+              Clear filters
+            </button>
           </div>
         )}
         {loading ? (

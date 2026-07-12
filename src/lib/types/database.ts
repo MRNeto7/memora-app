@@ -98,6 +98,8 @@ export type Database = {
           notes: string | null
           rating: number | null
           rating_food: number | null
+          venue_type: string | null
+          meal_type: string | null
           rating_service: number | null
           rating_ambiance: number | null
           is_public: boolean
@@ -114,6 +116,8 @@ export type Database = {
           notes?: string | null
           rating?: number | null
           rating_food?: number | null
+          venue_type?: string | null
+          meal_type?: string | null
           rating_service?: number | null
           rating_ambiance?: number | null
           is_public?: boolean
@@ -130,6 +134,8 @@ export type Database = {
           notes?: string | null
           rating?: number | null
           rating_food?: number | null
+          venue_type?: string | null
+          meal_type?: string | null
           rating_service?: number | null
           rating_ambiance?: number | null
           is_public?: boolean

@@ -10,6 +10,8 @@ import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import Portal from '@/components/ui/Portal'
 import RatingSliders from '@/components/ui/RatingSliders'
+import CategoryPicker from '@/components/ui/CategoryPicker'
+import { VenueType, MealType } from '@/lib/categories'
 import Icon from '@/components/ui/Icon'
 import PlacePhoto from '@/components/ui/PlacePhoto'
 
@@ -35,6 +37,8 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
   const [dishName, setDishName] = useState('')
   const [notes, setNotes] = useState('')
   const [ratings, setRatings] = useState<DetailRatings>({ food: 0, service: 0, ambiance: 0 })
+  const [venueType, setVenueType] = useState<VenueType | null>(null)
+  const [mealType, setMealType] = useState<MealType | null>(null)
   const [photos, setPhotos] = useState<PhotoEntry[]>([])
   const [visitDate, setVisitDate] = useState(new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
@@ -81,6 +85,8 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         rating_food: ratings.food || null,
         rating_service: ratings.service || null,
         rating_ambiance: ratings.ambiance || null,
+        venue_type: venueType,
+        meal_type: mealType,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: new Date(visitDate).toISOString(),
@@ -182,6 +188,10 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
           {/* Ratings */}
           <div className="rounded-2xl p-4 mb-4" style={{ background: '#f5f2ed' }}>
+            <div className="mb-4">
+              <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Category</label>
+              <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} compact />
+            </div>
             <RatingSliders ratings={ratings} onChange={setRatings} />
           </div>
 

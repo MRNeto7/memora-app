@@ -8,6 +8,8 @@ import { getSignedPhotoUrl } from '@/lib/storage'
 import { filterMediaFiles } from '@/lib/uploads'
 import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
+import { VenueType, MealType, venueTypeFromGoogle, mealTypeFromDate, venueTypeLabel, mealTypeLabel } from '@/lib/categories'
+import CategoryPicker from '@/components/ui/CategoryPicker'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
@@ -44,6 +46,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [detectedLat, setDetectedLat] = useState<number | null>(null)
   const [detectedLng, setDetectedLng] = useState<number | null>(null)
   const [detectedDate, setDetectedDate] = useState<Date | null>(null)
+  const [venueType, setVenueType] = useState<VenueType | null>(null)
+  const [mealType, setMealType] = useState<MealType | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   void debounceRef
@@ -74,7 +78,10 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         exifMessage: getExifMessage(exif),
       })
       if (exif.lat && exif.lng && !detectedLat) { setDetectedLat(exif.lat); setDetectedLng(exif.lng) }
-      if (exif.takenAt && !detectedDate) setDetectedDate(exif.takenAt)
+      if (exif.takenAt && !detectedDate) {
+        setDetectedDate(exif.takenAt)
+        setMealType(prev => prev ?? mealTypeFromDate(exif.takenAt))
+      }
     }
 
     setPhotos(prev => [...prev, ...newPhotos])
@@ -106,6 +113,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         rating_food: detailRatings.food || null,
         rating_service: detailRatings.service || null,
         rating_ambiance: detailRatings.ambiance || null,
+        venue_type: venueType,
+        meal_type: mealType,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: detectedDate?.toISOString() ?? new Date().toISOString(),
@@ -196,7 +205,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               <div className="mb-3">
                 <PlacesSearch value={locationQuery}
                   onChange={(v) => { setLocationQuery(v); setLocationName(v); setSelectedPlace(null) }}
-                  onSelect={(p) => { setSelectedPlace(p); setLocationName(p.name); setLocationQuery(p.name); setDetectedLat(p.lat); setDetectedLng(p.lng) }}
+                  onSelect={(p) => { setSelectedPlace(p); setLocationName(p.name); setLocationQuery(p.name); setDetectedLat(p.lat); setDetectedLng(p.lng); setVenueType(prev => prev ?? venueTypeFromGoogle(p.googleTypes)) }}
                   selectedPlace={selectedPlace} />
               </div>
 
@@ -207,6 +216,13 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               </div>
 
               <div className="mb-4 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+                <div className="mb-4">
+                  <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>
+                    Category
+                    {(venueType || mealType) && <span className="ml-2" style={{ color: '#0D4F57' }}>✓ suggested — tap to change</span>}
+                  </label>
+                  <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} />
+                </div>
                 <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
               </div>
 
@@ -275,6 +291,8 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
     ambiance: memory.rating_ambiance ?? 0,
   })
   const [saving, setSaving] = useState(false)
+  const [editVenueType, setEditVenueType] = useState<VenueType | null>((memory.venue_type as VenueType) ?? null)
+  const [editMealType, setEditMealType] = useState<MealType | null>((memory.meal_type as MealType) ?? null)
 
   useEffect(() => {
     if (memory.venue?.google_place_id) {
@@ -293,6 +311,8 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
       rating_food: editRatings.food || null,
       rating_service: editRatings.service || null,
       rating_ambiance: editRatings.ambiance || null,
+      venue_type: editVenueType,
+      meal_type: editMealType,
     }).eq('id', memory.id)
     setSaving(false); setEditing(false); onUpdate()
   }
@@ -319,6 +339,10 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
             className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
         </div>
         <div className="mb-5 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+          <div className="mb-4">
+            <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Category</label>
+            <CategoryPicker venueType={editVenueType} mealType={editMealType} onVenueType={setEditVenueType} onMealType={setEditMealType} />
+          </div>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
         <button onClick={handleSaveEdit} disabled={saving} className="w-full py-3 rounded-2xl text-white font-semibold text-sm"
@@ -375,6 +399,16 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
           <span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span>
           <p className="text-xs" style={{ color: '#7D878D' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
           {priceStr && <><span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span><span className="text-xs" style={{ color: '#7D878D' }}>{priceStr}</span></>}
+          {venueTypeLabel(memory.venue_type) && (
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(13,79,87,0.08)', color: '#0D4F57' }}>
+              {venueTypeLabel(memory.venue_type)!.emoji} {venueTypeLabel(memory.venue_type)!.label}
+            </span>
+          )}
+          {mealTypeLabel(memory.meal_type) && (
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(201,168,106,0.14)', color: '#a8863e' }}>
+              {mealTypeLabel(memory.meal_type)!.emoji} {mealTypeLabel(memory.meal_type)!.label}
+            </span>
+          )}
           {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(13,79,87,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? '#0D4F57' : '#a32d2d' }}>
               {venueDetails.openNow ? 'Open' : 'Closed'}

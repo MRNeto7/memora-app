@@ -9,6 +9,8 @@ import { compressImage } from '@/lib/images'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, FREE_BULK_LIMIT } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
+import CategoryPicker from '@/components/ui/CategoryPicker'
+import { VenueType, MealType, mealTypeFromDate } from '@/lib/categories'
 import Icon from '@/components/ui/Icon'
 import ProUpsell from '@/components/pro/ProUpsell'
 import Portal from '@/components/ui/Portal'
@@ -34,6 +36,8 @@ interface MemoryGroup {
   dishName: string
   notes: string
   ratings: DetailRatings
+  venueType: VenueType | null
+  mealType: MealType | null
   confirmed: boolean
   saving: boolean
   saved: boolean
@@ -83,6 +87,8 @@ function makeGroup(photos: PhotoItem[]): MemoryGroup {
     dishName: '',
     notes: '',
     ratings: { food: 0, service: 0, ambiance: 0 },
+    venueType: null,
+    mealType: mealTypeFromDate(date),
     confirmed: false,
     saving: false,
     saved: false,
@@ -296,6 +302,8 @@ export default function BulkUploadPage() {
         rating_food: group.ratings.food || null,
         rating_service: group.ratings.service || null,
         rating_ambiance: group.ratings.ambiance || null,
+        venue_type: group.venueType,
+        meal_type: group.mealType,
         is_public: false,
         public_lat: fuzzed?.lat ?? null, public_lng: fuzzed?.lng ?? null,
         visited_at: group.date.toISOString(),
@@ -628,6 +636,10 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
 
             {/* Ratings */}
             <div className="mb-3 rounded-xl p-3" style={{ background: '#f5f2ed' }}>
+              <div className="mb-3">
+                <CategoryPicker compact venueType={group.venueType} mealType={group.mealType}
+                  onVenueType={v => onUpdate({ venueType: v })} onMealType={m => onUpdate({ mealType: m })} />
+              </div>
               <RatingSliders ratings={group.ratings} onChange={r => onUpdate({ ratings: r })} title="Rate it (optional)" />
             </div>
 
