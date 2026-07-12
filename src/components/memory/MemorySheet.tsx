@@ -224,7 +224,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         {isNew && (
           <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
             <button onClick={handleSave} disabled={saving || !locationName.trim()}
-              className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
+              className="press w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
               style={{ background: '#0D4F57', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
               {saving ? 'Saving…' : '✓ Save memory'}
             </button>

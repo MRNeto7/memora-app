@@ -74,6 +74,9 @@ export default function PlacesPage() {
       }, {} as Record<string, MemoryWithDetails[]>)
     : { [sortBy === 'name' ? 'A–Z' : 'Top rated']: sortedMemories }
 
+  // Flat display order → per-card stagger delay on first render
+  const memoryOrder = new Map(sortedMemories.map((m, i) => [m.id, i]))
+
   return (
     <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
 
@@ -108,7 +111,7 @@ export default function PlacesPage() {
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             {([['date', 'Date'], ['name', 'Name'], ['rating', 'Rating']] as const).map(([opt, label]) => (
               <button key={opt} onClick={() => setSortBy(opt)}
-                className="glass flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
+                className="glass press flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
                 style={{
                   background: sortBy === opt ? '#0D4F57' : undefined,
                   color: sortBy === opt ? '#EAE5DD' : '#7D878D',
@@ -146,7 +149,7 @@ export default function PlacesPage() {
                   </div>
                   <div className="flex flex-col gap-3">
                     {items.map(m => (
-                      <MemoryCard key={m.id} memory={m} onClick={() => setSelectedMemory(m)} />
+                      <MemoryCard key={m.id} memory={m} index={memoryOrder.get(m.id) ?? 0} onClick={() => setSelectedMemory(m)} />
                     ))}
                   </div>
                 </div>
@@ -160,8 +163,8 @@ export default function PlacesPage() {
               <EmptyState icon="bookmark" title="Your wishlist is empty" sub="Add restaurants from the map or search for places to visit" />
             ) : (
               <div className="flex flex-col gap-3">
-                {wishlist.map(item => (
-                  <WishlistCard key={item.id} item={item} onClick={() => setSelectedWishlist(item)} onVisited={() => {}} onRemove={async () => {
+                {wishlist.map((item, i) => (
+                  <WishlistCard key={item.id} item={item} index={i} onClick={() => setSelectedWishlist(item)} onVisited={() => {}} onRemove={async () => {
                     await supabase.from('wishlists').delete().eq('id', item.id)
                     fetchAll()
                   }} />
@@ -172,7 +175,7 @@ export default function PlacesPage() {
             {/* Add to wishlist button */}
             <button
               onClick={() => setShowAddWishlist(true)}
-              className="w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
+              className="press w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
               style={{ background: '#0D4F57', color: '#EAE5DD' }}>
               <span style={{ fontSize: 18, color: '#C9A86A' }}>+</span>
               Add a restaurant
@@ -195,7 +198,7 @@ export default function PlacesPage() {
   )
 }
 
-function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: () => void }) {
+function MemoryCard({ memory, index, onClick }: { memory: MemoryWithDetails; index: number; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const supabase = createClient()
   const firstPhoto = memory.memory_photos?.[0]
@@ -206,7 +209,8 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
   }, [firstPhoto?.storage_path])
 
   return (
-    <button onClick={onClick} className="glass-card w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform">
+    <button onClick={onClick} className="glass-card rise w-full text-left rounded-2xl overflow-hidden"
+      style={{ animationDelay: `${Math.min(index, 12) * 0.03}s` }}>
       <div className="flex">
         <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
@@ -248,8 +252,9 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
   )
 }
 
-function WishlistCard({ item, onClick, onRemove }: {
+function WishlistCard({ item, index, onClick, onRemove }: {
   item: WishlistItem
+  index: number
   onClick: () => void
   onVisited: () => void
   onRemove: () => void
@@ -258,7 +263,8 @@ function WishlistCard({ item, onClick, onRemove }: {
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden">
+    <div className="glass-card rise rounded-2xl overflow-hidden"
+      style={{ animationDelay: `${Math.min(index, 12) * 0.03}s` }}>
       <button onClick={onClick} className="w-full text-left">
         <div className="flex">
           {/* Restaurant photo */}

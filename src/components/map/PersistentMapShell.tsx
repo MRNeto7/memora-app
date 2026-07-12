@@ -225,13 +225,13 @@ export default function PersistentMapShell() {
         {/* Toggles */}
         <div className="flex gap-1.5 pointer-events-auto">
           <button onClick={() => setShowMemories(v => !v)}
-            className="glass-pill flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
             style={{ background: showMemories ? '#0D4F57' : undefined, color: showMemories ? '#EAE5DD' : '#7D878D' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
             Memories
           </button>
           <button onClick={() => setShowWishlist(v => !v)}
-            className="glass-pill flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
             style={{ background: showWishlist ? '#C9A86A' : undefined, color: showWishlist ? '#fff' : '#7D878D' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
             Wishlist
