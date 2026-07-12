@@ -14,6 +14,7 @@ import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
 import TagFriendsSection, { useFriends, FriendChips } from './TagFriends'
+import LinkedPhotos from './LinkedPhotos'
 import Lightbox from '@/components/media/Lightbox'
 
 interface PlaceSuggestion {
@@ -475,6 +476,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
             {shown.notes && <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>{shown.notes}</p>}
           </div>
         )}
+
+        {/* Photos added on linked copies (e.g. the friend you tagged) */}
+        <LinkedPhotos memory={memory} onUpdate={onUpdate} />
 
         {/* Tag friends — invites them to save their own linked copy */}
         <TagFriendsSection memoryId={memory.id} />
