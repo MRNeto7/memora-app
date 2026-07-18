@@ -42,7 +42,7 @@ export default function UserMenu({ email }: UserMenuProps) {
             <button
               onClick={handleSignOut}
               className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-50"
-              style={{ color: '#a32d2d' }}
+              style={{ color: 'var(--danger)' }}
             >
               Sign out
             </button>

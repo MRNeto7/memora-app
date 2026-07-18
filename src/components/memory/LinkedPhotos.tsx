@@ -78,20 +78,20 @@ export default function LinkedPhotos({ memory, onUpdate }: {
   const names = [...new Set(available.map(a => a.ownerName))].join(', ')
 
   return (
-    <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed', borderLeft: '3px solid #C9A86A' }}>
-      <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#0D4F57' }}>
-        <Icon name="image" size={13} color="#C9A86A" />
+    <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)', borderLeft: '3px solid var(--gold-500)' }}>
+      <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--teal-600)' }}>
+        <Icon name="image" size={13} color="var(--gold-500)" />
         {names} added {available.length === 1 ? 'a photo' : `${available.length} photos`} you don’t have
       </p>
       <div className="flex gap-2 overflow-x-auto pb-1">
         {available.map(entry => (
           <div key={entry.photo.id} className="flex-shrink-0" style={{ width: 72 }}>
-            <div className="rounded-xl overflow-hidden" style={{ width: 72, height: 72, background: '#EAE5DD' }}>
+            <div className="rounded-xl overflow-hidden" style={{ width: 72, height: 72, background: 'var(--stone-400)' }}>
               <LinkedThumb path={entry.photo.storage_path} />
             </div>
             <button onClick={() => addToMine(entry)} disabled={addingId !== null}
               className="press w-full mt-1 py-1 rounded-lg text-xs font-semibold"
-              style={{ background: '#C9A86A', color: '#fff', opacity: addingId === entry.photo.id ? 0.6 : 1 }}>
+              style={{ background: 'var(--gold-500)', color: '#fff', opacity: addingId === entry.photo.id ? 0.6 : 1 }}>
               {addingId === entry.photo.id ? '…' : '+ Add'}
             </button>
           </div>
@@ -108,6 +108,6 @@ function LinkedThumb({ path }: { path: string }) {
     getSignedPhotoUrl(supabase, path).then(u => { if (u) setUrl(u) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
-  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
+  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: 'var(--stone-400)' }} />
   return <img src={url} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
 }

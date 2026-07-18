@@ -32,8 +32,11 @@ export default function Icon({
   style?: React.CSSProperties
 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color}
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    // stroke/fill via CSS, not attributes — CSS accepts var(--token) colors,
+    // SVG presentation attributes silently don't.
+    <svg width={size} height={size} viewBox="0 0 24 24"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"
+      style={{ fill, stroke: color, ...style }}>
       {PATHS[name]}
     </svg>
   )

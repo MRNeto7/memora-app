@@ -174,7 +174,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             <>
               <div className="flex items-center justify-end px-4 pt-3 pb-1 flex-shrink-0">
                 <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+                  style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
               </div>
               <MemoryDetailView memory={memory} onUpdate={onUpdate} />
             </>
@@ -184,9 +184,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           {isNew && (
             <div className="px-5 pt-5 pb-4">
               <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Save a memory</h2>
+              <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Save a memory</h2>
               <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+                style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
             </div>
 
               {/* Photos */}
@@ -201,21 +201,21 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                     </div>
                   ))}
                   <label className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
-                    style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}>
-                    <Icon name="camera" size={photos.length === 0 ? 24 : 18} color="#C9A86A" />
-                    <span className="text-xs mt-1 text-center px-1" style={{ color: '#C9A86A', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
+                    style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: 'var(--stone-200)', border: '2px dashed var(--gold-500)' }}>
+                    <Icon name="camera" size={photos.length === 0 ? 24 : 18} color="var(--gold-500)" />
+                    <span className="text-xs mt-1 text-center px-1" style={{ color: 'var(--gold-500)', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
                     <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handlePhotoSelect} />
                   </label>
                 </div>
               </div>
 
               {exifMessages.map((msg, i) => (
-                <div key={i} className="rounded-xl px-3 py-2.5 mb-3 text-xs leading-relaxed" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid #C9A86A' }}>{msg}</div>
+                <div key={i} className="rounded-xl px-3 py-2.5 mb-3 text-xs leading-relaxed" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid var(--gold-500)' }}>{msg}</div>
               ))}
 
               <div className="flex gap-2 mb-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#f0ede8', color: '#0D4F57' }}>
-                  <Icon name="clock" size={12} color="#0D4F57" />
+                <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: 'var(--stone-300)', color: 'var(--teal-600)' }}>
+                  <Icon name="clock" size={12} color="var(--teal-600)" />
                   {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   {detectedDate && <span className="ml-1 opacity-60">auto</span>}
                 </span>
@@ -229,25 +229,25 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               </div>
 
               <div className="mb-3">
-                <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
                 <input type="text" placeholder="e.g. Truffle pasta" value={dishName} onChange={e => setDishName(e.target.value)}
-                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
               </div>
 
-              <div className="mb-4 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+              <div className="mb-4 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
                 <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
               </div>
 
               <div className="mb-4">
-                <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
                 <textarea placeholder="What made it special?" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
               </div>
 
               {/* Tag friends — they'll be invited to save their own copy */}
               {friends.length > 0 && (
                 <div className="mb-4">
-                  <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Who was there? <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                  <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Who was there? <span style={{ fontWeight: 400 }}>(optional)</span></label>
                   <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
                     setTagIds(prev => {
                       const next = new Set(prev)
@@ -258,7 +258,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                 </div>
               )}
 
-              {saveError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>{saveError}</div>}
+              {saveError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{saveError}</div>}
             </div>
           )}
         </div>
@@ -268,7 +268,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
             <button onClick={handleSave} disabled={saving || !locationName.trim()}
               className="press w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
-              style={{ background: '#0D4F57', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
+              style={{ background: 'var(--teal-600)', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
               {saving ? 'Saving…' : '✓ Save memory'}
             </button>
           </div>
@@ -288,9 +288,9 @@ function StarRow({ value, max = 5 }: { value: number; max?: number }) {
         return (
           <div key={i} style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
             {/* Grey base */}
-            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: '#d4cdc3' }}>★</span>
+            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: 'var(--stone-500)' }}>★</span>
             {/* Gold fill — clip with overflow hidden */}
-            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: '#C9A86A', overflow: 'hidden', width: `${fill}%`, whiteSpace: 'nowrap' }}>★</span>
+            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: 'var(--gold-500)', overflow: 'hidden', width: `${fill}%`, whiteSpace: 'nowrap' }}>★</span>
           </div>
         )
       })}
@@ -357,24 +357,24 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
     return (
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Edit memory</h3>
-          <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-lg" style={{ color: '#7D878D', background: '#f5f2ed' }}>Cancel</button>
+          <h3 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Edit memory</h3>
+          <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-lg" style={{ color: 'var(--slate)', background: 'var(--stone-200)' }}>Cancel</button>
         </div>
         <div className="mb-3">
-          <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Dish name</label>
+          <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish name</label>
           <input type="text" value={editDish} onChange={e => setEditDish(e.target.value)} placeholder="What did you have?"
-            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
         </div>
         <div className="mb-4">
-          <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Notes</label>
+          <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes</label>
           <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} placeholder="What made it special?" rows={3}
-            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
         </div>
-        <div className="mb-5 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+        <div className="mb-5 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
         <button onClick={handleSaveEdit} className="press w-full py-3 rounded-2xl text-white font-semibold text-sm"
-          style={{ background: '#0D4F57' }}>Save changes</button>
+          style={{ background: 'var(--teal-600)' }}>Save changes</button>
       </div>
     )
   }
@@ -383,24 +383,24 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
     <>
       {/* Photos — square crop, natural and clean */}
       {photos.length > 0 && (
-        <div className="relative overflow-hidden cursor-pointer" style={{ background: '#f5f2ed' }}
+        <div className="relative overflow-hidden cursor-pointer" style={{ background: 'var(--stone-200)' }}
           onClick={() => setLightboxOpen(true)}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
-            <div className="flex items-center justify-center gap-2 py-2" style={{ background: '#f5f2ed' }}>
+            <div className="flex items-center justify-center gap-2 py-2" style={{ background: 'var(--stone-200)' }}>
               {currentPhoto > 0 && (
                 <button onClick={() => setCurrentPhoto(p => p - 1)}
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>‹</button>
+                  style={{ background: 'rgba(13,79,87,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>‹</button>
               )}
               {photos.map((_, i) => (
                 <button key={i} onClick={() => setCurrentPhoto(i)} className="rounded-full transition-all"
-                  style={{ width: i === currentPhoto ? 18 : 6, height: 6, background: i === currentPhoto ? '#0D4F57' : '#b0babe' }} />
+                  style={{ width: i === currentPhoto ? 18 : 6, height: 6, background: i === currentPhoto ? 'var(--teal-600)' : 'var(--slate-light)' }} />
               ))}
               {currentPhoto < photos.length - 1 && (
                 <button onClick={() => setCurrentPhoto(p => p + 1)}
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>›</button>
+                  style={{ background: 'rgba(13,79,87,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>›</button>
               )}
             </div>
           )}
@@ -410,9 +410,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
       <div className="px-5 pt-4 pb-5">
         {/* Title row */}
         <div className="flex items-start justify-between mb-1">
-          <h2 className="text-lg font-semibold leading-tight flex-1 mr-3" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Memory'}</h2>
+          <h2 className="text-lg font-semibold leading-tight flex-1 mr-3" style={{ color: 'var(--teal-600)' }}>{memory.venue?.name ?? 'Memory'}</h2>
           <button onClick={() => setEditing(true)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
-            style={{ background: '#f5f2ed', color: '#7D878D' }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Edit
           </button>
@@ -423,12 +423,12 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
 
         {/* Meta */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          {memory.venue?.address && <p className="text-xs" style={{ color: '#7D878D' }}>{memory.venue.address}</p>}
-          <span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span>
-          <p className="text-xs" style={{ color: '#7D878D' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-          {priceStr && <><span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span><span className="text-xs" style={{ color: '#7D878D' }}>{priceStr}</span></>}
+          {memory.venue?.address && <p className="text-xs" style={{ color: 'var(--slate)' }}>{memory.venue.address}</p>}
+          <span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span>
+          <p className="text-xs" style={{ color: 'var(--slate)' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+          {priceStr && <><span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span><span className="text-xs" style={{ color: 'var(--slate)' }}>{priceStr}</span></>}
           {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(13,79,87,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? '#0D4F57' : '#a32d2d' }}>
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(13,79,87,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? 'var(--teal-600)' : 'var(--danger)' }}>
               {venueDetails.openNow ? 'Open' : 'Closed'}
             </span>
           )}
@@ -436,34 +436,34 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
 
         {/* Rating — overall is out of 10; stars show it on a 5-star scale */}
         {shown.rating && (
-          <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
+          <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
             <div className="flex items-center gap-1.5 flex-1">
               <StarRow value={shown.rating / 2} max={5} />
-              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{shown.rating}/10</span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--gold-500)' }}>{shown.rating}/10</span>
             </div>
             {venueDetails?.rating && (
-              <span className="text-xs" style={{ color: '#7D878D' }}>Google {venueDetails.rating}★</span>
+              <span className="text-xs" style={{ color: 'var(--slate)' }}>Google {venueDetails.rating}★</span>
             )}
           </div>
         )}
 
         {/* Breakdown bars — only categories the user actually rated */}
         {(shown.rating_food || shown.rating_service || shown.rating_ambiance) && (
-          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: '#0D4F57' }}>Breakdown</p>
+          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--teal-600)' }}>Breakdown</p>
             {([
               ['Food & drink', shown.rating_food],
               ['Service', shown.rating_service],
               ['Ambiance', shown.rating_ambiance],
             ] as const).filter(([, val]) => val).map(([label, val]) => (
               <div key={label} className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs w-20 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
+                <span className="text-xs w-20 flex-shrink-0" style={{ color: 'var(--slate)' }}>{label}</span>
                 <div className="flex gap-0.5 flex-1">
                   {Array.from({ length: 10 }, (_, i) => (
-                    <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < val! ? '#C9A86A' : '#d4cdc3', opacity: i < val! ? 1 : 0.4 }} />
+                    <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < val! ? 'var(--gold-500)' : 'var(--stone-500)', opacity: i < val! ? 1 : 0.4 }} />
                   ))}
                 </div>
-                <span className="text-xs font-medium w-4 text-right" style={{ color: '#C9A86A' }}>{val}</span>
+                <span className="text-xs font-medium w-4 text-right" style={{ color: 'var(--gold-500)' }}>{val}</span>
               </div>
             ))}
           </div>
@@ -471,9 +471,9 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
 
         {/* Dish + notes inline */}
         {(shown.dish_name || shown.notes) && (
-          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
-            {shown.dish_name && <p className="text-xs font-semibold mb-0.5" style={{ color: '#0D4F57' }}>{shown.dish_name}</p>}
-            {shown.notes && <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>{shown.notes}</p>}
+          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+            {shown.dish_name && <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--teal-600)' }}>{shown.dish_name}</p>}
+            {shown.notes && <p className="text-xs leading-relaxed" style={{ color: 'var(--slate)' }}>{shown.notes}</p>}
           </div>
         )}
 
@@ -488,13 +488,13 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           {venueDetails?.website && (
             <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
               className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-              style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Website
             </a>
           )}
           {venueDetails?.phone && (
-            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
@@ -503,7 +503,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
               ?? `https://www.google.com/search?q=${encodeURIComponent(((memory.venue?.name ?? '') + ' ' + (memory.venue?.address ?? '')).trim())}`}
             target="_blank" rel="noopener noreferrer"
             className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-            style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             {venueDetails?.website ? 'Website' : 'Search'}
           </a>
@@ -540,7 +540,7 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
     getSignedPhotoUrl(supabase, storagePath).then(u => { if (u) setUrl(u) })
   }, [storagePath])
 
-  if (!url) return <div className="animate-pulse" style={{ height: 200, background: '#EAE5DD' }} />
+  if (!url) return <div className="animate-pulse" style={{ height: 200, background: 'var(--stone-400)' }} />
 
   if (isVideo) {
     return (
@@ -554,7 +554,7 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
     <img
       src={url}
       alt=""
-      style={{ width: '100%', height: 'auto', maxHeight: '45vh', objectFit: 'contain', background: '#f5f2ed', display: 'block' }}
+      style={{ width: '100%', height: 'auto', maxHeight: '45vh', objectFit: 'contain', background: 'var(--stone-200)', display: 'block' }}
     />
   )
 }
@@ -579,10 +579,10 @@ function PublicToggle({ memoryId, initialValue, venue, onUpdate }: { memoryId: s
   return (
     <div className="flex items-center gap-2 mb-3">
       <button onClick={toggle}
-        style={{ width: 36, height: 20, borderRadius: 10, background: isPublic ? '#0D4F57' : '#d4cdc3', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+        style={{ width: 36, height: 20, borderRadius: 10, background: isPublic ? 'var(--teal-600)' : 'var(--stone-500)', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
         <div style={{ position: 'absolute', top: 2, left: isPublic ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
       </button>
-      <span className="text-xs" style={{ color: isPublic ? '#0D4F57' : '#7D878D' }}>
+      <span className="text-xs" style={{ color: isPublic ? 'var(--teal-600)' : 'var(--slate)' }}>
         {isPublic ? 'Shared — friends you’ve added can see this' : 'Private — only you can see this'}
       </span>
     </div>

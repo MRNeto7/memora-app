@@ -185,18 +185,18 @@ export default function PersistentMapShell() {
             border: '0.5px solid rgba(201,168,106,0.4)',
             boxShadow: '0 8px 28px rgba(13,79,87,0.35)',
           }}>
-          <Icon name={bannerItem.kind === 'friend_request' ? 'friend-add' : 'camera'} size={22} color="#C9A86A" strokeWidth={1.8} />
+          <Icon name={bannerItem.kind === 'friend_request' ? 'friend-add' : 'camera'} size={22} color="var(--gold-500)" strokeWidth={1.8} />
 
           <span className="flex-1">
             {bannerItem.kind === 'friend_request' && (
               <>
-                <span className="block text-xs font-semibold" style={{ color: '#C9A86A' }}>Friend request</span>
+                <span className="block text-xs font-semibold" style={{ color: 'var(--gold-500)' }}>Friend request</span>
                 <span className="block text-sm font-semibold text-white">{bannerItem.name} wants to add you</span>
               </>
             )}
             {bannerItem.kind === 'anniversary' && (
               <>
-                <span className="block text-xs font-semibold" style={{ color: '#C9A86A' }}>
+                <span className="block text-xs font-semibold" style={{ color: 'var(--gold-500)' }}>
                   On this day · {bannerItem.yearsAgo} {bannerItem.yearsAgo === 1 ? 'year' : 'years'} ago
                 </span>
                 <span className="block text-sm font-semibold text-white">{bannerItem.title}</span>
@@ -219,21 +219,21 @@ export default function PersistentMapShell() {
         {/* Logo + count */}
         <div className="glass-pill flex items-center gap-2 px-3 py-1.5 rounded-2xl pointer-events-auto">
           <img src="/logo.png" alt="Mimora" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover' }} />
-          <span className="font-semibold text-sm" style={{ color: '#0D4F57' }}>Mimora</span>
-          <span className="text-xs" style={{ color: '#7D878D' }}>· {memories.length}</span>
+          <span className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>Mimora</span>
+          <span className="text-xs" style={{ color: 'var(--slate)' }}>· {memories.length}</span>
         </div>
         {/* Toggles */}
         <div className="flex gap-1.5 pointer-events-auto">
           <button onClick={() => setShowMemories(v => !v)}
             className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showMemories ? '#0D4F57' : undefined, color: showMemories ? '#EAE5DD' : '#7D878D' }}>
-            <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? '#C9A86A' : '#b0babe' }} />
+            style={{ background: showMemories ? 'var(--teal-600)' : undefined, color: showMemories ? 'var(--stone-400)' : 'var(--slate)' }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? 'var(--gold-500)' : 'var(--slate-light)' }} />
             Memories
           </button>
           <button onClick={() => setShowWishlist(v => !v)}
             className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showWishlist ? '#C9A86A' : undefined, color: showWishlist ? '#fff' : '#7D878D' }}>
-            <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : '#b0babe' }} />
+            style={{ background: showWishlist ? 'var(--gold-500)' : undefined, color: showWishlist ? '#fff' : 'var(--slate)' }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : 'var(--slate-light)' }} />
             Wishlist
           </button>
         </div>
@@ -317,7 +317,7 @@ function ClusteredMarkers({
             const el = document.createElement('div')
             el.style.cssText = `
               width: 44px; height: 44px; border-radius: 50%;
-              background: #0D4F57; border: 3px solid #C9A86A;
+              background: var(--teal-600); border: 3px solid var(--gold-500);
               display: flex; align-items: center; justify-content: center;
               color: #fff; font-size: 13px; font-weight: 600;
               box-shadow: 0 4px 12px rgba(13,79,87,0.4);
@@ -368,22 +368,22 @@ function WishlistPin({ name, isSelected }: { name: string; isSelected: boolean }
     <div className="flex flex-col items-center" style={{ cursor: 'pointer' }}>
       <div style={{
         width: size, height: size, borderRadius: '50%',
-        background: isSelected ? '#C9A86A' : '#fff',
-        border: `3px solid ${isSelected ? '#fff' : '#C9A86A'}`,
+        background: isSelected ? 'var(--gold-500)' : '#fff',
+        border: `3px solid ${isSelected ? '#fff' : 'var(--gold-500)'}`,
         boxShadow: isSelected ? '0 4px 16px rgba(201,168,106,0.5)' : '0 2px 8px rgba(201,168,106,0.4)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'all 0.2s ease',
       }}>
-        <svg width={isSelected ? 22 : 18} height={isSelected ? 22 : 18} viewBox="0 0 24 24" fill={isSelected ? '#fff' : '#C9A86A'}>
+        <svg width={isSelected ? 22 : 18} height={isSelected ? 22 : 18} viewBox="0 0 24 24" fill={isSelected ? '#fff' : 'var(--gold-500)'}>
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
         </svg>
       </div>
-      <div style={{ width: 2, height: 6, background: '#C9A86A', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C9A86A' }} />
+      <div style={{ width: 2, height: 6, background: 'var(--gold-500)', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--gold-500)' }} />
       <div style={{
-        marginTop: 2, background: isSelected ? '#C9A86A' : 'rgba(255,255,255,0.95)', borderRadius: 6,
+        marginTop: 2, background: isSelected ? 'var(--gold-500)' : 'rgba(255,255,255,0.95)', borderRadius: 6,
         padding: '2px 6px', fontSize: 10, fontWeight: 600,
-        color: isSelected ? '#fff' : '#0D4F57',
+        color: isSelected ? '#fff' : 'var(--teal-600)',
         maxWidth: 90, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         transition: 'all 0.2s ease',

@@ -63,9 +63,9 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
   }
 
   const priorityOptions = [
-    { value: 1, label: 'Low', color: '#7D878D' },
-    { value: 2, label: 'Medium', color: '#C9A86A' },
-    { value: 3, label: 'Must visit', color: '#0D4F57' },
+    { value: 1, label: 'Low', color: 'var(--slate)' },
+    { value: 2, label: 'Medium', color: 'var(--gold-500)' },
+    { value: 3, label: 'Must visit', color: 'var(--teal-600)' },
   ]
 
   const canSave = !!(selectedPlace || locationQuery.trim())
@@ -83,12 +83,12 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
         <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
           <div />
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+            style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
-          <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Add to wishlist</h2>
+          <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Add to wishlist</h2>
           
         </div>
 
@@ -107,13 +107,13 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
 
           {/* Priority */}
           <div className="mb-4">
-            <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Priority</label>
+            <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Priority</label>
             <div className="flex gap-2">
               {priorityOptions.map((opt) => (
                 <button key={opt.value} onClick={() => setPriority(opt.value)}
                   className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all"
                   style={{
-                    background: priority === opt.value ? opt.color : '#f5f2ed',
+                    background: priority === opt.value ? opt.color : 'var(--stone-200)',
                     color: priority === opt.value ? '#fff' : opt.color,
                   }}>
                   {opt.label}
@@ -124,7 +124,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
 
           {/* Notes */}
           <div className="mb-2">
-            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>
+            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>
               Why do you want to go? <span style={{ fontWeight: 400 }}>(optional)</span>
             </label>
             <textarea
@@ -133,13 +133,13 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
               rows={3}
               placeholder="Friend recommended it, seen it on Instagram…"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none resize-none"
-              style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }}
+              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }}
             />
           </div>
 
           {error && (
             <div className="rounded-xl px-4 py-3 mt-2 text-sm"
-              style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>
+              style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>
               {error}
             </div>
           )}
@@ -151,11 +151,11 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
             onClick={handleSave}
             disabled={saving || !canSave}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-            style={{ background: '#0D4F57', color: '#EAE5DD', opacity: saving || !canSave ? 0.5 : 1 }}
+            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving || !canSave ? 0.5 : 1 }}
           >
             {saving ? 'Saving…' : '✓ Add to wishlist'}
           </button>
-          {!canSave && <p className="text-center text-xs mt-2" style={{ color: '#b0babe' }}>Search for a restaurant first</p>}
+          {!canSave && <p className="text-center text-xs mt-2" style={{ color: 'var(--slate-light)' }}>Search for a restaurant first</p>}
         </div>
       </div>
     </div>

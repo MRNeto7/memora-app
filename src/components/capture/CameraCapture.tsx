@@ -34,7 +34,7 @@ export default function CameraCapture({ onFiles, onClose }: {
         {/* Library */}
         <label className="cursor-pointer mt-12 flex items-center gap-2 px-5 py-2.5 rounded-full"
           style={{ background: 'rgba(255,255,255,0.1)' }}>
-          <Icon name="image" size={18} color="#C9A86A" />
+          <Icon name="image" size={18} color="var(--gold-500)" />
           <span className="text-sm" style={{ color: '#fff' }}>Choose from library</span>
           <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => onFiles(e.target.files)} />
         </label>

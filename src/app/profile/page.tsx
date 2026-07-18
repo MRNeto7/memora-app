@@ -102,12 +102,12 @@ export default function ProfilePage() {
   const displayLabel = displayName || email.split('@')[0]
 
   return (
-    <div className="page-enter min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+    <div className="page-enter min-h-screen" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
       {/* Hero header */}
       <div className="page-header px-5 pb-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-semibold flex-shrink-0"
-            style={{ background: '#C9A86A', color: '#fff', letterSpacing: 1 }}>
+            style={{ background: 'var(--gold-500)', color: '#fff', letterSpacing: 1 }}>
             {initials}
           </div>
           <div>
@@ -134,9 +134,9 @@ export default function ProfilePage() {
         {loadError && (
           <div className="rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
             style={{ background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)' }}>
-            <p className="text-xs font-medium" style={{ color: '#a32d2d' }}>Couldn&apos;t load your profile. Check your connection.</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>Couldn&apos;t load your profile. Check your connection.</p>
             <button onClick={retryFetch} className="text-xs font-semibold px-3 py-1.5 rounded-xl flex-shrink-0"
-              style={{ background: '#a32d2d', color: '#fff' }}>
+              style={{ background: 'var(--danger)', color: '#fff' }}>
               Retry
             </button>
           </div>
@@ -145,9 +145,9 @@ export default function ProfilePage() {
         {/* Favourite place */}
         <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
-            <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>Favourite place</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>Favourite place</p>
             <button onClick={() => setShowVenuePicker(!showVenuePicker)}
-              className="text-xs px-3 py-1 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+              className="text-xs px-3 py-1 rounded-lg" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
               {favouriteVenue ? 'Change' : 'Select'}
             </button>
           </div>
@@ -155,16 +155,16 @@ export default function ProfilePage() {
           {showVenuePicker && (
             <div className="px-4 pb-3" onClick={(e) => e.stopPropagation()}>
               {venueOptions.length === 0 ? (
-                <p className="text-xs" style={{ color: '#7D878D' }}>Save some memories first</p>
+                <p className="text-xs" style={{ color: 'var(--slate)' }}>Save some memories first</p>
               ) : (
                 <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
                   {venueOptions.map(v => (
                     <button key={v.id}
                       onClick={(e) => { e.stopPropagation(); selectFavourite(v) }}
                       className="text-left px-3 py-2 rounded-xl text-sm transition-colors hover:bg-gray-50"
-                      style={{ border: favouriteVenue?.id === v.id ? '1.5px solid #0D4F57' : '1px solid #f0ede8', color: '#0D4F57', width: '100%' }}>
+                      style={{ border: favouriteVenue?.id === v.id ? '1.5px solid var(--teal-600)' : '1px solid var(--stone-300)', color: 'var(--teal-600)', width: '100%' }}>
                       <p className="font-medium text-sm">{v.name}</p>
-                      {v.address && <p className="text-xs truncate" style={{ color: '#7D878D' }}>{v.address}</p>}
+                      {v.address && <p className="text-xs truncate" style={{ color: 'var(--slate)' }}>{v.address}</p>}
                     </button>
                   ))}
                 </div>
@@ -176,16 +176,16 @@ export default function ProfilePage() {
             <div className="px-4 pb-4">
               {favouriteVenue ? (
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#f5f2ed' }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A86A"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>{favouriteVenue.name}</p>
-                    {favouriteVenue.address && <p className="text-xs" style={{ color: '#7D878D' }}>{favouriteVenue.address}</p>}
+                    <p className="text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>{favouriteVenue.name}</p>
+                    {favouriteVenue.address && <p className="text-xs" style={{ color: 'var(--slate)' }}>{favouriteVenue.address}</p>}
                   </div>
                 </div>
               ) : (
-                <p className="text-sm" style={{ color: '#7D878D' }}>Pick your favourite restaurant from your memories</p>
+                <p className="text-sm" style={{ color: 'var(--slate)' }}>Pick your favourite restaurant from your memories</p>
               )}
             </div>
           )}
@@ -198,15 +198,15 @@ export default function ProfilePage() {
         <button onClick={openNotifications}
           className="w-full rounded-2xl overflow-hidden flex items-center px-4 py-3.5"
           style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mr-3" style={{ background: '#f5f2ed' }}><Icon name="bell" size={16} color="#0D4F57" /></div>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mr-3" style={{ background: 'var(--stone-200)' }}><Icon name="bell" size={16} color="var(--teal-600)" /></div>
           <div className="flex-1 text-left">
-            <p className="text-sm" style={{ color: '#0D4F57' }}>Notifications</p>
-            <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>
+            <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Notifications</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>
               {unreadCount > 0 ? `${unreadCount} new` : 'Friend requests & throwbacks'}
             </p>
           </div>
           {unreadCount > 0 && (
-            <span className="flex items-center justify-center mr-2" style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: '#C9A86A', color: '#fff', fontSize: 11, fontWeight: 700 }}>
+            <span className="flex items-center justify-center mr-2" style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: 'var(--gold-500)', color: '#fff', fontSize: 11, fontWeight: 700 }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -215,15 +215,15 @@ export default function ProfilePage() {
 
         {/* Settings */}
         <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-          <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: '#7D878D' }}>Settings</p>
+          <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--slate)' }}>Settings</p>
 
           <PrivacyToggles />
 
           <Link href="/bulk-upload" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
             style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
             <div className="flex-1">
-              <p className="text-sm" style={{ color: '#0D4F57' }}>Bulk upload</p>
-              <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>Import multiple photos from camera roll</p>
+              <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Bulk upload</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Import multiple photos from camera roll</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0babe" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
           </Link>
@@ -231,8 +231,8 @@ export default function ProfilePage() {
           <Link href="/settings" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
             style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
             <div className="flex-1">
-              <p className="text-sm" style={{ color: '#0D4F57' }}>Account settings</p>
-              <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>Name, password, notifications</p>
+              <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Account settings</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Name, password, notifications</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0babe" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
           </Link>
@@ -240,8 +240,8 @@ export default function ProfilePage() {
           <Link href="/legal/privacy" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
             style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
             <div className="flex-1">
-              <p className="text-sm" style={{ color: '#0D4F57' }}>Privacy policy</p>
-              <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>How we use your data</p>
+              <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Privacy policy</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>How we use your data</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0babe" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
           </Link>
@@ -249,15 +249,15 @@ export default function ProfilePage() {
           <Link href="/legal/terms" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
             style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
             <div className="flex-1">
-              <p className="text-sm" style={{ color: '#0D4F57' }}>Terms of service</p>
-              <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>Terms and conditions</p>
+              <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Terms of service</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Terms and conditions</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0babe" strokeWidth="1.5"><path d="M9 18l6-6-6-6"/></svg>
           </Link>
         </div>
 
         <button onClick={handleSignOut} className="w-full py-3 rounded-2xl text-sm font-medium"
-          style={{ color: '#a32d2d', background: 'rgba(163,45,45,0.07)', border: '0.5px solid rgba(163,45,45,0.15)' }}>
+          style={{ color: 'var(--danger)', background: 'rgba(163,45,45,0.07)', border: '0.5px solid rgba(163,45,45,0.15)' }}>
           Sign out
         </button>
       </div>
@@ -277,7 +277,7 @@ export default function ProfilePage() {
           <div className="fixed z-[70] flex items-center justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, padding: '16px' }}>
             <div className="sheet-enter pointer-events-auto" style={{ width: 'min(420px, 100%)' }}>
               <ProUpsell />
-              <button onClick={() => setShowProInfo(false)} className="w-full mt-3 py-3 rounded-2xl text-sm font-medium" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', color: '#0D4F57' }}>
+              <button onClick={() => setShowProInfo(false)} className="w-full mt-3 py-3 rounded-2xl text-sm font-medium" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', color: 'var(--teal-600)' }}>
                 Close
               </button>
             </div>
@@ -294,15 +294,15 @@ function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: 
 
   if (isPro) {
     return (
-      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #136570 0%, #0D4F57 100%)', boxShadow: '0 4px 16px rgba(13,79,87,0.2)' }}>
+      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%)', boxShadow: '0 4px 16px rgba(13,79,87,0.2)' }}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(201,168,106,0.2)', border: '0.5px solid rgba(201,168,106,0.4)' }}>
-          <Icon name="sparkle" size={20} color="#C9A86A" strokeWidth={1.5} />
+          <Icon name="sparkle" size={20} color="var(--gold-500)" strokeWidth={1.5} />
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold text-white">Mimora Pro</p>
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>All features unlocked</p>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.25)', color: '#C9A86A' }}>Active</span>
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.25)', color: 'var(--gold-500)' }}>Active</span>
       </div>
     )
   }
@@ -316,16 +316,16 @@ function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: 
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#7D878D' }}>Free plan</p>
-        <button onClick={onLearnMore} className="press text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: '#0D4F57', color: '#C9A86A' }}>
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--slate)' }}>Free plan</p>
+        <button onClick={onLearnMore} className="press text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--teal-600)', color: 'var(--gold-500)' }}>
           See Mimora Pro
         </button>
       </div>
       <div className="px-4 pb-4">
         {limits.map(l => (
           <div key={l} className="flex items-center gap-2.5 py-1">
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#C9A86A', flexShrink: 0 }} />
-            <p className="text-xs" style={{ color: '#7D878D' }}>{l}</p>
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--gold-500)', flexShrink: 0 }} />
+            <p className="text-xs" style={{ color: 'var(--slate)' }}>{l}</p>
           </div>
         ))}
       </div>
@@ -337,10 +337,10 @@ function PrivacyToggleRow({ label, sub, value, onChange }: { label: string; sub:
   return (
     <div className="w-full flex items-center px-4 py-3.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
       <div className="flex-1">
-        <p className="text-sm" style={{ color: '#0D4F57' }}>{label}</p>
-        <p className="text-xs mt-0.5" style={{ color: '#7D878D' }}>{sub}</p>
+        <p className="text-sm" style={{ color: 'var(--teal-600)' }}>{label}</p>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>{sub}</p>
       </div>
-      <button onClick={() => onChange(!value)} style={{ width: 44, height: 26, borderRadius: 13, background: value ? '#0D4F57' : '#d4cdc3', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+      <button onClick={() => onChange(!value)} style={{ width: 44, height: 26, borderRadius: 13, background: value ? 'var(--teal-600)' : 'var(--stone-500)', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
         <div style={{ position: 'absolute', top: 3, left: value ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
       </button>
     </div>

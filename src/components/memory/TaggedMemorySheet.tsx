@@ -83,28 +83,28 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
             <div className="flex items-center gap-2">
-              <Icon name="pin" size={16} color="#C9A86A" />
-              <h2 className="font-semibold text-sm" style={{ color: '#0D4F57' }}>{taggerName} tagged you</h2>
+              <Icon name="pin" size={16} color="var(--gold-500)" />
+              <h2 className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>{taggerName} tagged you</h2>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+              style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
           </div>
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto">
             {failed ? (
-              <p className="text-sm text-center py-12 px-6" style={{ color: '#7D878D' }}>This memory isn’t available any more.</p>
+              <p className="text-sm text-center py-12 px-6" style={{ color: 'var(--slate)' }}>This memory isn’t available any more.</p>
             ) : !memory ? (
-              <p className="text-sm text-center py-12" style={{ color: '#7D878D' }}>Loading…</p>
+              <p className="text-sm text-center py-12" style={{ color: 'var(--slate)' }}>Loading…</p>
             ) : (
               <div className="px-5 py-4">
-                <h3 className="text-lg font-semibold leading-tight mb-1" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'A memory'}</h3>
+                <h3 className="text-lg font-semibold leading-tight mb-1" style={{ color: 'var(--teal-600)' }}>{memory.venue?.name ?? 'A memory'}</h3>
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  {memory.venue?.address && <p className="text-xs" style={{ color: '#7D878D' }}>{memory.venue.address}</p>}
+                  {memory.venue?.address && <p className="text-xs" style={{ color: 'var(--slate)' }}>{memory.venue.address}</p>}
                   {date && (
                     <>
-                      <span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span>
-                      <p className="text-xs" style={{ color: '#7D878D' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      <span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span>
+                      <p className="text-xs" style={{ color: 'var(--slate)' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </>
                   )}
                 </div>
@@ -112,7 +112,7 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
                 {memory.memory_photos.length > 0 && (
                   <div className="flex gap-2 overflow-x-auto pb-1 mb-3">
                     {memory.memory_photos.map(p => (
-                      <div key={p.id} className="flex-shrink-0 rounded-xl overflow-hidden" style={{ width: 84, height: 84, background: '#EAE5DD' }}>
+                      <div key={p.id} className="flex-shrink-0 rounded-xl overflow-hidden" style={{ width: 84, height: 84, background: 'var(--stone-400)' }}>
                         <TaggedThumb path={p.storage_path} />
                       </div>
                     ))}
@@ -120,12 +120,12 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
                 )}
 
                 {memory.dish_name && (
-                  <p className="text-xs mb-3" style={{ color: '#7D878D' }}>They had: <span className="font-semibold" style={{ color: '#0D4F57' }}>{memory.dish_name}</span></p>
+                  <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>They had: <span className="font-semibold" style={{ color: 'var(--teal-600)' }}>{memory.dish_name}</span></p>
                 )}
 
-                <div className="rounded-xl px-3 py-2.5" style={{ background: '#f5f2ed' }}>
-                  <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>
-                    Saving adds this to <span className="font-semibold" style={{ color: '#0D4F57' }}>your</span> memories with the photos copied over — then add your own rating, notes and photos. It stays private unless you share it.
+                <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--stone-200)' }}>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--slate)' }}>
+                    Saving adds this to <span className="font-semibold" style={{ color: 'var(--teal-600)' }}>your</span> memories with the photos copied over — then add your own rating, notes and photos. It stays private unless you share it.
                   </p>
                 </div>
               </div>
@@ -137,13 +137,13 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
             <div className="flex-shrink-0 px-5 pt-3 pb-4 flex flex-col gap-2" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
               <button onClick={handleSaveToProfile} disabled={saving}
                 className="press w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ background: '#0D4F57', color: '#EAE5DD', opacity: saving ? 0.6 : 1 }}>
-                <Icon name="bookmark" size={15} color="#C9A86A" />
+                style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving ? 0.6 : 1 }}>
+                <Icon name="bookmark" size={15} color="var(--gold-500)" />
                 {saving ? 'Saving…' : 'Save to my memories'}
               </button>
               <button onClick={handleDismiss} disabled={saving}
                 className="press w-full py-2.5 rounded-xl text-xs font-medium"
-                style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
                 No thanks
               </button>
             </div>
@@ -161,6 +161,6 @@ function TaggedThumb({ path }: { path: string }) {
     getSignedPhotoUrl(supabase, path).then(u => { if (u) setUrl(u) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
-  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: '#EAE5DD' }} />
+  if (!url) return <div className="w-full h-full animate-pulse" style={{ background: 'var(--stone-400)' }} />
   return <img src={url} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
 }

@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="min-h-screen" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3">
           <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
@@ -65,8 +65,8 @@ Each of these services has their own privacy policies. We use them only as neces
           },
         ].map(section => (
           <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
-            <p className="font-semibold text-sm mb-2" style={{ color: '#0D4F57' }}>{section.title}</p>
-            <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: '#7D878D' }}>{section.body}</p>
+            <p className="font-semibold text-sm mb-2" style={{ color: 'var(--teal-600)' }}>{section.title}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--slate)' }}>{section.body}</p>
           </div>
         ))}
       </div>

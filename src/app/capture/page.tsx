@@ -142,7 +142,7 @@ export default function CapturePage() {
 
   if (stage === 'form') {
     return (
-      <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
         <div className="page-header px-5 pb-4">
           <div className="flex items-center gap-3">
             <button onClick={() => setStage('prompt')}
@@ -166,22 +166,22 @@ export default function CapturePage() {
               </div>
             ))}
             <label className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer"
-              style={{ width: 90, height: 90, background: '#fff', border: '2px dashed #C9A86A' }}>
+              style={{ width: 90, height: 90, background: '#fff', border: '2px dashed var(--gold-500)' }}>
               <span style={{ fontSize: 22 }}>+</span>
-              <span className="text-xs" style={{ color: '#C9A86A' }}>Add more</span>
+              <span className="text-xs" style={{ color: 'var(--gold-500)' }}>Add more</span>
               <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
             </label>
           </div>
 
           {/* EXIF messages */}
           {[...new Set(photos.map(p => p.exifMessage).filter(Boolean))].map((msg, i) => (
-            <div key={i} className="rounded-xl px-3 py-2.5 text-xs" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid #C9A86A' }}>{msg}</div>
+            <div key={i} className="rounded-xl px-3 py-2.5 text-xs" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid var(--gold-500)' }}>{msg}</div>
           ))}
 
           {/* Date chip */}
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#fff', color: '#0D4F57', border: '0.5px solid rgba(13,79,87,0.1)' }}>
-              <Icon name="clock" size={12} color="#0D4F57" />
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#fff', color: 'var(--teal-600)', border: '0.5px solid rgba(13,79,87,0.1)' }}>
+              <Icon name="clock" size={12} color="var(--teal-600)" />
               {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               {detectedDate && <span className="ml-1 opacity-50 text-xs">from photo</span>}
             </span>
@@ -189,7 +189,7 @@ export default function CapturePage() {
 
           {/* Location */}
           <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-            <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Restaurant</label>
+            <label className="text-xs font-semibold block mb-2" style={{ color: 'var(--slate)' }}>Restaurant</label>
             <PlacesSearch
               value={locationQuery}
               onChange={v => { setLocationQuery(v); setSelectedPlace(null) }}
@@ -200,10 +200,10 @@ export default function CapturePage() {
 
           {/* Dish */}
           <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-            <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
+            <label className="text-xs font-semibold block mb-2" style={{ color: 'var(--slate)' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <input type="text" value={dishName} onChange={e => setDishName(e.target.value)} placeholder="e.g. Truffle pasta"
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
-              style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
           </div>
 
           {/* Ratings */}
@@ -213,17 +213,17 @@ export default function CapturePage() {
 
           {/* Notes */}
           <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-            <label className="text-xs font-semibold block mb-2" style={{ color: '#7D878D' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
+            <label className="text-xs font-semibold block mb-2" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="What made it special?" rows={2}
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none"
-              style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
           </div>
 
-          {saveError && <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>{saveError}</div>}
+          {saveError && <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{saveError}</div>}
 
           <button onClick={handleSave} disabled={saving || !locationQuery.trim()}
             className="w-full py-4 rounded-2xl text-white font-semibold text-sm"
-            style={{ background: '#0D4F57', opacity: saving || !locationQuery.trim() ? 0.5 : 1 }}>
+            style={{ background: 'var(--teal-600)', opacity: saving || !locationQuery.trim() ? 0.5 : 1 }}>
             {saving ? 'Saving…' : '✓ Save memory'}
           </button>
         </div>

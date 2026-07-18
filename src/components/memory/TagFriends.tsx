@@ -49,11 +49,11 @@ export function FriendChips({ friends, selected, onToggle }: {
           <button key={f.id} type="button" onClick={() => onToggle(f.id)}
             className="press flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
             style={{
-              background: on ? '#0D4F57' : '#fff',
-              color: on ? '#EAE5DD' : '#7D878D',
-              border: on ? '0.5px solid #0D4F57' : '0.5px solid rgba(13,79,87,0.12)',
+              background: on ? 'var(--teal-600)' : '#fff',
+              color: on ? 'var(--stone-400)' : 'var(--slate)',
+              border: on ? '0.5px solid var(--teal-600)' : '0.5px solid rgba(13,79,87,0.12)',
             }}>
-            {on && <Icon name="check" size={11} color="#C9A86A" strokeWidth={2.5} />}
+            {on && <Icon name="check" size={11} color="var(--gold-500)" strokeWidth={2.5} />}
             {f.name}
           </button>
         )
@@ -117,12 +117,12 @@ export default function TagFriendsSection({ memoryId }: { memoryId: string }) {
     .filter(Boolean)
 
   return (
-    <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
-      <p className="text-xs font-semibold mb-2" style={{ color: '#0D4F57' }}>Tag friends</p>
+    <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+      <p className="text-xs font-semibold mb-2" style={{ color: 'var(--teal-600)' }}>Tag friends</p>
       <FriendChips friends={friends} selected={taggedIds} onToggle={toggle} />
       {savedNames.length > 0 && (
-        <p className="text-xs mt-2 flex items-center gap-1" style={{ color: '#7D878D' }}>
-          <Icon name="check" size={11} color="#C9A86A" strokeWidth={2.5} />
+        <p className="text-xs mt-2 flex items-center gap-1" style={{ color: 'var(--slate)' }}>
+          <Icon name="check" size={11} color="var(--gold-500)" strokeWidth={2.5} />
           {savedNames.join(', ')} saved this to their profile
         </p>
       )}

@@ -34,7 +34,7 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
           width: size,
           height: size,
           borderRadius: '50%',
-          border: `3px solid ${isSelected ? '#0D4F57' : '#fff'}`,
+          border: `3px solid ${isSelected ? 'var(--teal-600)' : '#fff'}`,
           boxShadow: isSelected
             ? '0 4px 16px rgba(13,79,87,0.45)'
             : '0 2px 8px rgba(0,0,0,0.25)',
@@ -57,7 +57,7 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
             style={{
               width: '100%',
               height: '100%',
-              background: '#0D4F57',
+              background: 'var(--teal-600)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -70,18 +70,18 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
         )}
       </div>
       {/* Pin tail */}
-      <div style={{ width: 2, height: 6, background: isSelected ? '#0D4F57' : '#bbb', borderRadius: 1 }} />
-      <div style={{ width: 4, height: 4, borderRadius: '50%', background: isSelected ? '#0D4F57' : '#bbb' }} />
+      <div style={{ width: 2, height: 6, background: isSelected ? 'var(--teal-600)' : '#bbb', borderRadius: 1 }} />
+      <div style={{ width: 4, height: 4, borderRadius: '50%', background: isSelected ? 'var(--teal-600)' : '#bbb' }} />
       {/* Venue name label */}
       {memory.venue?.name && (
         <div style={{
           marginTop: 2,
-          background: isSelected ? '#0D4F57' : 'rgba(255,255,255,0.95)',
+          background: isSelected ? 'var(--teal-600)' : 'rgba(255,255,255,0.95)',
           borderRadius: 6,
           padding: '2px 6px',
           fontSize: 10,
           fontWeight: 600,
-          color: isSelected ? '#fff' : '#0D4F57',
+          color: isSelected ? '#fff' : 'var(--teal-600)',
           maxWidth: 90,
           textAlign: 'center',
           overflow: 'hidden',

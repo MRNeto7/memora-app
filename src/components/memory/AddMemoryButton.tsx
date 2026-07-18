@@ -18,7 +18,7 @@ export default function AddMemoryButton({ onClick }: AddMemoryButtonProps) {
         bottom: 'calc(env(safe-area-inset-bottom, 0px) + 102px)',
       }}
     >
-      <span style={{ color: '#C9A86A', fontSize: 18, lineHeight: 1 }}>+</span>
+      <span style={{ color: 'var(--gold-500)', fontSize: 18, lineHeight: 1 }}>+</span>
       Save memory
     </button>
   )
