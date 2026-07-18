@@ -109,7 +109,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
   return (
     <Portal>
-      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
       <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none" style={{ padding: '12px 16px 88px' }}>
       <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
@@ -119,7 +119,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
           <div>
             <p className="text-xs mb-0.5" style={{ color: 'var(--slate)' }}>Saving memory at</p>
             <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>{venue.name}</h2>
@@ -167,7 +167,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
             <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>When did you visit?</label>
             <input type="date" value={visitDate} onChange={e => setVisitDate(e.target.value)}
               className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)', color: 'var(--teal-600)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)', color: 'var(--teal-600)' }} />
           </div>
 
           {/* Dish */}
@@ -176,7 +176,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
             <input type="text" value={dishName} onChange={e => setDishName(e.target.value)}
               placeholder="e.g. Half chicken, extra hot"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
           {/* Ratings */}
@@ -190,14 +190,14 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
               placeholder="What made it special?"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none resize-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
           {error && <div className="rounded-xl px-4 py-3 mt-2 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{error}</div>}
         </div>
 
         {/* Fixed footer */}
-        <div className="flex-shrink-0 px-5 pt-3 pb-5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="flex-shrink-0 px-5 pt-3 pb-5" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
           <button onClick={handleSave} disabled={saving}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold"
             style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving ? 0.6 : 1 }}>

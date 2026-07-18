@@ -89,30 +89,30 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'var(--stone-200)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16191B" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </Link>
-          <h1 className="text-xl font-semibold text-white">Account settings</h1>
+          <h1 className="text-xl font-semibold">Account settings</h1>
         </div>
       </div>
 
       <div className="px-4 pt-5 space-y-4">
 
         {/* Display name */}
-        <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--slate)' }}>Profile</p>
           <div className="mb-3">
             <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Display name</label>
             <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
               placeholder="Your name"
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)', color: 'var(--teal-600)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)', color: 'var(--teal-600)' }} />
           </div>
           <div className="mb-4">
             <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Email</label>
             <input type="email" value={email} disabled
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: '#f5f5f5', color: 'var(--slate)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: '#f5f5f5', color: 'var(--slate)' }} />
             <p className="text-xs mt-1" style={{ color: 'var(--slate-light)' }}>Email cannot be changed</p>
           </div>
           <button onClick={saveName} disabled={saving}
@@ -123,7 +123,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Password */}
-        <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--slate)' }}>Password</p>
 
           <div className="mb-3">
@@ -131,18 +131,18 @@ export default function SettingsPage() {
             <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
               placeholder="At least 8 characters"
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
           <div className="mb-4">
             <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Confirm new password</label>
             <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Re-enter password"
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
           {passwordError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{passwordError}</div>}
-          {passwordSuccess && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--teal-600)' }}>✓ Password updated successfully</div>}
+          {passwordSuccess && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--teal-600)' }}>✓ Password updated successfully</div>}
 
           <button onClick={changePassword} disabled={savingPassword || !newPassword}
             className="w-full py-3 rounded-2xl text-sm font-semibold mb-2"

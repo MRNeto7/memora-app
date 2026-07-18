@@ -179,11 +179,11 @@ export default function PersistentMapShell() {
           className="rise absolute left-4 right-4 z-20 flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
           style={{
             top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
-            background: 'rgba(13,79,87,0.88)',
+            background: 'rgba(16,20,22,0.88)',
             backdropFilter: 'blur(20px) saturate(1.4)',
             WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
             border: '0.5px solid rgba(201,168,106,0.4)',
-            boxShadow: '0 8px 28px rgba(13,79,87,0.35)',
+            boxShadow: '0 8px 28px rgba(16,20,22,0.35)',
           }}>
           <Icon name={bannerItem.kind === 'friend_request' ? 'friend-add' : 'camera'} size={22} color="var(--gold-500)" strokeWidth={1.8} />
 
@@ -320,7 +320,7 @@ function ClusteredMarkers({
               background: var(--teal-600); border: 3px solid var(--gold-500);
               display: flex; align-items: center; justify-content: center;
               color: #fff; font-size: 13px; font-weight: 600;
-              box-shadow: 0 4px 12px rgba(13,79,87,0.4);
+              box-shadow: 0 4px 12px rgba(16,20,22,0.4);
               cursor: pointer;
             `
             el.textContent = String(count)

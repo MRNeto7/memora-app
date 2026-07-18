@@ -64,7 +64,7 @@ Each of these services has their own privacy policies. We use them only as neces
             body: `For any privacy-related questions or data deletion requests, contact us at privacy@mimora.app`
           },
         ].map(section => (
-          <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
             <p className="font-semibold text-sm mb-2" style={{ color: 'var(--teal-600)' }}>{section.title}</p>
             <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--slate)' }}>{section.body}</p>
           </div>

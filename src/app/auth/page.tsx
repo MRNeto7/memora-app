@@ -82,7 +82,7 @@ export default function AuthPage() {
       <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: 'var(--stone-400)' }}>
 
         {/* Tab toggle */}
-        <div className="flex rounded-2xl p-1 mb-6" style={{ background: 'rgba(13,79,87,0.08)' }}>
+        <div className="flex rounded-2xl p-1 mb-6" style={{ background: 'rgba(16,20,22,0.08)' }}>
           {(['signin', 'signup'] as const).map((m) => (
             <button
               key={m}
@@ -110,7 +110,7 @@ export default function AuthPage() {
               required
               autoComplete="email"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-              style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: 'var(--teal-600)' }}
+              style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
             />
           </div>
 
@@ -126,7 +126,7 @@ export default function AuthPage() {
                 required
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 className="w-full text-sm px-4 py-3 rounded-xl outline-none pr-12"
-                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: 'var(--teal-600)' }}
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
               />
               <button
                 type="button"
@@ -151,7 +151,7 @@ export default function AuthPage() {
                 required
                 autoComplete="new-password"
                 className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: 'var(--teal-600)' }}
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
               />
             </div>
           )}
@@ -177,7 +177,7 @@ export default function AuthPage() {
             </div>
           )}
           {success && (
-            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--teal-600)', borderLeft: '3px solid var(--teal-600)' }}>
+            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--teal-600)', borderLeft: '3px solid var(--teal-600)' }}>
               {success}
             </div>
           )}

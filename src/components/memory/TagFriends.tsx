@@ -51,7 +51,7 @@ export function FriendChips({ friends, selected, onToggle }: {
             style={{
               background: on ? 'var(--teal-600)' : '#fff',
               color: on ? 'var(--stone-400)' : 'var(--slate)',
-              border: on ? '0.5px solid var(--teal-600)' : '0.5px solid rgba(13,79,87,0.12)',
+              border: on ? '0.5px solid var(--teal-600)' : '0.5px solid rgba(16,20,22,0.12)',
             }}>
             {on && <Icon name="check" size={11} color="var(--gold-500)" strokeWidth={2.5} />}
             {f.name}

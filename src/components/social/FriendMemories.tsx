@@ -123,7 +123,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           ) : (
             <div className="flex flex-col gap-3">
               {memories.map(mem => (
-                <div key={mem.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+                <div key={mem.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
                   <div className="flex">
                     <div style={{ width: 76, height: 76, flexShrink: 0, margin: 6, borderRadius: 12, overflow: 'hidden', background: 'var(--stone-400)' }}>
                       {mem.memory_photos.length > 0
@@ -145,7 +145,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
                       onClick={() => addToMyWishlist(mem.venue)}
                       disabled={addingToWishlist === mem.venue.id}
                       className="w-full py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5"
-                      style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)', color: 'var(--gold-500)', background: 'rgba(201,168,106,0.06)' }}>
+                      style={{ borderTop: '0.5px solid rgba(16,20,22,0.06)', color: 'var(--gold-500)', background: 'rgba(201,168,106,0.06)' }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                       {addingToWishlist === mem.venue.id ? 'Adding…' : 'Add to my wishlist'}
                     </button>
@@ -167,7 +167,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           ) : (
             <div className="flex flex-col gap-3">
               {wishlist.map(item => (
-                <div key={item.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+                <div key={item.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
                   <div className="flex">
                     <div style={{ width: 76, height: 76, flexShrink: 0, margin: 6, borderRadius: 12, overflow: 'hidden' }}>
                       <PlacePhoto placeId={item.venue?.google_place_id ?? null} width={150} fallbackInitials={item.venue?.name?.slice(0, 2).toUpperCase()} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

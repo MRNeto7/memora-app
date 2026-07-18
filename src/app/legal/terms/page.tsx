@@ -59,7 +59,7 @@ You agree not to upload content that:
             body: `For questions about these terms, contact us at legal@mimora.app`
           },
         ].map(section => (
-          <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
             <p className="font-semibold text-sm mb-2" style={{ color: 'var(--teal-600)' }}>{section.title}</p>
             <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--slate)' }}>{section.body}</p>
           </div>

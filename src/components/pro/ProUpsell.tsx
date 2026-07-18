@@ -9,7 +9,7 @@ export default function ProUpsell({ feature }: { feature?: string }) {
   return (
     <div className="rise rounded-3xl p-6 text-center" style={{
       background: 'linear-gradient(165deg, var(--teal-500) 0%, var(--teal-600) 60%, var(--teal-700) 100%)',
-      boxShadow: '0 8px 32px rgba(13,79,87,0.3)',
+      boxShadow: '0 8px 32px rgba(16,20,22,0.3)',
     }}>
       <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
         style={{ background: 'rgba(201,168,106,0.18)', border: '0.5px solid rgba(201,168,106,0.4)' }}>

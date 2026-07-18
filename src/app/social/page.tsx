@@ -120,18 +120,18 @@ export default function SocialPage() {
     <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="page-header" style={{ paddingBottom: 0 }}>
         <div className="px-5 mb-4">
-          <h1 className="text-xl font-semibold text-white">Social</h1>
-          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{friends.length} {friends.length === 1 ? 'friend' : 'friends'}</p>
+          <h1 className="text-xl font-semibold">Social</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>{friends.length} {friends.length === 1 ? 'friend' : 'friends'}</p>
         </div>
 
         {myMimoraId && (
-          <div className="mx-5 mb-4 px-4 py-3 rounded-2xl flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <div className="mx-5 mb-4 px-4 py-3 rounded-2xl flex items-center justify-between" style={{ background: 'var(--stone-200)' }}>
             <div>
-              <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Your Mimora ID</p>
-              <p className="text-xl font-bold tracking-widest text-white">{myMimoraId}</p>
+              <p className="text-xs mb-0.5" style={{ color: 'var(--slate)' }}>Your Mimora ID</p>
+              <p className="text-xl font-bold tracking-widest">{myMimoraId}</p>
             </div>
             <button onClick={copyMimoraId} className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
-              style={{ background: copySuccess ? 'var(--gold-500)' : 'rgba(255,255,255,0.15)', color: '#fff' }}>
+              style={{ background: copySuccess ? 'var(--gold-500)' : 'var(--stone-200)', color: copySuccess ? '#fff' : 'var(--teal-600)' }}>
               {copySuccess ? 'Copied!' : 'Copy'}
             </button>
           </div>
@@ -141,7 +141,7 @@ export default function SocialPage() {
           {(['friends', 'requests', 'find'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className="px-4 py-2.5 text-sm font-medium rounded-t-xl capitalize transition-all"
-              style={{ background: tab === t ? 'var(--stone-400)' : 'transparent', color: tab === t ? 'var(--teal-600)' : 'rgba(255,255,255,0.6)' }}>
+              style={{ background: tab === t ? 'var(--stone-200)' : 'transparent', color: tab === t ? 'var(--teal-600)' : 'var(--slate)' }}>
               {t === 'requests' ? (requests.length > 0 ? `Requests (${requests.length})` : 'Requests') : t === 'friends' ? `Friends (${friends.length})` : 'Find friends'}
             </button>
           ))}
@@ -175,7 +175,7 @@ export default function SocialPage() {
               {friends.map(f => (
                 <button key={f.friend_id} onClick={() => setSelectedFriend(f)}
                   className="w-full text-left rounded-2xl px-4 py-3.5 flex items-center gap-4"
-                  style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+                  style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
                   <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--teal-600)' }}>
                     <span className="text-white font-semibold text-sm">{(f.display_name ?? f.memora_id).slice(0, 2).toUpperCase()}</span>
                   </div>
@@ -199,7 +199,7 @@ export default function SocialPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {requests.map(req => (
-                <div key={req.id} className="rounded-2xl px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+                <div key={req.id} className="rounded-2xl px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--teal-600)' }}>
                       <span className="text-white font-semibold text-sm">{(req.from_user?.display_name ?? req.from_user?.memora_id ?? '?').slice(0, 2).toUpperCase()}</span>
@@ -221,14 +221,14 @@ export default function SocialPage() {
 
         {tab === 'find' && (
           <div>
-            <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+            <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
               <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Search by Mimora ID</label>
               <div className="flex gap-2">
                 <input type="text" placeholder="e.g. MA4829" value={searchId}
                   onChange={e => setSearchId(e.target.value.toUpperCase())}
                   onKeyDown={e => e.key === 'Enter' && handleSearch()}
                   className="flex-1 text-sm px-4 py-2.5 rounded-xl outline-none"
-                  style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)', letterSpacing: 2, fontWeight: 600, color: 'var(--teal-600)' }} />
+                  style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)', letterSpacing: 2, fontWeight: 600, color: 'var(--teal-600)' }} />
                 <button onClick={handleSearch} disabled={searching || !searchId.trim()}
                   className="px-4 py-2.5 rounded-xl text-sm font-semibold"
                   style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: searching || !searchId.trim() ? 0.5 : 1 }}>

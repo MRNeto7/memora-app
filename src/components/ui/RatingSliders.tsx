@@ -30,7 +30,7 @@ export default function RatingSliders({ ratings, onChange, title = 'Rate your ex
         </div>
       ))}
       {overall > 0 && (
-        <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.1)' }}>
+        <div className="flex items-center pt-2.5" style={{ borderTop: '0.5px solid rgba(16,20,22,0.1)' }}>
           <span className="text-xs font-semibold" style={{ color: 'var(--teal-600)' }}>Overall</span>
           <span className="text-sm font-semibold ml-auto" style={{ color: 'var(--gold-500)' }}>{overall}/10</span>
         </div>

@@ -111,8 +111,8 @@ export default function ProfilePage() {
             {initials}
           </div>
           <div>
-            <p className="font-semibold text-white text-base leading-tight">{displayLabel}</p>
-            {mimoraId && <p className="text-xs mt-0.5 font-mono tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>{mimoraId}</p>}
+            <p className="font-semibold text-base leading-tight">{displayLabel}</p>
+            {mimoraId && <p className="text-xs mt-0.5 font-mono tracking-widest" style={{ color: 'var(--slate)' }}>{mimoraId}</p>}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">
@@ -121,9 +121,9 @@ export default function ProfilePage() {
             { label: 'Places', value: stats.totalVenues },
             { label: 'Avg rating', value: stats.avgRating > 0 ? `${stats.avgRating}★` : '—' },
           ].map(s => (
-            <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              <p className="text-xl font-semibold text-white">{loading ? '…' : s.value}</p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.label}</p>
+            <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: 'var(--stone-200)' }}>
+              <p className="text-xl font-semibold">{loading ? '…' : s.value}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -143,7 +143,7 @@ export default function ProfilePage() {
         )}
 
         {/* Favourite place */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
             <p className="text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>Favourite place</p>
             <button onClick={() => setShowVenuePicker(!showVenuePicker)}
@@ -197,7 +197,7 @@ export default function ProfilePage() {
         {/* Notifications */}
         <button onClick={openNotifications}
           className="w-full rounded-2xl overflow-hidden flex items-center px-4 py-3.5"
-          style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+          style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
           <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mr-3" style={{ background: 'var(--stone-200)' }}><Icon name="bell" size={16} color="var(--teal-600)" /></div>
           <div className="flex-1 text-left">
             <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Notifications</p>
@@ -214,13 +214,13 @@ export default function ProfilePage() {
         </button>
 
         {/* Settings */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
           <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--slate)' }}>Settings</p>
 
           <PrivacyToggles />
 
           <Link href="/bulk-upload" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
-            style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+            style={{ borderTop: '0.5px solid rgba(16,20,22,0.06)' }}>
             <div className="flex-1">
               <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Bulk upload</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Import multiple photos from camera roll</p>
@@ -229,7 +229,7 @@ export default function ProfilePage() {
           </Link>
 
           <Link href="/settings" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
-            style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+            style={{ borderTop: '0.5px solid rgba(16,20,22,0.06)' }}>
             <div className="flex-1">
               <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Account settings</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Name, password, notifications</p>
@@ -238,7 +238,7 @@ export default function ProfilePage() {
           </Link>
 
           <Link href="/legal/privacy" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
-            style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+            style={{ borderTop: '0.5px solid rgba(16,20,22,0.06)' }}>
             <div className="flex-1">
               <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Privacy policy</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>How we use your data</p>
@@ -247,7 +247,7 @@ export default function ProfilePage() {
           </Link>
 
           <Link href="/legal/terms" className="w-full flex items-center px-4 py-3.5 transition-colors hover:bg-gray-50 no-underline"
-            style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+            style={{ borderTop: '0.5px solid rgba(16,20,22,0.06)' }}>
             <div className="flex-1">
               <p className="text-sm" style={{ color: 'var(--teal-600)' }}>Terms of service</p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Terms and conditions</p>
@@ -273,7 +273,7 @@ export default function ProfilePage() {
 
       {showProInfo && (
         <Portal>
-          <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={() => setShowProInfo(false)} />
+          <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={() => setShowProInfo(false)} />
           <div className="fixed z-[70] flex items-center justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, padding: '16px' }}>
             <div className="sheet-enter pointer-events-auto" style={{ width: 'min(420px, 100%)' }}>
               <ProUpsell />
@@ -294,7 +294,7 @@ function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: 
 
   if (isPro) {
     return (
-      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%)', boxShadow: '0 4px 16px rgba(13,79,87,0.2)' }}>
+      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%)', boxShadow: '0 4px 16px rgba(16,20,22,0.2)' }}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(201,168,106,0.2)', border: '0.5px solid rgba(201,168,106,0.4)' }}>
           <Icon name="sparkle" size={20} color="var(--gold-500)" strokeWidth={1.5} />
         </div>
@@ -314,7 +314,7 @@ function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: 
     'Bulk upload is Pro',
   ]
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--slate)' }}>Free plan</p>
         <button onClick={onLearnMore} className="press text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--teal-600)', color: 'var(--gold-500)' }}>
@@ -335,7 +335,7 @@ function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: 
 
 function PrivacyToggleRow({ label, sub, value, onChange }: { label: string; sub: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="w-full flex items-center px-4 py-3.5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.06)' }}>
+    <div className="w-full flex items-center px-4 py-3.5" style={{ borderTop: '0.5px solid rgba(16,20,22,0.06)' }}>
       <div className="flex-1">
         <p className="text-sm" style={{ color: 'var(--teal-600)' }}>{label}</p>
         <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>{sub}</p>

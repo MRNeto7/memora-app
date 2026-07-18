@@ -147,10 +147,10 @@ export default function CapturePage() {
           <div className="flex items-center gap-3">
             <button onClick={() => setStage('prompt')}
               className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(255,255,255,0.15)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              style={{ background: 'var(--stone-200)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16191B" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
-            <h1 className="text-xl font-semibold text-white">Save memory</h1>
+            <h1 className="text-xl font-semibold">Save memory</h1>
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export default function CapturePage() {
 
           {/* Date chip */}
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#fff', color: 'var(--teal-600)', border: '0.5px solid rgba(13,79,87,0.1)' }}>
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#fff', color: 'var(--teal-600)', border: '0.5px solid rgba(16,20,22,0.1)' }}>
               <Icon name="clock" size={12} color="var(--teal-600)" />
               {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               {detectedDate && <span className="ml-1 opacity-50 text-xs">from photo</span>}
@@ -188,7 +188,7 @@ export default function CapturePage() {
           </div>
 
           {/* Location */}
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
             <label className="text-xs font-semibold block mb-2" style={{ color: 'var(--slate)' }}>Restaurant</label>
             <PlacesSearch
               value={locationQuery}
@@ -199,24 +199,24 @@ export default function CapturePage() {
           </div>
 
           {/* Dish */}
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
             <label className="text-xs font-semibold block mb-2" style={{ color: 'var(--slate)' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <input type="text" value={dishName} onChange={e => setDishName(e.target.value)} placeholder="e.g. Truffle pasta"
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
           {/* Ratings */}
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
             <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
           </div>
 
           {/* Notes */}
-          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
             <label className="text-xs font-semibold block mb-2" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="What made it special?" rows={2}
               className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
           {saveError && <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{saveError}</div>}

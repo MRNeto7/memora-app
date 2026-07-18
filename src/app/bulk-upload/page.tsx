@@ -301,12 +301,12 @@ export default function BulkUploadPage() {
       {/* Header */}
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16191B" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </Link>
           <div>
-            <h1 className="text-xl font-semibold text-white">Bulk upload</h1>
-            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Import multiple photos at once</p>
+            <h1 className="text-xl font-semibold">Bulk upload</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Import multiple photos at once</p>
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ export default function BulkUploadPage() {
 
         {loading && (
           <Portal>
-            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
+            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(16,20,22,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
               <div className="rounded-3xl px-8 py-7 flex flex-col items-center" style={{ background: '#fff', width: 'min(300px, 85%)', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
                 <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: 'var(--teal-600)', borderTopColor: 'transparent' }} />
                 {progress ? (
@@ -420,7 +420,7 @@ export default function BulkUploadPage() {
             </div>
 
             {pending.length === 0 && saved.length > 0 && (
-              <div className="mt-4 rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+              <div className="mt-4 rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
                 <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--teal-600)' }}>
                   <Icon name="check" size={20} color="var(--gold-500)" strokeWidth={2.5} />
                 </div>
@@ -449,7 +449,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
 
   if (group.saved) {
     return (
-      <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#f0faf4', border: '1px solid rgba(13,79,87,0.15)' }}>
+      <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#f0faf4', border: '1px solid rgba(16,20,22,0.15)' }}>
         <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--teal-600)' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
@@ -463,7 +463,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
       {/* Photo strip */}
       <div className="flex gap-1 p-2 overflow-x-auto">
         {group.photos.slice(0, 6).map((photo, i) => (
@@ -521,7 +521,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
               <input type="text" value={group.dishName} onChange={e => onUpdate({ dishName: e.target.value })}
                 placeholder="What did you have?"
                 className="w-full text-sm px-3 py-2 rounded-xl outline-none"
-                style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+                style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
             </div>
 
             {/* Ratings */}
@@ -535,7 +535,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
               <input type="text" value={group.notes} onChange={e => onUpdate({ notes: e.target.value })}
                 placeholder="Quick thought…"
                 className="w-full text-sm px-3 py-2 rounded-xl outline-none"
-                style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+                style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
             </div>
           </>
         )}

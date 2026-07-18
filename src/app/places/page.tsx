@@ -83,8 +83,8 @@ export default function PlacesPage() {
       {/* Header */}
       <div className="page-header" style={{ paddingBottom: 0 }}>
         <div className="px-5 mb-4">
-          <h1 className="text-xl font-semibold text-white">Places</h1>
-          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <h1 className="text-xl font-semibold">Places</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>
             {memories.length} memories · {wishlist.length} on wishlist
           </p>
         </div>
@@ -95,8 +95,8 @@ export default function PlacesPage() {
             <button key={t} onClick={() => setTab(t)}
               className="px-5 py-2.5 text-sm font-medium rounded-t-xl transition-all"
               style={{
-                background: tab === t ? 'var(--stone-400)' : 'transparent',
-                color: tab === t ? 'var(--teal-600)' : 'rgba(255,255,255,0.6)',
+                background: tab === t ? 'var(--stone-200)' : 'transparent',
+                color: tab === t ? 'var(--teal-600)' : 'var(--slate)',
               }}>
               {t === 'memories' ? `Memories (${memories.length})` : `Wishlist (${wishlist.length})`}
             </button>
@@ -144,7 +144,7 @@ export default function PlacesPage() {
                 <div key={month} className="mb-6">
                   <div className="flex items-center gap-3 mb-3">
                     <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--slate)' }}>{month}</p>
-                    <div className="flex-1 h-px" style={{ background: 'rgba(13,79,87,0.1)' }} />
+                    <div className="flex-1 h-px" style={{ background: 'rgba(16,20,22,0.1)' }} />
                     <p className="text-xs" style={{ color: 'var(--slate-light)' }}>{items.length}</p>
                   </div>
                   <div className="flex flex-col gap-3">

@@ -78,14 +78,14 @@ export default function ResetPasswordPage() {
               <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="At least 8 characters" required autoComplete="new-password"
                 className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: 'var(--teal-600)' }} />
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }} />
             </div>
             <div className="mb-4">
               <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Confirm new password</label>
               <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
                 placeholder="Re-enter your password" required autoComplete="new-password"
                 className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: 'var(--teal-600)' }} />
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }} />
             </div>
 
             {error && (

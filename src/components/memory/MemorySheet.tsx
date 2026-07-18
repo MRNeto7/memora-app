@@ -159,7 +159,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   return (
     <Portal>
       {/* Backdrop */}
-      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
 
       {/* Centred modal card */}
       <div className="fixed z-[70] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
@@ -174,7 +174,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             <>
               <div className="flex items-center justify-end px-4 pt-3 pb-1 flex-shrink-0">
                 <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
+                  style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
               </div>
               <MemoryDetailView memory={memory} onUpdate={onUpdate} />
             </>
@@ -186,7 +186,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Save a memory</h2>
               <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
+                style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
             </div>
 
               {/* Photos */}
@@ -231,7 +231,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               <div className="mb-3">
                 <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
                 <input type="text" placeholder="e.g. Truffle pasta" value={dishName} onChange={e => setDishName(e.target.value)}
-                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
               </div>
 
               <div className="mb-4 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
@@ -241,7 +241,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               <div className="mb-4">
                 <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
                 <textarea placeholder="What made it special?" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
               </div>
 
               {/* Tag friends — they'll be invited to save their own copy */}
@@ -265,7 +265,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
         {/* Sticky footer for add mode */}
         {isNew && (
-          <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
             <button onClick={handleSave} disabled={saving || !locationName.trim()}
               className="press w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
               style={{ background: 'var(--teal-600)', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
@@ -363,12 +363,12 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         <div className="mb-3">
           <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish name</label>
           <input type="text" value={editDish} onChange={e => setEditDish(e.target.value)} placeholder="What did you have?"
-            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
         </div>
         <div className="mb-4">
           <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes</label>
           <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} placeholder="What made it special?" rows={3}
-            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }} />
+            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
         </div>
         <div className="mb-5 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
@@ -391,7 +391,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
               {currentPhoto > 0 && (
                 <button onClick={() => setCurrentPhoto(p => p - 1)}
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>‹</button>
+                  style={{ background: 'rgba(16,20,22,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>‹</button>
               )}
               {photos.map((_, i) => (
                 <button key={i} onClick={() => setCurrentPhoto(i)} className="rounded-full transition-all"
@@ -400,7 +400,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
               {currentPhoto < photos.length - 1 && (
                 <button onClick={() => setCurrentPhoto(p => p + 1)}
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>›</button>
+                  style={{ background: 'rgba(16,20,22,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>›</button>
               )}
             </div>
           )}
@@ -428,7 +428,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           <p className="text-xs" style={{ color: 'var(--slate)' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
           {priceStr && <><span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span><span className="text-xs" style={{ color: 'var(--slate)' }}>{priceStr}</span></>}
           {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(13,79,87,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? 'var(--teal-600)' : 'var(--danger)' }}>
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(16,20,22,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? 'var(--teal-600)' : 'var(--danger)' }}>
               {venueDetails.openNow ? 'Open' : 'Closed'}
             </span>
           )}

@@ -72,7 +72,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
 
   return (
     <>
-      <div className="fixed z-20" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
+      <div className="fixed z-20" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
 
       {/* Sheet — flex column with fixed footer */}
       <div className="fixed z-30 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
@@ -83,11 +83,11 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
         <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
           <div />
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
+            style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
           <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Add to wishlist</h2>
           
         </div>
@@ -133,7 +133,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
               rows={3}
               placeholder="Friend recommended it, seen it on Instagram…"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none resize-none"
-              style={{ border: '1.5px solid var(--stone-400)', background: 'var(--stone-100)' }}
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }}
             />
           </div>
 
@@ -146,7 +146,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
         </div>
 
         {/* Fixed footer — always visible */}
-        <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+        <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
           <button
             onClick={handleSave}
             disabled={saving || !canSave}

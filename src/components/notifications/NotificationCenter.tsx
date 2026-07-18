@@ -39,14 +39,14 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
 
   return (
     <Portal>
-      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
       <div className="fixed z-[70] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
         <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto" style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
             <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Notifications</h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(13,79,87,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
+            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
           </div>
 
           {/* Body */}
@@ -63,7 +63,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
               </div>
             ) : (
               items.map(item => (
-                <div key={item.id} className="flex items-start gap-3 px-5 py-3.5" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.05)' }}>
+                <div key={item.id} className="flex items-start gap-3 px-5 py-3.5" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.05)' }}>
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
                     <Icon name={item.kind === 'friend_request' ? 'friend-add' : item.kind === 'friend_accepted' ? 'friend-check' : item.kind === 'tagged' ? 'pin' : 'camera'} size={16} color="var(--teal-600)" />
                   </div>

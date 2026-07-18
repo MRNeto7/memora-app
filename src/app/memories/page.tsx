@@ -50,7 +50,7 @@ export default function MemoriesPage() {
       <div
         className="page-header px-5 pb-4"
       >
-        <h1 className="text-xl font-semibold text-white">My memories</h1>
+        <h1 className="text-xl font-semibold">My memories</h1>
         <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
           {memories.length} {memories.length === 1 ? 'memory' : 'memories'} saved
         </p>
@@ -84,7 +84,7 @@ export default function MemoriesPage() {
               {/* Month header */}
               <div className="flex items-center gap-3 mb-3">
                 <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: 'var(--slate)' }}>{month}</p>
-                <div className="flex-1 h-px" style={{ background: 'rgba(13,79,87,0.1)' }} />
+                <div className="flex-1 h-px" style={{ background: 'rgba(16,20,22,0.1)' }} />
                 <p className="text-xs" style={{ color: 'var(--slate-light)' }}>{monthMemories.length}</p>
               </div>
 
@@ -135,7 +135,7 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
       onClick={onClick}
       className="w-full text-left rounded-2xl overflow-hidden transition-transform active:scale-98"
       style={{
-        background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)',
+        background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)',
       }}
     >
       <div className="flex">

@@ -36,7 +36,7 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
           borderRadius: '50%',
           border: `3px solid ${isSelected ? 'var(--teal-600)' : '#fff'}`,
           boxShadow: isSelected
-            ? '0 4px 16px rgba(13,79,87,0.45)'
+            ? '0 4px 16px rgba(16,20,22,0.45)'
             : '0 2px 8px rgba(0,0,0,0.25)',
           background: '#f0faf4',
           display: 'flex',

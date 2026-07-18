@@ -1,59 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --teal:       #0D4F57;
-  --teal-light: #1a6b75;
-  --teal-pale:  #e8f2f3;
-  --stone:      #EAE5DD;
-  --stone-dark: #d4cdc3;
+  /* ══ EDITORIAL MONO PALETTE ═══════════════════════
+     Instagram-style: pure white surfaces, ink text,
+     light-grey buttons — photos bring the colour.
+     Variable NAMES keep their legacy ramp identity
+     (teal-* = ink scale, stone-* = paper scale) so no
+     component changes were needed; a semantic rename
+     (--ink/--paper/--accent) lands with the restyle
+     pass. Gold survives solely for ratings. */
+  --teal:       var(--teal-600);
+  --teal-light: var(--teal-400);
+  --teal-pale:  var(--teal-100);
+  --stone:      var(--stone-400);
+  --stone-dark: var(--stone-500);
   --gold:       #C9A86A;
   --gold-light: #e8d5a8;
   --gold-dark:  #a8863e;
-  --slate:      #7D878D;
-  --slate-light:#b0babe;
-  --slate-pale: #f4f5f5;
+  --slate:      #6B7280;
+  --slate-light:#9CA3AF;
+  --slate-pale: #F3F4F6;
   --brand:      var(--teal);
-  --brand-dark: #0a3d44;
+  --brand-dark: var(--teal-800);
   --brand-light: var(--teal-pale);
   --accent:     var(--gold);
 
   --nav-height: 80px;
 
-  /* ── Tonal ramps ─────────────────────────────────
-     Same brand hues, no new colors — these just name
-     the tints/shades already hardcoded across the app
-     (#0a3d44, #f5f2ed, #fafaf9, #f0ede8, …) so surfaces
-     can reference one source of truth. */
-  --teal-900: #072e33;
-  --teal-800: #0a3d44;  /* == --brand-dark */
-  --teal-700: #0b454c;
-  --teal-600: #0D4F57;  /* == --teal (base) */
-  --teal-500: #136570;
-  --teal-400: #1a6b75;  /* == --teal-light */
-  --teal-300: #4a8a91;
-  --teal-200: #9cc0c4;
-  --teal-100: #e8f2f3;  /* == --teal-pale */
+  /* Ink scale (was teal) — text and primary CTAs */
+  --teal-900: #000000;
+  --teal-800: #101214;
+  --teal-700: #131619;
+  --teal-600: #16191B;  /* primary ink */
+  --teal-500: #23272B;
+  --teal-400: #3A4045;
+  --teal-300: #6B7280;
+  --teal-200: #C4C9CE;
+  --teal-100: #F1F2F4;
 
+  /* Gold — ratings and stars only */
   --gold-900: #7d6329;
-  --gold-700: #a8863e;  /* == --gold-dark */
-  --gold-500: #C9A86A;  /* == --gold (base) */
-  --gold-300: #e8d5a8;  /* == --gold-light */
+  --gold-700: #a8863e;
+  --gold-500: #C9A86A;
+  --gold-300: #e8d5a8;
   --gold-100: #f6ecd6;
 
   --danger: #a32d2d;
 
-  --stone-500: #d4cdc3; /* == --stone-dark */
-  --stone-400: #EAE5DD; /* == --stone (base) */
-  --stone-300: #f0ede8;
-  --stone-200: #f5f2ed;
-  --stone-100: #fafaf9;
+  /* Paper scale (was stone) — surfaces and greys */
+  --stone-500: #E5E7EB; /* hairlines, borders */
+  --stone-400: #FFFFFF; /* page background, text on ink */
+  --stone-300: #F6F7F8;
+  --stone-200: #F1F2F4; /* light-grey buttons + insets */
+  --stone-100: #FAFAFA;
 
   /* ── Elevation scale ─────────────────────────────
-     Three tiers of lift, tuned in the brand teal so
-     shadows read as depth, not grey. */
-  --shadow-resting:  0 1px 2px rgba(13,79,87,0.04), 0 2px 8px rgba(13,79,87,0.06);
-  --shadow-raised:   0 2px 4px rgba(13,79,87,0.06), 0 8px 20px rgba(13,79,87,0.12);
-  --shadow-floating: 0 4px 12px rgba(7,46,51,0.10), 0 24px 48px rgba(7,46,51,0.22);
+     Neutral ink-tinted lift on white. */
+  --shadow-resting:  0 1px 2px rgba(16,20,22,0.04), 0 2px 8px rgba(16,20,22,0.05);
+  --shadow-raised:   0 2px 4px rgba(16,20,22,0.05), 0 8px 20px rgba(16,20,22,0.10);
+  --shadow-floating: 0 4px 12px rgba(16,20,22,0.08), 0 24px 48px rgba(16,20,22,0.18);
 
   /* ── Motion ──────────────────────────────────────
      One expressive spring, one soft iOS-sheet spring,
@@ -98,9 +103,10 @@ body {
 .safe-top    { padding-top: env(safe-area-inset-top, 0px); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-/* Page header — teal gradient that respects notch (Apple Sports-style depth) */
+/* Page header — clean white band that respects the notch */
 .page-header {
-  background: linear-gradient(180deg, #136570 0%, #0D4F57 60%, #0B454C 100%);
+  background: var(--stone-400);
+  border-bottom: 0.5px solid var(--stone-500);
   padding-top: env(safe-area-inset-top, 0px);
 }
 .page-header-content {
@@ -112,14 +118,14 @@ body {
    tuned variants. All lift via the elevation tokens —
    no ad-hoc shadows. */
 
-/* Canonical frosted material — light card on the stone bg.
-   .glass-card is a legacy alias for the same material. */
+/* Canonical frosted material — white card with a hairline, so edges
+   stay visible on the white page. .glass-card is a legacy alias. */
 .glass,
 .glass-card {
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   backdrop-filter: blur(20px) saturate(1.5);
-  border: 0.5px solid rgba(255, 255, 255, 0.65);
+  border: 0.5px solid rgba(16, 20, 22, 0.08);
   box-shadow: var(--shadow-resting);
 }
 
@@ -133,20 +139,20 @@ body {
 
 /* Floating pill — nav, overlay controls */
 .glass-pill {
-  background: rgba(234, 229, 221, 0.78);
+  background: rgba(255, 255, 255, 0.85);
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
   backdrop-filter: blur(24px) saturate(1.6);
-  border: 0.5px solid rgba(255, 255, 255, 0.55);
+  border: 0.5px solid rgba(16, 20, 22, 0.08);
   box-shadow: var(--shadow-raised);
 }
 
 /* Near-opaque frost for modal/sheet cards — depth without
    sacrificing text legibility over the blurred backdrop */
 .glass-modal {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.96);
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
-  border: 0.5px solid rgba(255, 255, 255, 0.7);
+  border: 0.5px solid rgba(16, 20, 22, 0.06);
   box-shadow: var(--shadow-floating);
 }
 

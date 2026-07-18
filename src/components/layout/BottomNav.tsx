@@ -65,7 +65,7 @@ export default function BottomNav() {
                   background: isActive('/') ? 'var(--gold-500)' : 'var(--teal-600)',
                   boxShadow: isActive('/')
                     ? '0 6px 24px rgba(201,168,106,0.45)'
-                    : '0 4px 20px rgba(13,79,87,0.35)',
+                    : '0 4px 20px rgba(16,20,22,0.35)',
                   border: '3px solid rgba(255,255,255,0.7)',
                   transition: 'background 0.3s ease, box-shadow 0.3s ease',
                 }}
