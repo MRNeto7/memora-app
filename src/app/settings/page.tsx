@@ -117,7 +117,7 @@ export default function SettingsPage() {
           </div>
           <button onClick={saveName} disabled={saving}
             className="w-full py-3 rounded-2xl text-sm font-semibold"
-            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving ? 0.6 : 1 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving ? 0.6 : 1 }}>
             {nameSuccess ? '✓ Saved' : saving ? 'Saving…' : 'Save name'}
           </button>
         </div>
@@ -146,7 +146,7 @@ export default function SettingsPage() {
 
           <button onClick={changePassword} disabled={savingPassword || !newPassword}
             className="w-full py-3 rounded-2xl text-sm font-semibold mb-2"
-            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: savingPassword || !newPassword ? 0.5 : 1 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: savingPassword || !newPassword ? 0.5 : 1 }}>
             {savingPassword ? 'Updating…' : 'Update password'}
           </button>
 

@@ -317,7 +317,7 @@ function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: 
     <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--slate)' }}>Free plan</p>
-        <button onClick={onLearnMore} className="press text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--teal-600)', color: 'var(--gold-500)' }}>
+        <button onClick={onLearnMore} className="press text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
           See Mimora Pro
         </button>
       </div>

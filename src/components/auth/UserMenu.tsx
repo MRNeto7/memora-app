@@ -24,8 +24,8 @@ export default function UserMenu({ email }: UserMenuProps) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-        style={{ background: '#1e7a4c' }}
+        className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold"
+        style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}
       >
         {initials}
       </button>

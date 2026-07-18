@@ -151,7 +151,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
             onClick={handleSave}
             disabled={saving || !canSave}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving || !canSave ? 0.5 : 1 }}
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving || !canSave ? 0.5 : 1 }}
           >
             {saving ? 'Saving…' : '✓ Add to wishlist'}
           </button>

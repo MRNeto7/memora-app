@@ -67,19 +67,19 @@ export default function AuthPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5"
-      style={{ background: 'var(--teal-600)' }}
+      style={{ background: 'var(--stone-400)' }}
     >
       {/* Logo */}
       <div className="flex flex-col items-center mb-8">
-        <div className="mb-4 rounded-3xl overflow-hidden" style={{ width: 96, height: 96, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+        <div className="mb-4 rounded-3xl overflow-hidden" style={{ width: 96, height: 96, boxShadow: 'var(--shadow-raised)' }}>
           <Image src="/logo.png" alt="Mimora" width={96} height={96} className="w-full h-full object-cover" priority />
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: 'var(--stone-400)' }}>Mimora</h1>
-        <p className="text-sm mt-1.5" style={{ color: 'rgba(234,229,221,0.55)' }}>Pin your food memories to the map</p>
+        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: 'var(--teal-600)' }}>Mimora</h1>
+        <p className="text-sm mt-1.5" style={{ color: 'var(--slate)' }}>Pin your food memories to the map</p>
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: 'var(--stone-400)' }}>
+      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: 'var(--stone-400)', border: '0.5px solid var(--stone-500)' }}>
 
         {/* Tab toggle */}
         <div className="flex rounded-2xl p-1 mb-6" style={{ background: 'rgba(16,20,22,0.08)' }}>
@@ -89,8 +89,8 @@ export default function AuthPage() {
               onClick={() => { setMode(m); setError(null); setSuccess(null) }}
               className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
               style={{
-                background: mode === m ? 'var(--teal-600)' : 'transparent',
-                color: mode === m ? 'var(--stone-400)' : 'var(--slate)',
+                background: mode === m ? '#fff' : 'transparent',
+                color: mode === m ? 'var(--teal-600)' : 'var(--slate)',
               }}
             >
               {m === 'signin' ? 'Sign in' : 'Create account'}
@@ -188,8 +188,8 @@ export default function AuthPage() {
             disabled={loading}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-opacity"
             style={{
-              background: 'var(--teal-600)',
-              color: 'var(--stone-400)',
+              background: 'var(--stone-200)',
+              color: 'var(--teal-600)',
               opacity: loading ? 0.6 : 1,
             }}
           >

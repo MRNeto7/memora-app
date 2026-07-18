@@ -85,18 +85,18 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
   return (
     <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 80 }}>
       {/* Header */}
-      <div style={{ background: 'var(--teal-600)', paddingTop: 48, paddingBottom: 0 }}>
+      <div style={{ background: 'var(--stone-400)', borderBottom: '0.5px solid var(--stone-500)', paddingTop: 48, paddingBottom: 0 }}>
         <div className="px-5 mb-4 flex items-center gap-3">
           <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(255,255,255,0.15)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            style={{ background: 'var(--stone-200)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16191B" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
-          <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--gold-500)' }}>
-            <span className="text-white font-bold">{initials}</span>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
+            <span className="font-bold" style={{ color: 'var(--slate)' }}>{initials}</span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">{friend.display_name ?? friend.memora_id}</h1>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{friend.memora_id} · {friend.memory_count} public {friend.memory_count === 1 ? 'memory' : 'memories'}</p>
+            <h1 className="text-lg font-semibold">{friend.display_name ?? friend.memora_id}</h1>
+            <p className="text-xs" style={{ color: 'var(--slate)' }}>{friend.memora_id} · {friend.memory_count} public {friend.memory_count === 1 ? 'memory' : 'memories'}</p>
           </div>
         </div>
 
@@ -104,7 +104,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           {(['memories', 'wishlist'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className="px-5 py-2.5 text-sm font-medium rounded-t-xl capitalize transition-all"
-              style={{ background: tab === t ? 'var(--stone-400)' : 'transparent', color: tab === t ? 'var(--teal-600)' : 'rgba(255,255,255,0.6)' }}>
+              style={{ background: tab === t ? 'var(--stone-200)' : 'transparent', color: tab === t ? 'var(--teal-600)' : 'var(--slate)' }}>
               {t === 'memories' ? `Memories (${memories.length})` : wishlistPublic ? `Wishlist (${wishlist.length})` : 'Wishlist'}
             </button>
           ))}

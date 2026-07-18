@@ -222,8 +222,8 @@ export default function CapturePage() {
           {saveError && <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{saveError}</div>}
 
           <button onClick={handleSave} disabled={saving || !locationQuery.trim()}
-            className="w-full py-4 rounded-2xl text-white font-semibold text-sm"
-            style={{ background: 'var(--teal-600)', opacity: saving || !locationQuery.trim() ? 0.5 : 1 }}>
+            className="w-full py-4 rounded-2xl font-semibold text-sm"
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving || !locationQuery.trim() ? 0.5 : 1 }}>
             {saving ? 'Saving…' : '✓ Save memory'}
           </button>
         </div>

@@ -156,19 +156,19 @@ export default function SocialPage() {
               <h2 className="font-semibold text-base mb-2" style={{ color: 'var(--teal-600)' }}>Couldn&apos;t load your friends</h2>
               <p className="text-sm mb-4" style={{ color: 'var(--slate)' }}>Check your connection and try again</p>
               <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-                style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+                style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
                 Retry
               </button>
             </div>
           ) :
           friends.length === 0 ? (
             <div className="flex flex-col items-center py-20 text-center">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--teal-600)' }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--stone-200)' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
               <h2 className="font-semibold text-base mb-2" style={{ color: 'var(--teal-600)' }}>No friends yet</h2>
               <p className="text-sm mb-4" style={{ color: 'var(--slate)', maxWidth: 240 }}>Share your Mimora ID or search for friends</p>
-              <button onClick={() => setTab('find')} className="px-5 py-2.5 rounded-2xl text-sm font-semibold" style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>Find friends</button>
+              <button onClick={() => setTab('find')} className="px-5 py-2.5 rounded-2xl text-sm font-semibold" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>Find friends</button>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -176,8 +176,8 @@ export default function SocialPage() {
                 <button key={f.friend_id} onClick={() => setSelectedFriend(f)}
                   className="w-full text-left rounded-2xl px-4 py-3.5 flex items-center gap-4"
                   style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
-                  <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--teal-600)' }}>
-                    <span className="text-white font-semibold text-sm">{(f.display_name ?? f.memora_id).slice(0, 2).toUpperCase()}</span>
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--slate)' }}>{(f.display_name ?? f.memora_id).slice(0, 2).toUpperCase()}</span>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>{f.display_name ?? f.memora_id}</p>
@@ -201,8 +201,8 @@ export default function SocialPage() {
               {requests.map(req => (
                 <div key={req.id} className="rounded-2xl px-4 py-3.5" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--teal-600)' }}>
-                      <span className="text-white font-semibold text-sm">{(req.from_user?.display_name ?? req.from_user?.memora_id ?? '?').slice(0, 2).toUpperCase()}</span>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--stone-200)' }}>
+                      <span className="font-semibold text-sm" style={{ color: 'var(--slate)' }}>{(req.from_user?.display_name ?? req.from_user?.memora_id ?? '?').slice(0, 2).toUpperCase()}</span>
                     </div>
                     <div>
                       <p className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>{req.from_user?.display_name ?? req.from_user?.memora_id}</p>
@@ -210,7 +210,7 @@ export default function SocialPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => respondRequest(req.id, true)} className="flex-1 py-2 rounded-xl text-xs font-semibold" style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>Accept</button>
+                    <button onClick={() => respondRequest(req.id, true)} className="flex-1 py-2 rounded-xl text-xs font-semibold" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>Accept</button>
                     <button onClick={() => respondRequest(req.id, false)} className="flex-1 py-2 rounded-xl text-xs font-medium" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>Decline</button>
                   </div>
                 </div>
@@ -231,15 +231,15 @@ export default function SocialPage() {
                   style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)', letterSpacing: 2, fontWeight: 600, color: 'var(--teal-600)' }} />
                 <button onClick={handleSearch} disabled={searching || !searchId.trim()}
                   className="px-4 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: searching || !searchId.trim() ? 0.5 : 1 }}>
+                  style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: searching || !searchId.trim() ? 0.5 : 1 }}>
                   {searching ? '…' : 'Find'}
                 </button>
               </div>
               {searchError && <p className="text-xs mt-2" style={{ color: 'var(--danger)' }}>{searchError}</p>}
               {searchResult && (
                 <div className="mt-3 pt-3 flex items-center gap-3" style={{ borderTop: '0.5px solid var(--stone-300)' }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--teal-600)' }}>
-                    <span className="text-white font-semibold text-sm">{(searchResult.display_name ?? searchResult.memora_id).slice(0, 2).toUpperCase()}</span>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--stone-200)' }}>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--slate)' }}>{(searchResult.display_name ?? searchResult.memora_id).slice(0, 2).toUpperCase()}</span>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>{searchResult.display_name ?? searchResult.memora_id}</p>

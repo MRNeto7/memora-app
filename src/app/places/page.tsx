@@ -113,8 +113,8 @@ export default function PlacesPage() {
               <button key={opt} onClick={() => setSortBy(opt)}
                 className="glass press flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
                 style={{
-                  background: sortBy === opt ? 'var(--teal-600)' : undefined,
-                  color: sortBy === opt ? 'var(--stone-400)' : 'var(--slate)',
+                  background: sortBy === opt ? 'var(--stone-200)' : undefined,
+                  color: sortBy === opt ? 'var(--teal-600)' : 'var(--slate)',
                   border: sortBy === opt ? '0.5px solid var(--teal-600)' : undefined,
                 }}>
                 {label}
@@ -131,7 +131,7 @@ export default function PlacesPage() {
             <h2 className="font-semibold text-base mb-2" style={{ color: 'var(--teal-600)' }}>Couldn&apos;t load your places</h2>
             <p className="text-sm mb-4" style={{ color: 'var(--slate)' }}>Check your connection and try again</p>
             <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               Retry
             </button>
           </div>
@@ -176,7 +176,7 @@ export default function PlacesPage() {
             <button
               onClick={() => setShowAddWishlist(true)}
               className="press w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               <span style={{ fontSize: 18, color: 'var(--gold-500)' }}>+</span>
               Add a restaurant
             </button>
@@ -216,8 +216,8 @@ function MemoryCard({ memory, index, onClick }: { memory: MemoryWithDetails; ind
           {photoUrl
             ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
             : <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--stone-300)' }}>
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'var(--teal-600)' }}>
-                  <span className="text-white text-xs font-bold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'var(--stone-200)' }}>
+                  <span className="text-xs font-bold" style={{ color: 'var(--slate)' }}>{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
                 </div>
               </div>
           }

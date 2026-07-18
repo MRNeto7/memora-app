@@ -57,13 +57,13 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
             style={{
               width: '100%',
               height: '100%',
-              background: 'var(--teal-600)',
+              background: 'var(--stone-200)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <span style={{ color: '#fff', fontSize: 10, fontWeight: 600 }}>
+            <span style={{ color: 'var(--slate)', fontSize: 10, fontWeight: 600 }}>
               {memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}
             </span>
           </div>

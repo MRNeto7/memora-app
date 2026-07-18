@@ -226,13 +226,13 @@ export default function PersistentMapShell() {
         <div className="flex gap-1.5 pointer-events-auto">
           <button onClick={() => setShowMemories(v => !v)}
             className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showMemories ? 'var(--teal-600)' : undefined, color: showMemories ? 'var(--stone-400)' : 'var(--slate)' }}>
+            style={{ background: showMemories ? 'var(--stone-200)' : undefined, color: showMemories ? 'var(--teal-600)' : 'var(--slate)' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showMemories ? 'var(--gold-500)' : 'var(--slate-light)' }} />
             Memories
           </button>
           <button onClick={() => setShowWishlist(v => !v)}
             className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-            style={{ background: showWishlist ? 'var(--gold-500)' : undefined, color: showWishlist ? '#fff' : 'var(--slate)' }}>
+            style={{ background: showWishlist ? 'var(--stone-200)' : undefined, color: showWishlist ? 'var(--teal-600)' : 'var(--slate)' }}>
             <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : 'var(--slate-light)' }} />
             Wishlist
           </button>
@@ -317,10 +317,10 @@ function ClusteredMarkers({
             const el = document.createElement('div')
             el.style.cssText = `
               width: 44px; height: 44px; border-radius: 50%;
-              background: var(--teal-600); border: 3px solid var(--gold-500);
+              background: #fff; border: 0.5px solid rgba(16,20,22,0.12);
               display: flex; align-items: center; justify-content: center;
-              color: #fff; font-size: 13px; font-weight: 600;
-              box-shadow: 0 4px 12px rgba(16,20,22,0.4);
+              color: #16191B; font-size: 13px; font-weight: 600;
+              box-shadow: 0 4px 12px rgba(16,20,22,0.18);
               cursor: pointer;
             `
             el.textContent = String(count)

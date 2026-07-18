@@ -65,7 +65,7 @@ export default function MemoriesPage() {
           <h2 className="font-semibold text-base mb-2" style={{ color: 'var(--teal-600)' }}>Couldn&apos;t load your memories</h2>
           <p className="text-sm mb-4" style={{ color: 'var(--slate)' }}>Check your connection and try again</p>
           <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
             Retry
           </button>
         </div>
@@ -150,9 +150,9 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
             <div className="w-full h-full flex items-center justify-center">
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: 'var(--teal-600)' }}
+                style={{ background: 'var(--stone-200)' }}
               >
-                <span className="text-white text-sm font-semibold">
+                <span className="text-sm font-semibold" style={{ color: 'var(--slate)' }}>
                   {memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}
                 </span>
               </div>

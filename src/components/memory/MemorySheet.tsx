@@ -267,8 +267,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
         {isNew && (
           <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
             <button onClick={handleSave} disabled={saving || !locationName.trim()}
-              className="press w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
-              style={{ background: 'var(--teal-600)', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
+              className="press w-full py-3.5 rounded-2xl font-semibold text-sm"
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
               {saving ? 'Saving…' : '✓ Save memory'}
             </button>
           </div>
@@ -373,8 +373,8 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
         <div className="mb-5 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
-        <button onClick={handleSaveEdit} className="press w-full py-3 rounded-2xl text-white font-semibold text-sm"
-          style={{ background: 'var(--teal-600)' }}>Save changes</button>
+        <button onClick={handleSaveEdit} className="press w-full py-3 rounded-2xl font-semibold text-sm"
+          style={{ background: 'var(--stone-200)' }}>Save changes</button>
       </div>
     )
   }
@@ -488,7 +488,7 @@ function MemoryDetailView({ memory, onUpdate }: { memory: MemoryWithDetails; onU
           {venueDetails?.website && (
             <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
               className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Website
             </a>

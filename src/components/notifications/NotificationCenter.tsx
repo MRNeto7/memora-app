@@ -74,7 +74,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
                         <p className="text-sm" style={{ color: 'var(--teal-600)' }}><span className="font-semibold">{item.name}</span> wants to add you</p>
                         <p className="text-xs mt-0.5 mb-2" style={{ color: 'var(--slate-light)' }}>{timeAgo(item.at)}</p>
                         <div className="flex gap-2">
-                          <button onClick={() => respond(item.requestId, true)} className="press px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>Accept</button>
+                          <button onClick={() => respond(item.requestId, true)} className="press px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>Accept</button>
                           <button onClick={() => respond(item.requestId, false)} className="press px-4 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>Decline</button>
                         </div>
                       </>

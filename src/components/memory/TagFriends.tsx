@@ -50,7 +50,7 @@ export function FriendChips({ friends, selected, onToggle }: {
             className="press flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
             style={{
               background: on ? 'var(--teal-600)' : '#fff',
-              color: on ? 'var(--stone-400)' : 'var(--slate)',
+              color: on ? 'var(--teal-600)' : 'var(--slate)',
               border: on ? '0.5px solid var(--teal-600)' : '0.5px solid rgba(16,20,22,0.12)',
             }}>
             {on && <Icon name="check" size={11} color="var(--gold-500)" strokeWidth={2.5} />}

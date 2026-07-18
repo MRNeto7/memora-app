@@ -391,7 +391,7 @@ export default function BulkUploadPage() {
                 {ready.length > 1 && (
                   <button onClick={saveAll} disabled={savingAll}
                     className="press text-xs px-3 py-1.5 rounded-lg font-semibold"
-                    style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: savingAll ? 0.6 : 1 }}>
+                    style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: savingAll ? 0.6 : 1 }}>
                     {savingAll ? (saveProgress ? `Saving ${saveProgress.done} of ${saveProgress.total}…` : 'Saving…') : `Save all (${ready.length})`}
                   </button>
                 )}
@@ -421,12 +421,12 @@ export default function BulkUploadPage() {
 
             {pending.length === 0 && saved.length > 0 && (
               <div className="mt-4 rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
-                <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--teal-600)' }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--stone-200)' }}>
                   <Icon name="check" size={20} color="var(--gold-500)" strokeWidth={2.5} />
                 </div>
                 <p className="font-semibold" style={{ color: 'var(--teal-600)' }}>All done!</p>
                 <p className="text-sm mt-1 mb-4" style={{ color: 'var(--slate)' }}>{saved.length} {saved.length === 1 ? 'memory' : 'memories'} saved to your map</p>
-                <Link href="/" className="inline-block px-6 py-3 rounded-2xl text-sm font-semibold no-underline" style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+                <Link href="/" className="inline-block px-6 py-3 rounded-2xl text-sm font-semibold no-underline" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
                   View on map
                 </Link>
               </div>
@@ -450,7 +450,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
   if (group.saved) {
     return (
       <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#f0faf4', border: '1px solid rgba(16,20,22,0.15)' }}>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--teal-600)' }}>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div>
@@ -546,7 +546,7 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
         <div className="flex gap-2 pb-1">
           <button onClick={onSave} disabled={group.saving || !group.locationQuery.trim()}
             className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: group.saving || !group.locationQuery.trim() ? 0.5 : 1 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: group.saving || !group.locationQuery.trim() ? 0.5 : 1 }}>
             {group.saving ? 'Saving…' : '✓ Save memory'}
           </button>
           <button onClick={onDismiss}

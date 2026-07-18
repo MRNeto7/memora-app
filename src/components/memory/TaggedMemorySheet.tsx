@@ -137,7 +137,7 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
             <div className="flex-shrink-0 px-5 pt-3 pb-4 flex flex-col gap-2" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
               <button onClick={handleSaveToProfile} disabled={saving}
                 className="press w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving ? 0.6 : 1 }}>
+                style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving ? 0.6 : 1 }}>
                 <Icon name="bookmark" size={15} color="var(--gold-500)" />
                 {saving ? 'Saving…' : 'Save to my memories'}
               </button>

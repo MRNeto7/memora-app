@@ -200,7 +200,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         <div className="flex-shrink-0 px-5 pt-3 pb-5" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
           <button onClick={handleSave} disabled={saving}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-            style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving ? 0.6 : 1 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving ? 0.6 : 1 }}>
             {saving ? 'Saving…' : '✓ Save memory'}
           </button>
           <p className="text-center text-xs mt-2" style={{ color: 'var(--slate-light)' }}>This will remove it from your wishlist</p>

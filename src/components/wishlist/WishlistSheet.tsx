@@ -149,7 +149,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
           {!editing && (
             <button onClick={() => setConverting(true)}
               className="press w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 mb-2"
-              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
@@ -210,7 +210,7 @@ function VenueWebsiteButton({ placeId, venueName, address }: { placeId: string |
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-      style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: ready ? 1 : 0.7, flex: 1, padding: '12px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, textAlign: 'center', display: 'block', lineHeight: 1 }}>
+      style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: ready ? 1 : 0.7, flex: 1, padding: '12px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, textAlign: 'center', display: 'block', lineHeight: 1 }}>
       {ready ? label : '…'}
     </a>
   )

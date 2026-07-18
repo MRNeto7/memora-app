@@ -51,10 +51,10 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="page-enter min-h-screen flex flex-col items-center justify-center px-5" style={{ background: 'var(--teal-600)' }}>
-      <h1 className="text-2xl font-semibold mb-6" style={{ color: 'var(--stone-400)' }}>Reset password</h1>
+    <div className="page-enter min-h-screen flex flex-col items-center justify-center px-5" style={{ background: 'var(--stone-400)' }}>
+      <h1 className="text-2xl font-semibold mb-6" style={{ color: 'var(--teal-600)' }}>Reset password</h1>
 
-      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: 'var(--stone-400)' }}>
+      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: 'var(--stone-400)', border: '0.5px solid var(--stone-500)' }}>
         {status === 'verifying' && (
           <p className="text-sm text-center py-6" style={{ color: 'var(--slate)' }}>Checking your reset link…</p>
         )}
@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
             <p className="text-xs mb-5" style={{ color: 'var(--slate)' }}>Request a new reset link from the sign-in screen.</p>
             <button onClick={() => router.push('/auth')}
               className="px-6 py-3 rounded-2xl text-sm font-semibold"
-              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               Back to sign in
             </button>
           </div>
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
 
             <button type="submit" disabled={saving}
               className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-              style={{ background: 'var(--teal-600)', color: 'var(--stone-400)', opacity: saving ? 0.6 : 1 }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving ? 0.6 : 1 }}>
               {saving ? 'Saving…' : 'Set new password'}
             </button>
           </form>
