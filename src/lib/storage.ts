@@ -102,25 +102,52 @@ export function thumbPath(path: string): string {
 const backfillAttempted = new Set<string>()
 
 /**
- * Signed URL for a photo's thumbnail, falling back to the full image
+ * Working URL for a photo's thumbnail, falling back to the full image
  * when no thumb exists (uploads that predate thumbnails). Own photos
  * get their thumb quietly backfilled in the background so the map
  * gets faster with use.
+ *
+ * Signed URLs are NOT trusted blindly: Supabase signs paths without
+ * checking the object exists (the batch endpoint especially), so a
+ * pre-thumbnail photo gets a validly-signed URL that 404s and renders
+ * a blank <img>. The thumb's pixels are fetched here — success feeds
+ * the offline cache; failure means "no thumb yet" → backfill + full
+ * image, and the dead cache entry is scrubbed.
  */
 export async function getThumbUrl(supabase: Supabase, path: string): Promise<string | null> {
   const tp = thumbPath(path)
   const offline = await fromBlobCache(tp)
   if (offline) return offline
 
-  const cached = getCached(tp)
-  if (cached) { cacheBlobInBackground(tp, cached); return cached }
+  let url = getCached(tp)
+  if (!url) {
+    const { data } = await supabase.storage.from('memory-photos').createSignedUrl(tp, SIGN_TTL_SECONDS)
+    if (data?.signedUrl) {
+      url = data.signedUrl
+      memoryCache.set(tp, { url, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 })
+      persistToSession()
+    }
+  }
 
-  const { data } = await supabase.storage.from('memory-photos').createSignedUrl(tp, SIGN_TTL_SECONDS)
-  if (data?.signedUrl) {
-    memoryCache.set(tp, { url: data.signedUrl, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 })
-    persistToSession()
-    cacheBlobInBackground(tp, data.signedUrl)
-    return data.signedUrl
+  if (url) {
+    try {
+      const res = await fetch(url)
+      if (res.ok) {
+        const blob = await res.blob()
+        void putBlob(tp, blob)
+        const obj = URL.createObjectURL(blob)
+        objectUrls.set(tp, obj)
+        return obj
+      }
+      // Signed-but-missing object — drop the poisoned entry so a future
+      // call re-checks after the backfill lands.
+      memoryCache.delete(tp)
+      persistToSession()
+    } catch {
+      // Network failure (offline, blocked) — the signed URL may still
+      // work in an <img>, so serve it rather than falling to full size.
+      return url
+    }
   }
 
   void backfillThumb(supabase, path)
