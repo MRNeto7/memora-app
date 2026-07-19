@@ -71,9 +71,13 @@ export default function PersistentMapShell() {
   }
 
   async function fetchWishlist() {
+    const { data: { session } } = await supabase.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) return
     const { data, error } = await supabase
       .from('wishlists')
       .select('id, notes, priority, added_at, venue:venues(id, name, lat, lng, address, google_place_id)')
+      .eq('user_id', uid)
     if (error) throw error
     if (data) {
       const mapped = data.filter(w => w.venue).map(w => ({
@@ -89,9 +93,15 @@ export default function PersistentMapShell() {
   }
 
   async function fetchMemories() {
+    // Owner-scoped — RLS also exposes friends' shared memories, which must
+    // not appear as your own pins
+    const { data: { session } } = await supabase.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) return
     const { data, error } = await supabase
       .from('memories')
       .select('*, venue:venues(*), memory_photos(*)')
+      .eq('user_id', uid)
       .order('visited_at', { ascending: false })
     if (error) throw error
     if (data) {

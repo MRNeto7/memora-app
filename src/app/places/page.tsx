@@ -42,9 +42,15 @@ export default function PlacesPage() {
   const supabase = createClient()
 
   async function fetchAll() {
+    // Explicit owner scoping — RLS also grants read on FRIENDS' shared
+    // memories (their profile view), so an unscoped query pulls those
+    // into your own lists.
+    const { data: { session } } = await supabase.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) { setLoading(false); return }
     const [{ data: mems, error: memError }, { data: wish, error: wishError }] = await Promise.all([
-      supabase.from('memories').select('*, venue:venues(*), memory_photos(*)').order('visited_at', { ascending: false }),
-      supabase.from('wishlists').select('*, venue:venues(*)').order('priority', { ascending: false }).order('added_at', { ascending: false }),
+      supabase.from('memories').select('*, venue:venues(*), memory_photos(*)').eq('user_id', uid).order('visited_at', { ascending: false }),
+      supabase.from('wishlists').select('*, venue:venues(*)').eq('user_id', uid).order('priority', { ascending: false }).order('added_at', { ascending: false }),
     ])
     setLoadError(Boolean(memError || wishError))
     if (mems) { setMemories(mems as MemoryWithDetails[]); void saveCached(supabase, CACHE_KEYS.memories, mems) }

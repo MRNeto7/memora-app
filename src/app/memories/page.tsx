@@ -16,9 +16,14 @@ export default function MemoriesPage() {
   const supabase = createClient()
 
   async function fetchMemories() {
+    // Owner-scoped — RLS also exposes friends' shared memories
+    const { data: { session } } = await supabase.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) { setLoading(false); return }
     const { data, error } = await supabase
       .from('memories')
       .select('*, venue:venues(*), memory_photos(*)')
+      .eq('user_id', uid)
       .order('visited_at', { ascending: false })
     if (error) setLoadError(true)
     else {
