@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrls, thumbPath } from '@/lib/storage'
+import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { useNotifications, NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
@@ -74,13 +75,17 @@ export default function PersistentMapShell() {
       .from('wishlists')
       .select('id, notes, priority, added_at, venue:venues(id, name, lat, lng, address, google_place_id)')
     if (error) throw error
-    if (data) setWishlist(data.filter(w => w.venue).map(w => ({
-      ...w.venue!,
-      wishlistId: w.id,
-      wishlistNotes: w.notes,
-      wishlistPriority: w.priority,
-      wishlistAddedAt: w.added_at,
-    })))
+    if (data) {
+      const mapped = data.filter(w => w.venue).map(w => ({
+        ...w.venue!,
+        wishlistId: w.id,
+        wishlistNotes: w.notes,
+        wishlistPriority: w.priority,
+        wishlistAddedAt: w.added_at,
+      }))
+      setWishlist(mapped)
+      void saveCached(supabase, CACHE_KEYS.wishlistMap, mapped)
+    }
   }
 
   async function fetchMemories() {
@@ -91,6 +96,7 @@ export default function PersistentMapShell() {
     if (error) throw error
     if (data) {
       setMemories(data as MemoryWithDetails[])
+      void saveCached(supabase, CACHE_KEYS.memories, data)
       // Warm the signed-URL cache for every pin's thumbnail in ONE
       // round-trip, instead of a request per pin as markers mount.
       const pinThumbs = (data as MemoryWithDetails[])
@@ -109,6 +115,23 @@ export default function PersistentMapShell() {
       setLoadError(true)
     }
   }
+
+  // Hydrate pins from the offline snapshot for instant paint (and
+  // airplane mode) — the network refresh below replaces it when it lands.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const [mems, wish] = await Promise.all([
+        loadCached<MemoryWithDetails[]>(supabase, CACHE_KEYS.memories),
+        loadCached<WishlistVenue[]>(supabase, CACHE_KEYS.wishlistMap),
+      ])
+      if (cancelled) return
+      if (mems) setMemories(prev => (prev.length === 0 ? mems : prev))
+      if (wish) setWishlist(prev => (prev.length === 0 ? wish : prev))
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Refetch whenever the map becomes visible again — cheap data refresh,
   // no map remount (so no billed Maps load on tab switches).
@@ -150,7 +173,7 @@ export default function PersistentMapShell() {
           gestureHandling="greedy"
           style={{ width: '100%', height: '100%' }}
         >
-          {showWishlist && wishlist.map(venue => (
+          {showWishlist && wishlist.filter(v => !(v.lat === 0 && v.lng === 0)).map(venue => (
             <AdvancedMarker
               key={`wish-${venue.id}`}
               position={{ lat: venue.lat, lng: venue.lng }}
@@ -165,8 +188,8 @@ export default function PersistentMapShell() {
             onSelect={(m) => { setSelected(m); setShowAddSheet(false) }}
           />
           <FitToData points={[
-            ...memories.filter(m => m.venue).map(m => ({ lat: m.venue!.lat, lng: m.venue!.lng })),
-            ...wishlist.map(v => ({ lat: v.lat, lng: v.lng })),
+            ...memories.filter(m => m.venue && !(m.venue.lat === 0 && m.venue.lng === 0)).map(m => ({ lat: m.venue!.lat, lng: m.venue!.lng })),
+            ...wishlist.filter(v => !(v.lat === 0 && v.lng === 0)).map(v => ({ lat: v.lat, lng: v.lng })),
           ]} />
         </Map>
 
@@ -285,19 +308,35 @@ export default function PersistentMapShell() {
   )
 }
 
-// Fits the map to the user's pins once they load (instead of staying on the
-// hardcoded London default). Runs once; the user can pan freely after.
+// Opens the map on the user's HOME CLUSTER — the densest group of pins —
+// rather than the bounding box of everything. Fitting all pins meant one
+// holiday (e.g. Madeira + a London life) centred the camera mid-ocean.
+// Distant trips stay one pan away. Runs once; the user pans freely after.
+const CLUSTER_RADIUS_DEG = 1.5 // ≈150km — city-scale neighbourhood
+
+function homeCluster(points: { lat: number; lng: number }[]): { lat: number; lng: number }[] {
+  let best = points
+  let bestCount = 1
+  for (const p of points) {
+    const near = points.filter(q =>
+      Math.abs(q.lat - p.lat) <= CLUSTER_RADIUS_DEG && Math.abs(q.lng - p.lng) <= CLUSTER_RADIUS_DEG)
+    if (near.length > bestCount) { bestCount = near.length; best = near }
+  }
+  return best
+}
+
 function FitToData({ points }: { points: { lat: number; lng: number }[] }) {
   const map = useMap()
   const fitted = useRef(false)
   useEffect(() => {
     if (!map || fitted.current || points.length === 0) return
-    if (points.length === 1) {
-      map.setCenter(points[0])
+    const home = homeCluster(points)
+    if (home.length === 1) {
+      map.setCenter(home[0])
       map.setZoom(14)
     } else {
       const bounds = new google.maps.LatLngBounds()
-      points.forEach(p => bounds.extend(p))
+      home.forEach(p => bounds.extend(p))
       map.fitBounds(bounds, 80)
     }
     fitted.current = true
@@ -341,16 +380,24 @@ function ClusteredMarkers({
     }
   }, [map])
 
+  // Refetches produce a new `memories` array with mostly the same ids, so
+  // React reuses the AdvancedMarker elements and their ref callbacks never
+  // re-fire. Rebuild the clusterer from the still-mounted markers instead
+  // of wiping it — wiping left it empty and the pins vanished until a
+  // toggle forced a remount.
   useEffect(() => {
     if (!clusterer.current) return
     clusterer.current.clearMarkers()
-    markerRefs.current = {}
+    const live = Object.values(markerRefs.current)
+    if (live.length > 0) clusterer.current.addMarkers(live as unknown as google.maps.Marker[])
   }, [memories])
 
   return (
     <>
       {memories.map((memory) => {
-        if (!memory.venue) return null
+        // No venue, or a venue saved without a location (0,0 = "Null
+        // Island" in the Atlantic) — nothing sensible to pin.
+        if (!memory.venue || (memory.venue.lat === 0 && memory.venue.lng === 0)) return null
         return (
           <AdvancedMarker
             key={memory.id}
@@ -360,6 +407,8 @@ function ClusteredMarkers({
               if (marker && clusterer.current) {
                 markerRefs.current[memory.id] = marker
                 clusterer.current.addMarker(marker as unknown as google.maps.Marker)
+              } else if (!marker) {
+                delete markerRefs.current[memory.id]
               }
             }}
           >

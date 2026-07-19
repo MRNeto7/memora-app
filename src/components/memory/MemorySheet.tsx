@@ -652,7 +652,7 @@ function DeleteMemoryButton({ memoryId, onDeleted }: { memoryId: string; onDelet
     return (
       <div className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(163,45,45,0.08)', border: '0.5px solid rgba(163,45,45,0.2)' }}>
         <p className="text-xs flex-1" style={{ color: '#a32d2d' }}>Delete this memory and its photos?</p>
-        <button onClick={() => setConfirming(false)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>Cancel</button>
+        <button onClick={() => setConfirming(false)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>Cancel</button>
         <button onClick={handleDelete} disabled={deleting} className="text-xs px-2.5 py-1.5 rounded-lg font-semibold" style={{ background: '#a32d2d', color: '#fff', opacity: deleting ? 0.6 : 1 }}>
           {deleting ? '…' : 'Delete'}
         </button>

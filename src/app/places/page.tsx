@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrl, getThumbUrl } from '@/lib/storage'
+import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import MemorySheet from '@/components/memory/MemorySheet'
 import WishlistSheet from '@/components/wishlist/WishlistSheet'
@@ -46,8 +47,8 @@ export default function PlacesPage() {
       supabase.from('wishlists').select('*, venue:venues(*)').order('priority', { ascending: false }).order('added_at', { ascending: false }),
     ])
     setLoadError(Boolean(memError || wishError))
-    if (mems) setMemories(mems as MemoryWithDetails[])
-    if (wish) setWishlist(wish as WishlistItem[])
+    if (mems) { setMemories(mems as MemoryWithDetails[]); void saveCached(supabase, CACHE_KEYS.memories, mems) }
+    if (wish) { setWishlist(wish as WishlistItem[]); void saveCached(supabase, CACHE_KEYS.wishlistList, wish) }
     setLoading(false)
   }
 
@@ -58,8 +59,21 @@ export default function PlacesPage() {
   }
 
   useEffect(() => {
-    const load = async () => { await fetchAll() }
+    // Offline snapshot first for instant paint, then the network refresh
+    const load = async () => {
+      const [mems, wish] = await Promise.all([
+        loadCached<MemoryWithDetails[]>(supabase, CACHE_KEYS.memories),
+        loadCached<WishlistItem[]>(supabase, CACHE_KEYS.wishlistList),
+      ])
+      if (mems || wish) {
+        if (mems) setMemories(mems)
+        if (wish) setWishlist(wish)
+        setLoading(false)
+      }
+      await fetchAll()
+    }
     load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Filter, then sort and group
@@ -122,7 +136,6 @@ export default function PlacesPage() {
                 style={{
                   background: sortBy === opt ? 'var(--stone-200)' : undefined,
                   color: sortBy === opt ? 'var(--teal-600)' : 'var(--slate)',
-                  border: sortBy === opt ? '0.5px solid var(--teal-600)' : undefined,
                 }}>
                 {label}
               </button>
@@ -137,21 +150,21 @@ export default function PlacesPage() {
               <button key={t.value} onClick={() => setVenueFilter(venueFilter === t.value ? null : t.value)}
                 className="flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1"
                 style={{
-                  background: venueFilter === t.value ? '#0D4F57' : '#fff',
-                  color: venueFilter === t.value ? '#EAE5DD' : '#7D878D',
-                  border: `0.5px solid ${venueFilter === t.value ? '#0D4F57' : 'rgba(13,79,87,0.12)'}`,
+                  background: venueFilter === t.value ? 'var(--stone-200)' : '#fff',
+                  color: venueFilter === t.value ? 'var(--teal-600)' : 'var(--slate)',
+                  border: '0.5px solid rgba(16,20,22,0.12)',
                 }}>
                 <span style={{ fontSize: 11 }}>{t.emoji}</span>{t.label}
               </button>
             ))}
-            <div className="flex-shrink-0" style={{ width: 1, height: 18, background: 'rgba(13,79,87,0.15)' }} />
+            <div className="flex-shrink-0" style={{ width: 1, height: 18, background: 'rgba(16,20,22,0.15)' }} />
             {MEAL_TYPES.map(t => (
               <button key={t.value} onClick={() => setMealFilter(mealFilter === t.value ? null : t.value)}
                 className="flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1"
                 style={{
-                  background: mealFilter === t.value ? '#C9A86A' : '#fff',
-                  color: mealFilter === t.value ? '#fff' : '#7D878D',
-                  border: `0.5px solid ${mealFilter === t.value ? '#C9A86A' : 'rgba(13,79,87,0.12)'}`,
+                  background: mealFilter === t.value ? 'var(--stone-200)' : '#fff',
+                  color: mealFilter === t.value ? 'var(--teal-600)' : 'var(--slate)',
+                  border: '0.5px solid rgba(16,20,22,0.12)',
                 }}>
                 <span style={{ fontSize: 11 }}>{t.emoji}</span>{t.label}
               </button>
@@ -159,17 +172,19 @@ export default function PlacesPage() {
           </div>
         )}
 
-        {(venueFilter || mealFilter) && filteredMemories.length === 0 && !loading && (
-          <div className="rounded-2xl p-6 text-center" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
-            <p className="text-sm mb-1" style={{ color: '#0D4F57' }}>No memories match these filters</p>
-            <button onClick={() => { setVenueFilter(null); setMealFilter(null) }} className="text-xs font-semibold" style={{ color: '#C9A86A' }}>
+        {tab === 'memories' && (venueFilter || mealFilter) && filteredMemories.length === 0 && !loading && (
+          <div className="rounded-2xl p-6 text-center" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--teal-600)' }}>No memories match these filters</p>
+            <button onClick={() => { setVenueFilter(null); setMealFilter(null) }} className="text-xs font-semibold" style={{ color: 'var(--gold-700)' }}>
               Clear filters
             </button>
           </div>
         )}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <p className="text-sm" style={{ color: 'var(--slate)' }}>Loading…</p>
+          <div className="flex flex-col gap-3 pt-1">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="rounded-2xl animate-pulse" style={{ height: 88, background: 'var(--stone-200)', opacity: 1 - i * 0.2 }} />
+            ))}
           </div>
         ) : loadError ? (
           <div className="flex flex-col items-center justify-center py-24 px-6 text-center">

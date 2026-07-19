@@ -1,6 +1,35 @@
 import type { createClient } from '@/lib/supabase/client'
+import { getBlob, putBlob } from '@/lib/imageCache'
 
 type Supabase = ReturnType<typeof createClient>
+
+/* ── Offline blob layer ──────────────────────────────
+   Images render from the IndexedDB cache when available (works in
+   airplane mode), and every image served from the network is cached
+   in the background. Object URLs are kept for the session — small,
+   bounded by the photo count, and revoking mid-render breaks <img>. */
+
+const objectUrls = new Map<string, string>()
+const blobFetchInFlight = new Set<string>()
+const VIDEO_RE = /\.(mp4|mov|webm|m4v)$/i
+
+async function fromBlobCache(path: string): Promise<string | null> {
+  const existing = objectUrls.get(path)
+  if (existing) return existing
+  const blob = await getBlob(path)
+  if (!blob) return null
+  const url = URL.createObjectURL(blob)
+  objectUrls.set(path, url)
+  return url
+}
+
+function cacheBlobInBackground(path: string, url: string) {
+  if (typeof window === 'undefined' || VIDEO_RE.test(path) || blobFetchInFlight.has(path)) return
+  blobFetchInFlight.add(path)
+  void fetch(url)
+    .then(async r => { if (r.ok) await putBlob(path, await r.blob()) })
+    .catch(() => { blobFetchInFlight.delete(path) }) // retry later if it failed
+}
 
 // Signed URLs must stay stable across page navigations: a fresh URL has a
 // fresh token, which defeats the browser's HTTP cache and re-downloads every
@@ -44,13 +73,17 @@ function getCached(path: string): string | null {
 }
 
 export async function getSignedPhotoUrl(supabase: Supabase, path: string): Promise<string | null> {
+  const offline = await fromBlobCache(path)
+  if (offline) return offline
+
   const cached = getCached(path)
-  if (cached) return cached
+  if (cached) { cacheBlobInBackground(path, cached); return cached }
 
   const { data } = await supabase.storage.from('memory-photos').createSignedUrl(path, SIGN_TTL_SECONDS)
   if (!data?.signedUrl) return null
   memoryCache.set(path, { url: data.signedUrl, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 })
   persistToSession()
+  cacheBlobInBackground(path, data.signedUrl)
   return data.signedUrl
 }
 
@@ -76,13 +109,17 @@ const backfillAttempted = new Set<string>()
  */
 export async function getThumbUrl(supabase: Supabase, path: string): Promise<string | null> {
   const tp = thumbPath(path)
+  const offline = await fromBlobCache(tp)
+  if (offline) return offline
+
   const cached = getCached(tp)
-  if (cached) return cached
+  if (cached) { cacheBlobInBackground(tp, cached); return cached }
 
   const { data } = await supabase.storage.from('memory-photos').createSignedUrl(tp, SIGN_TTL_SECONDS)
   if (data?.signedUrl) {
     memoryCache.set(tp, { url: data.signedUrl, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 })
     persistToSession()
+    cacheBlobInBackground(tp, data.signedUrl)
     return data.signedUrl
   }
 
@@ -105,6 +142,7 @@ async function backfillThumb(supabase: Supabase, path: string) {
     const thumb = await makeThumbnail(new File([blob], path.split('/').pop() ?? 'photo.jpg', { type: blob.type || 'image/jpeg' }))
     if (!thumb) return
     await supabase.storage.from('memory-photos').upload(thumbPath(path), thumb, { upsert: true, contentType: thumb.type })
+    void putBlob(thumbPath(path), thumb) // freshly generated — cache it locally too
   } catch { /* best-effort — the full image already rendered */ }
 }
 
@@ -126,6 +164,9 @@ export async function getSignedPhotoUrls(supabase: Supabase, paths: string[]): P
       if (item.signedUrl && item.path) {
         result.set(item.path, item.signedUrl)
         memoryCache.set(item.path, { url: item.signedUrl, expiresAt })
+        // Pull the pixels into the offline cache too (browser caps
+        // concurrency per host, so firing all of these is fine)
+        cacheBlobInBackground(item.path, item.signedUrl)
       }
     }
     persistToSession()

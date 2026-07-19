@@ -13,7 +13,7 @@ export default function CameraCapture({ onFiles, onClose }: {
 }) {
   return (
     <Portal>
-      <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center px-6" style={{ background: '#0C2A2E' }}>
+      <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center px-6" style={{ background: 'var(--teal-800)' }}>
         {/* Close */}
         <button onClick={onClose} aria-label="Close"
           className="absolute w-10 h-10 rounded-full flex items-center justify-center"
