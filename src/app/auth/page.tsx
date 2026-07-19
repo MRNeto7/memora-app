@@ -42,10 +42,14 @@ export default function AuthPage() {
     setLoading(true)
 
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message)
+      } else if (data.session) {
+        // Email confirmation is off — the account is live and signed in
+        router.push('/')
       } else {
+        // Confirmation is on — no session until the emailed link is tapped
         setSuccess('Account created! Check your email to confirm, then sign in.')
         setMode('signin')
       }
