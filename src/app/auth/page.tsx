@@ -13,6 +13,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -42,7 +43,11 @@ export default function AuthPage() {
     setLoading(true)
 
     if (mode === 'signup') {
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      const { data, error } = await supabase.auth.signUp({
+        email, password,
+        // Picked up by handle_new_user (010); email prefix is the fallback
+        options: { data: { display_name: displayName.trim() } },
+      })
       if (error) {
         setError(error.message)
       } else if (data.session) {
@@ -103,6 +108,23 @@ export default function AuthPage() {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Name (signup only) — becomes the display name friends see */}
+          {mode === 'signup' && (
+            <div className="mb-3">
+              <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Your name</label>
+              <input
+                type="text"
+                placeholder="How friends will see you"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoComplete="name"
+                maxLength={40}
+                className="w-full text-sm px-4 py-3 rounded-xl outline-none"
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
+              />
+            </div>
+          )}
+
           {/* Email */}
           <div className="mb-3">
             <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Email</label>
