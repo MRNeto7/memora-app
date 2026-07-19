@@ -29,6 +29,7 @@ export default function SocialPage() {
   const [myMimoraId, setMyMimoraId] = useState<string>('')
   const [searchId, setSearchId] = useState('')
   const [searchResult, setSearchResult] = useState<{ id: string; memora_id: string; display_name: string | null } | null>(null)
+  const [requestStatus, setRequestStatus] = useState<'none' | 'sending' | 'pending' | 'friends'>('none')
   const [searchError, setSearchError] = useState('')
   const [searching, setSearching] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -95,21 +96,37 @@ export default function SocialPage() {
     // under RLS; this looks up exact IDs with minimal fields (migration 008)
     const { data } = await supabase.rpc('find_user_by_memora_id', { search_id: searchId.trim() })
     const match = data?.[0]
-    if (match) setSearchResult({ id: match.id, display_name: match.display_name, memora_id: match.memora_id ?? '' })
-    else setSearchError('No user found with that Mimora ID.')
+    if (!match) { setSearchError('No user found with that Mimora ID.'); setSearching(false); return }
+
+    // Reflect any existing relationship so the button shows the true state
+    let status: 'none' | 'pending' | 'friends' = 'none'
+    const { data: { session } } = await supabase.auth.getSession()
+    const uid = session?.user?.id
+    if (uid) {
+      const { data: existing } = await supabase.from('friend_requests').select('status')
+        .or(`and(from_user_id.eq.${uid},to_user_id.eq.${match.id}),and(from_user_id.eq.${match.id},to_user_id.eq.${uid})`)
+      const s = existing?.[0]?.status
+      if (s === 'accepted') status = 'friends'
+      else if (s === 'pending') status = 'pending'
+    }
+    setRequestStatus(status)
+    setSearchResult({ id: match.id, display_name: match.display_name, memora_id: match.memora_id ?? '' })
     setSearching(false)
   }
 
   async function sendRequest(toUserId: string) {
+    if (requestStatus !== 'none') return
+    setRequestStatus('sending') // disable instantly — no double-tap window
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setRequestStatus('none'); return }
     const { error } = await supabase.from('friend_requests').insert({ from_user_id: user.id, to_user_id: toUserId })
-    if (error) {
-      // 23505 = unique violation — a request between these users already exists
-      toast(error.code === '23505' ? 'Request already sent' : 'Could not send request', 'error')
+    if (error && error.code !== '23505') {
+      // 23505 = unique violation — a request already exists, so Pending is right
+      setRequestStatus('none')
+      toast('Could not send request', 'error')
       return
     }
-    setSearchResult(null); setSearchId('')
+    setRequestStatus('pending')
     toast('Friend request sent')
   }
 
@@ -255,7 +272,13 @@ export default function SocialPage() {
                     <p className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>{searchResult.display_name ?? searchResult.memora_id}</p>
                     <p className="text-xs" style={{ color: 'var(--slate)' }}>{searchResult.memora_id}</p>
                   </div>
-                  <button onClick={() => sendRequest(searchResult.id)} className="px-3 py-1.5 rounded-xl text-xs font-semibold" style={{ background: 'var(--gold-500)', color: '#fff' }}>Add</button>
+                  {requestStatus === 'none' ? (
+                    <button onClick={() => sendRequest(searchResult.id)} className="press px-3 py-1.5 rounded-xl text-xs font-semibold" style={{ background: 'var(--gold-500)', color: '#fff' }}>Add</button>
+                  ) : (
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-semibold" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
+                      {requestStatus === 'friends' ? '✓ Friends' : requestStatus === 'sending' ? '…' : 'Pending'}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
