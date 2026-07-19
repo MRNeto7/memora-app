@@ -8,13 +8,13 @@
 	"ios": {
 		"contentInset": "never",
 		"scrollEnabled": false,
-		"backgroundColor": "#0D4F57"
+		"backgroundColor": "#FFFFFF"
 	},
 	"plugins": {
 		"SplashScreen": {
 			"launchShowDuration": 2000,
 			"launchAutoHide": true,
-			"backgroundColor": "#0D4F57",
+			"backgroundColor": "#FFFFFF",
 			"showSpinner": false,
 			"splashFullScreen": true,
 			"splashImmersive": true

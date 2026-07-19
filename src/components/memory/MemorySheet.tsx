@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
-import { getSignedPhotoUrl } from '@/lib/storage'
+import { getSignedPhotoUrl, getThumbUrl, thumbPath } from '@/lib/storage'
 import { filterMediaFiles, uploadPhotoWithThumb } from '@/lib/uploads'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { VenueType, MealType, venueTypeFromGoogle, mealTypeFromDate, venueTypeLabel, mealTypeLabel } from '@/lib/categories'
@@ -14,7 +15,7 @@ import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
-import TagFriendsSection, { useFriends, FriendChips } from './TagFriends'
+import TagFriendsSection, { useFriends, FriendChips, AddFriendsHint } from './TagFriends'
 import LinkedPhotos from './LinkedPhotos'
 import Lightbox from '@/components/media/Lightbox'
 import { toast } from '@/lib/toast'
@@ -51,8 +52,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [mealType, setMealType] = useState<MealType | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const friends = useFriends()
+  const { friends, loaded: friendsLoaded } = useFriends()
   const [tagIds, setTagIds] = useState<Set<string>>(new Set())
+  const router = useRouter()
   void debounceRef
 
   const overall = calcOverall(detailRatings)
@@ -258,17 +260,22 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                   className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
               </div>
 
-              {/* Tag friends — they'll be invited to save their own copy */}
-              {friends.length > 0 && (
+              {/* Tag friends — they'll be invited to save their own copy.
+                  No friends yet: point at Social, where Mimora IDs are added. */}
+              {friendsLoaded && (
                 <div className="mb-4">
                   <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Who was there? <span style={{ fontWeight: 400 }}>(optional)</span></label>
-                  <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
-                    setTagIds(prev => {
-                      const next = new Set(prev)
-                      if (next.has(id)) next.delete(id); else next.add(id)
-                      return next
-                    })
-                  }} />
+                  {friends.length > 0 ? (
+                    <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
+                      setTagIds(prev => {
+                        const next = new Set(prev)
+                        if (next.has(id)) next.delete(id); else next.add(id)
+                        return next
+                      })
+                    }} />
+                  ) : (
+                    <AddFriendsHint onAddFriends={() => { onClose(); router.push('/social') }} />
+                  )}
                 </div>
               )}
 
@@ -291,6 +298,18 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
     </div>
     </Portal>
   )
+}
+
+// Thumb for the edit-mode photo strip
+function EditPhotoThumb({ path }: { path: string }) {
+  const supabase = createClient()
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    getThumbUrl(supabase, path).then(u => { if (u) setUrl(u) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path])
+  if (!url) return <div className="w-full h-full rounded-xl animate-pulse" style={{ background: 'var(--stone-200)' }} />
+  return <img src={url} className="w-full h-full object-cover rounded-xl" style={{ display: 'block' }} />
 }
 
 // ── Star display ──
@@ -321,6 +340,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
   const [editing, setEditing] = useState(false)
   const supabase = createClient()
+  const router = useRouter()
 
   const [editDish, setEditDish] = useState(memory.dish_name ?? '')
   const [editNotes, setEditNotes] = useState(memory.notes ?? '')
@@ -337,6 +357,41 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
   // but never refresh the `memory` object they're holding.
   const [overrides, setOverrides] = useState<Partial<MemoryWithDetails>>({})
   const shown = { ...memory, ...overrides }
+
+  // Photo edits are STAGED — removals and additions apply on Save, so an
+  // accidental tap never destroys a photo (Cancel discards everything).
+  const isPro = useIsPro()
+  const [removedPhotoIds, setRemovedPhotoIds] = useState<Set<string>>(new Set())
+  const [addedPhotos, setAddedPhotos] = useState<PhotoEntry[]>([])
+
+  function cancelEdit() {
+    setEditing(false)
+    setRemovedPhotoIds(new Set())
+    addedPhotos.forEach(p => URL.revokeObjectURL(p.preview))
+    setAddedPhotos([])
+  }
+
+  async function handleEditPhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    const { accepted: allAccepted, rejected } = await filterMediaFiles(files, {
+      allowVideo: isPro === true,
+      videoRejectionMessage: 'Video memories are part of Mimora Pro — coming soon.',
+    })
+    let accepted = allAccepted
+    const kept = memory.memory_photos.length - removedPhotoIds.size + addedPhotos.length
+    if (isPro !== true && kept + accepted.length > FREE_PHOTOS_PER_MEMORY) {
+      accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - kept))
+      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+    }
+    if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
+    const newPhotos: PhotoEntry[] = []
+    for (const file of accepted) {
+      const exif = await readPhotoExif(file)
+      newPhotos.push({ file, preview: URL.createObjectURL(file), lat: exif.lat, lng: exif.lng, takenAt: exif.takenAt, exifMessage: getExifMessage(exif) })
+    }
+    setAddedPhotos(prev => [...prev, ...newPhotos])
+    e.target.value = ''
+  }
 
   useEffect(() => {
     if (memory.venue?.google_place_id) {
@@ -357,17 +412,42 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
       venue_type: editVenueType,
       meal_type: editMealType,
     }
-    // Optimistic: show the edits immediately, revert if the write fails
+    // Optimistic: show the edits (incl. photo removals) immediately, revert
+    // the field patch if the write fails. Photo uploads/deletions run in
+    // the background after the row update.
     const previous = overrides
-    setOverrides(o => ({ ...o, ...patch }))
+    const removed = memory.memory_photos.filter(p => removedPhotoIds.has(p.id))
+    const keep = memory.memory_photos.filter(p => !removedPhotoIds.has(p.id))
+    const toAdd = [...addedPhotos]
+    setOverrides(o => ({ ...o, ...patch, memory_photos: keep }))
     setEditing(false)
-    supabase.from('memories').update(patch).eq('id', memory.id).then(({ error }) => {
-      if (error) { setOverrides(previous); toast('Couldn’t save your edits — please try again.', 'error') }
-      else onUpdate()
-    })
+    setRemovedPhotoIds(new Set())
+    setAddedPhotos([])
+    void (async () => {
+      const { error } = await supabase.from('memories').update(patch).eq('id', memory.id)
+      if (error) { setOverrides(previous); toast('Couldn’t save your edits — please try again.', 'error'); return }
+      // Removals: storage objects first (full + thumb) so nothing orphans
+      for (const p of removed) {
+        await supabase.storage.from('memory-photos').remove([p.storage_path, thumbPath(p.storage_path)])
+        await supabase.from('memory_photos').delete().eq('id', p.id)
+      }
+      if (toAdd.length > 0) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          let failed = 0
+          for (const photo of toAdd) {
+            const path = await uploadPhotoWithThumb(supabase, user.id, memory.id, photo.file)
+            if (!path) { failed++; continue }
+            await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+          }
+          if (failed > 0) toast(`${failed === 1 ? 'A photo' : `${failed} photos`} didn't upload — try adding ${failed === 1 ? 'it' : 'them'} again.`, 'error')
+        }
+      }
+      onUpdate()
+    })()
   }
 
-  const photos = memory.memory_photos
+  const photos = shown.memory_photos
   const date = new Date(memory.visited_at)
   const priceStr = venueDetails?.priceLevel ? '£'.repeat(venueDetails.priceLevel) : null
 
@@ -376,7 +456,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Edit memory</h3>
-          <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-lg" style={{ color: 'var(--slate)', background: 'var(--stone-200)' }}>Cancel</button>
+          <button onClick={cancelEdit} className="text-xs px-3 py-1 rounded-lg" style={{ color: 'var(--slate)', background: 'var(--stone-200)' }}>Cancel</button>
         </div>
         <div className="mb-3">
           <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish name</label>
@@ -395,6 +475,42 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
           </div>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
+
+        {/* Photos — removals staged (undo with ↺), applied on save */}
+        <div className="mb-5">
+          <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Photos</label>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {memory.memory_photos.map(p => (
+              <div key={p.id} className="relative flex-shrink-0" style={{ width: 72, height: 72, opacity: removedPhotoIds.has(p.id) ? 0.35 : 1 }}>
+                <EditPhotoThumb path={p.storage_path} />
+                <button onClick={() => setRemovedPhotoIds(prev => { const n = new Set(prev); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n })}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
+                  style={{ background: 'rgba(0,0,0,0.55)', fontSize: 10 }}>
+                  {removedPhotoIds.has(p.id) ? '↺' : '✕'}
+                </button>
+              </div>
+            ))}
+            {addedPhotos.map((p, i) => (
+              <div key={`new-${i}`} className="relative flex-shrink-0" style={{ width: 72, height: 72 }}>
+                <img src={p.preview} className="w-full h-full object-cover rounded-xl" />
+                <button onClick={() => setAddedPhotos(prev => prev.filter((_, j) => j !== i))}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-white"
+                  style={{ background: 'rgba(0,0,0,0.55)', fontSize: 10 }}>✕</button>
+              </div>
+            ))}
+            <label className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
+              style={{ width: 72, height: 72, background: 'var(--stone-200)', border: '2px dashed var(--gold-500)' }}>
+              <Icon name="camera" size={18} color="var(--gold-500)" />
+              <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleEditPhotoSelect} />
+            </label>
+          </div>
+          {removedPhotoIds.size > 0 && (
+            <p className="text-xs mt-1.5" style={{ color: 'var(--slate)' }}>
+              {removedPhotoIds.size === 1 ? '1 photo' : `${removedPhotoIds.size} photos`} will be removed when you save
+            </p>
+          )}
+        </div>
+
         <button onClick={handleSaveEdit} className="press w-full py-3 rounded-2xl font-semibold text-sm"
           style={{ background: 'var(--stone-200)' }}>Save changes</button>
       </div>
@@ -513,7 +629,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
         <LinkedPhotos memory={memory} onUpdate={onUpdate} />
 
         {/* Tag friends — invites them to save their own linked copy */}
-        <TagFriendsSection memoryId={memory.id} />
+        <TagFriendsSection memoryId={memory.id} onAddFriends={() => { onClose(); router.push('/social') }} />
 
         {/* Action buttons */}
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
