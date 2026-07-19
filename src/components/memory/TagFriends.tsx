@@ -49,7 +49,7 @@ export function FriendChips({ friends, selected, onToggle }: {
           <button key={f.id} type="button" onClick={() => onToggle(f.id)}
             className="press flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
             style={{
-              background: on ? 'var(--teal-600)' : '#fff',
+              background: on ? 'var(--stone-200)' : '#fff',
               color: on ? 'var(--teal-600)' : 'var(--slate)',
               border: on ? '0.5px solid var(--teal-600)' : '0.5px solid rgba(16,20,22,0.12)',
             }}>
