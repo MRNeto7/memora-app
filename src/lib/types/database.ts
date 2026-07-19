@@ -401,6 +401,14 @@ export type Database = {
         Args: { mem_id: string; viewer: string }
         Returns: boolean
       }
+      find_user_by_memora_id: {
+        Args: { search_id: string }
+        Returns: { id: string; memora_id: string | null; display_name: string | null }[]
+      }
+      has_friend_link: {
+        Args: { a: string; b: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
