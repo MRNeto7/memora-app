@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
+import { getSignedPhotoUrls, thumbPath } from '@/lib/storage'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { useNotifications, NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
@@ -88,7 +89,16 @@ export default function PersistentMapShell() {
       .select('*, venue:venues(*), memory_photos(*)')
       .order('visited_at', { ascending: false })
     if (error) throw error
-    if (data) setMemories(data as MemoryWithDetails[])
+    if (data) {
+      setMemories(data as MemoryWithDetails[])
+      // Warm the signed-URL cache for every pin's thumbnail in ONE
+      // round-trip, instead of a request per pin as markers mount.
+      const pinThumbs = (data as MemoryWithDetails[])
+        .map(m => m.memory_photos?.[0]?.storage_path)
+        .filter((p): p is string => Boolean(p))
+        .map(p => thumbPath(p))
+      if (pinThumbs.length > 0) void getSignedPhotoUrls(supabase, pinThumbs)
+    }
   }
 
   async function loadAll() {

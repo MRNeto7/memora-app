@@ -4,8 +4,7 @@ import { toast } from '@/lib/toast'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
-import { filterMediaFiles } from '@/lib/uploads'
-import { compressImage } from '@/lib/images'
+import { filterMediaFiles, uploadPhotoWithThumb } from '@/lib/uploads'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, checkMemoryAllowance, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
@@ -131,11 +130,8 @@ export default function CapturePage() {
       if (me) { setSaveError(me.message); setSaving(false); return }
 
       for (const photo of photos) {
-        const upload = await compressImage(photo.file)
-        const ext = upload.name.split('.').pop()
-        const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
-        if (!ue) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+        const path = await uploadPhotoWithThumb(supabase, user.id, memory.id, photo.file)
+        if (path) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
 
       router.push('/places')

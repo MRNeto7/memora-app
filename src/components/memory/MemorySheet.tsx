@@ -5,8 +5,7 @@ import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
 import { getSignedPhotoUrl } from '@/lib/storage'
-import { filterMediaFiles } from '@/lib/uploads'
-import { compressImage } from '@/lib/images'
+import { filterMediaFiles, uploadPhotoWithThumb } from '@/lib/uploads'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { VenueType, MealType, venueTypeFromGoogle, mealTypeFromDate, venueTypeLabel, mealTypeLabel } from '@/lib/categories'
 import CategoryPicker from '@/components/ui/CategoryPicker'
@@ -147,11 +146,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           let failed = 0
           for (const photo of pending) {
             try {
-              const upload = await compressImage(photo.file)
-              const ext = upload.name.split('.').pop()
-              const path = `${userId}/${memoryId}/${crypto.randomUUID()}.${ext}`
-              const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
-              if (ue) { failed++; continue }
+              const path = await uploadPhotoWithThumb(supabase, userId, memoryId, photo.file)
+              if (!path) { failed++; continue }
               await supabase.from('memory_photos').insert({ memory_id: memoryId, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
             } catch { failed++ }
           }

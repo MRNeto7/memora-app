@@ -4,7 +4,7 @@ import { toast } from '@/lib/toast'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { MemoryWithDetails, MemoryPhotoRow } from '@/lib/types/database'
-import { getSignedPhotoUrl } from '@/lib/storage'
+import { getThumbUrl, thumbPath } from '@/lib/storage'
 import Icon from '@/components/ui/Icon'
 
 interface LinkedPhoto { ownerName: string; photo: MemoryPhotoRow }
@@ -63,6 +63,8 @@ export default function LinkedPhotos({ memory, onUpdate }: {
       const dest = `${memory.user_id}/${memory.id}/${base}`
       const { error: ce } = await supabase.storage.from('memory-photos').copy(entry.photo.storage_path, dest)
       if (ce) { toast('Couldn’t add the photo — please try again.', 'error'); return }
+      // Bring the thumbnail along too (best-effort — may not exist yet)
+      void supabase.storage.from('memory-photos').copy(thumbPath(entry.photo.storage_path), thumbPath(dest))
       await supabase.from('memory_photos').insert({
         memory_id: memory.id, storage_path: dest,
         lat: entry.photo.lat, lng: entry.photo.lng, taken_at: entry.photo.taken_at,
@@ -106,7 +108,7 @@ function LinkedThumb({ path }: { path: string }) {
   const supabase = createClient()
   const [url, setUrl] = useState<string | null>(null)
   useEffect(() => {
-    getSignedPhotoUrl(supabase, path).then(u => { if (u) setUrl(u) })
+    getThumbUrl(supabase, path).then(u => { if (u) setUrl(u) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
   if (!url) return <div className="w-full h-full animate-pulse" style={{ background: 'var(--stone-400)' }} />

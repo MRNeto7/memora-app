@@ -4,7 +4,7 @@ import { toast } from '@/lib/toast'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { MemoryWithDetails } from '@/lib/types/database'
-import { getSignedPhotoUrl } from '@/lib/storage'
+import { getThumbUrl, thumbPath } from '@/lib/storage'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 
@@ -56,6 +56,8 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
         const dest = `${user.id}/${copy.id}/${base}`
         const { error: ce } = await supabase.storage.from('memory-photos').copy(p.storage_path, dest)
         if (ce) { failedPhotos++; continue }
+        // Bring the thumbnail along too (best-effort — may not exist yet)
+        void supabase.storage.from('memory-photos').copy(thumbPath(p.storage_path), thumbPath(dest))
         await supabase.from('memory_photos').insert({
           memory_id: copy.id, storage_path: dest, lat: p.lat, lng: p.lng, taken_at: p.taken_at,
         })
@@ -159,7 +161,7 @@ function TaggedThumb({ path }: { path: string }) {
   const supabase = createClient()
   const [url, setUrl] = useState<string | null>(null)
   useEffect(() => {
-    getSignedPhotoUrl(supabase, path).then(u => { if (u) setUrl(u) })
+    getThumbUrl(supabase, path).then(u => { if (u) setUrl(u) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
   if (!url) return <div className="w-full h-full animate-pulse" style={{ background: 'var(--stone-400)' }} />
