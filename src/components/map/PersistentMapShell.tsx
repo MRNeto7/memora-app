@@ -308,19 +308,35 @@ export default function PersistentMapShell() {
   )
 }
 
-// Fits the map to the user's pins once they load (instead of staying on the
-// hardcoded London default). Runs once; the user can pan freely after.
+// Opens the map on the user's HOME CLUSTER — the densest group of pins —
+// rather than the bounding box of everything. Fitting all pins meant one
+// holiday (e.g. Madeira + a London life) centred the camera mid-ocean.
+// Distant trips stay one pan away. Runs once; the user pans freely after.
+const CLUSTER_RADIUS_DEG = 1.5 // ≈150km — city-scale neighbourhood
+
+function homeCluster(points: { lat: number; lng: number }[]): { lat: number; lng: number }[] {
+  let best = points
+  let bestCount = 1
+  for (const p of points) {
+    const near = points.filter(q =>
+      Math.abs(q.lat - p.lat) <= CLUSTER_RADIUS_DEG && Math.abs(q.lng - p.lng) <= CLUSTER_RADIUS_DEG)
+    if (near.length > bestCount) { bestCount = near.length; best = near }
+  }
+  return best
+}
+
 function FitToData({ points }: { points: { lat: number; lng: number }[] }) {
   const map = useMap()
   const fitted = useRef(false)
   useEffect(() => {
     if (!map || fitted.current || points.length === 0) return
-    if (points.length === 1) {
-      map.setCenter(points[0])
+    const home = homeCluster(points)
+    if (home.length === 1) {
+      map.setCenter(home[0])
       map.setZoom(14)
     } else {
       const bounds = new google.maps.LatLngBounds()
-      points.forEach(p => bounds.extend(p))
+      home.forEach(p => bounds.extend(p))
       map.fitBounds(bounds, 80)
     }
     fitted.current = true
