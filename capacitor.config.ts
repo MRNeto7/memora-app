@@ -10,13 +10,15 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'never',
     scrollEnabled: false,
-    backgroundColor: '#0D4F57',
+    // Mono palette — matches the white app so load/overscroll doesn't flash teal.
+    // Takes effect at the next `npx cap sync ios` + Xcode build.
+    backgroundColor: '#FFFFFF',
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
-      backgroundColor: '#0D4F57',
+      backgroundColor: '#FFFFFF',
       showSpinner: false,
       splashFullScreen: true,
       splashImmersive: true,
