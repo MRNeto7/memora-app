@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, getExifMessage, fuzzCoordinates } from '@/lib/exif'
@@ -14,7 +15,7 @@ import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
-import TagFriendsSection, { useFriends, FriendChips } from './TagFriends'
+import TagFriendsSection, { useFriends, FriendChips, AddFriendsHint } from './TagFriends'
 import LinkedPhotos from './LinkedPhotos'
 import Lightbox from '@/components/media/Lightbox'
 import { toast } from '@/lib/toast'
@@ -51,8 +52,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [mealType, setMealType] = useState<MealType | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const friends = useFriends()
+  const { friends, loaded: friendsLoaded } = useFriends()
   const [tagIds, setTagIds] = useState<Set<string>>(new Set())
+  const router = useRouter()
   void debounceRef
 
   const overall = calcOverall(detailRatings)
@@ -258,17 +260,22 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                   className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
               </div>
 
-              {/* Tag friends — they'll be invited to save their own copy */}
-              {friends.length > 0 && (
+              {/* Tag friends — they'll be invited to save their own copy.
+                  No friends yet: point at Social, where Mimora IDs are added. */}
+              {friendsLoaded && (
                 <div className="mb-4">
                   <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Who was there? <span style={{ fontWeight: 400 }}>(optional)</span></label>
-                  <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
-                    setTagIds(prev => {
-                      const next = new Set(prev)
-                      if (next.has(id)) next.delete(id); else next.add(id)
-                      return next
-                    })
-                  }} />
+                  {friends.length > 0 ? (
+                    <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
+                      setTagIds(prev => {
+                        const next = new Set(prev)
+                        if (next.has(id)) next.delete(id); else next.add(id)
+                        return next
+                      })
+                    }} />
+                  ) : (
+                    <AddFriendsHint onAddFriends={() => { onClose(); router.push('/social') }} />
+                  )}
                 </div>
               )}
 
@@ -333,6 +340,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
   const [venueDetails, setVenueDetails] = useState<VenueDetails | null>(null)
   const [editing, setEditing] = useState(false)
   const supabase = createClient()
+  const router = useRouter()
 
   const [editDish, setEditDish] = useState(memory.dish_name ?? '')
   const [editNotes, setEditNotes] = useState(memory.notes ?? '')
@@ -621,7 +629,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
         <LinkedPhotos memory={memory} onUpdate={onUpdate} />
 
         {/* Tag friends — invites them to save their own linked copy */}
-        <TagFriendsSection memoryId={memory.id} />
+        <TagFriendsSection memoryId={memory.id} onAddFriends={() => { onClose(); router.push('/social') }} />
 
         {/* Action buttons */}
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>

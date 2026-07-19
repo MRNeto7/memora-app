@@ -7,32 +7,54 @@ import Icon from '@/components/ui/Icon'
 
 export interface Friend { id: string; name: string }
 
-// Accepted friends of the signed-in user (same lookup as the social page)
-export function useFriends() {
+// Accepted friends of the signed-in user (same lookup as the social page).
+// `loaded` lets callers tell "no friends" apart from "still fetching", so
+// empty-state hints don't flash for users who do have friends.
+export function useFriends(): { friends: Friend[]; loaded: boolean } {
   const [friends, setFriends] = useState<Friend[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) { if (!cancelled) setLoaded(true); return }
       const { data: reqs } = await supabase
         .from('friend_requests')
         .select('from_user_id, to_user_id')
         .eq('status', 'accepted')
         .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
       const ids = [...new Set((reqs ?? []).map(r => r.from_user_id === user.id ? r.to_user_id : r.from_user_id))]
-      if (ids.length === 0) return
+      if (ids.length === 0) { if (!cancelled) setLoaded(true); return }
       const { data: profiles } = await supabase.from('users').select('id, display_name, memora_id').in('id', ids)
-      if (!cancelled && profiles) {
-        setFriends(profiles.map(p => ({ id: p.id, name: p.display_name || p.memora_id || 'Friend' })))
+      if (!cancelled) {
+        if (profiles) setFriends(profiles.map(p => ({ id: p.id, name: p.display_name || p.memora_id || 'Friend' })))
+        setLoaded(true)
       }
     })()
     return () => { cancelled = true }
   }, [])
 
-  return friends
+  return { friends, loaded }
+}
+
+// Empty-state hint — tagging needs accepted friends, which are added by
+// Mimora ID on the Social page. Without this, the tag UI simply hides and
+// the feature is undiscoverable.
+export function AddFriendsHint({ onAddFriends }: { onAddFriends: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5" style={{ background: 'var(--stone-200)' }}>
+      <p className="text-xs leading-relaxed" style={{ color: 'var(--slate)' }}>
+        Tag friends in memories once you&apos;re connected — add them with their Mimora ID.
+      </p>
+      <button type="button" onClick={onAddFriends}
+        className="press flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg"
+        style={{ background: '#fff', color: 'var(--teal-600)', border: '0.5px solid rgba(16,20,22,0.12)' }}>
+        Add friends
+      </button>
+    </div>
+  )
 }
 
 // Toggleable friend chips — shared by the add-mode picker and the
@@ -67,9 +89,9 @@ interface TagRow { id: string; tagged_user_id: string; status: 'pending' | 'save
 
 // Tag friends on a saved memory (own memories only — inserts are also
 // RLS-gated to the memory owner + accepted friends).
-export default function TagFriendsSection({ memoryId }: { memoryId: string }) {
+export default function TagFriendsSection({ memoryId, onAddFriends }: { memoryId: string; onAddFriends: () => void }) {
   const supabase = createClient()
-  const friends = useFriends()
+  const { friends, loaded } = useFriends()
   const [tags, setTags] = useState<TagRow[]>([])
   // Fail soft if migration 007 hasn't been applied yet
   const [available, setAvailable] = useState(true)
@@ -88,7 +110,15 @@ export default function TagFriendsSection({ memoryId }: { memoryId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memoryId])
 
-  if (!available || friends.length === 0) return null
+  if (!available || !loaded) return null
+
+  if (friends.length === 0) {
+    return (
+      <div className="mb-3">
+        <AddFriendsHint onAddFriends={onAddFriends} />
+      </div>
+    )
+  }
 
   const taggedIds = new Set(tags.map(t => t.tagged_user_id))
 
