@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { toast } from '@/lib/toast'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
-import { validateMediaFile } from '@/lib/uploads'
-import { compressImage } from '@/lib/images'
+import { validateMediaFile, uploadPhotoWithThumb } from '@/lib/uploads'
 import { calcOverall, DetailRatings } from '@/lib/ratings'
 import { useIsPro, FREE_BULK_LIMIT } from '@/lib/pro'
 import RatingSliders from '@/components/ui/RatingSliders'
@@ -318,11 +317,8 @@ export default function BulkUploadPage() {
         const batch = group.photos.slice(i, i + 3)
         const results = await Promise.all(batch.map(async photo => {
           try {
-            const upload = await compressImage(photo.file)
-            const ext = upload.name.split('.').pop()
-            const path = `${user.id}/${memory.id}/${crypto.randomUUID()}.${ext}`
-            const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
-            if (ue) return false
+            const path = await uploadPhotoWithThumb(supabase, user.id, memory.id, photo.file)
+            if (!path) return false
             await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
             return true
           } catch { return false }

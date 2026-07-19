@@ -1,7 +1,31 @@
+import type { createClient } from '@/lib/supabase/client'
+import { compressImage, makeThumbnail } from '@/lib/images'
+import { thumbPath } from '@/lib/storage'
+
+type Supabase = ReturnType<typeof createClient>
+
 export const MAX_IMAGE_BYTES = 20 * 1024 * 1024 // 20MB
 export const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50MB — caps Supabase storage; 15s cap below bounds it further
 export const MAX_VIDEO_SECONDS = 15
 export const MAX_FILES_PER_SELECTION = 20
+
+/**
+ * Compress and upload a photo plus its thumbnail (thumb is best-effort —
+ * consumers fall back to the full image). Returns the storage path of the
+ * full image, or null if that upload failed.
+ */
+export async function uploadPhotoWithThumb(
+  supabase: Supabase, userId: string, memoryId: string, file: File
+): Promise<string | null> {
+  const upload = await compressImage(file)
+  const ext = upload.name.split('.').pop()
+  const path = `${userId}/${memoryId}/${crypto.randomUUID()}.${ext}`
+  const { error } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
+  if (error) return null
+  const thumb = await makeThumbnail(upload)
+  if (thumb) await supabase.storage.from('memory-photos').upload(thumbPath(path), thumb, { upsert: true, contentType: thumb.type })
+  return path
+}
 
 export function getVideoDuration(file: File): Promise<number> {
   return new Promise((resolve) => {

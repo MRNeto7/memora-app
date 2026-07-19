@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getSignedPhotoUrl } from '@/lib/storage'
+import { getThumbUrl } from '@/lib/storage'
 import { MemoryWithDetails } from '@/lib/types/database'
 import Icon from '@/components/ui/Icon'
 import MemorySheet from '@/components/memory/MemorySheet'
@@ -122,7 +122,7 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
   useEffect(() => {
     if (!firstPhoto) return
     async function load() {
-      const url = await getSignedPhotoUrl(supabase, firstPhoto!.storage_path)
+      const url = await getThumbUrl(supabase, firstPhoto!.storage_path)
       if (url) setPhotoUrl(url)
     }
     load()

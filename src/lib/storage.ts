@@ -54,6 +54,60 @@ export async function getSignedPhotoUrl(supabase: Supabase, path: string): Promi
   return data.signedUrl
 }
 
+/* ── Thumbnails ──────────────────────────────────────
+   Thumbs live at {user}/{memory}/thumbs/{file} — derived by convention,
+   no schema change, and the existing storage policies still apply
+   (folder[1] = owner, folder[2] = memory id). */
+
+export function thumbPath(path: string): string {
+  const i = path.lastIndexOf('/')
+  return `${path.slice(0, i)}/thumbs${path.slice(i)}`
+}
+
+// One backfill attempt per path per session — avoids retry loops on
+// videos and other files that can never have a thumb.
+const backfillAttempted = new Set<string>()
+
+/**
+ * Signed URL for a photo's thumbnail, falling back to the full image
+ * when no thumb exists (uploads that predate thumbnails). Own photos
+ * get their thumb quietly backfilled in the background so the map
+ * gets faster with use.
+ */
+export async function getThumbUrl(supabase: Supabase, path: string): Promise<string | null> {
+  const tp = thumbPath(path)
+  const cached = getCached(tp)
+  if (cached) return cached
+
+  const { data } = await supabase.storage.from('memory-photos').createSignedUrl(tp, SIGN_TTL_SECONDS)
+  if (data?.signedUrl) {
+    memoryCache.set(tp, { url: data.signedUrl, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 })
+    persistToSession()
+    return data.signedUrl
+  }
+
+  void backfillThumb(supabase, path)
+  return getSignedPhotoUrl(supabase, path)
+}
+
+async function backfillThumb(supabase: Supabase, path: string) {
+  if (backfillAttempted.has(path) || typeof window === 'undefined') return
+  backfillAttempted.add(path)
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || !path.startsWith(`${user.id}/`)) return // storage RLS: own folder only
+    const url = await getSignedPhotoUrl(supabase, path)
+    if (!url) return
+    const res = await fetch(url)
+    if (!res.ok) return
+    const blob = await res.blob()
+    const { makeThumbnail } = await import('@/lib/images')
+    const thumb = await makeThumbnail(new File([blob], path.split('/').pop() ?? 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+    if (!thumb) return
+    await supabase.storage.from('memory-photos').upload(thumbPath(path), thumb, { upsert: true, contentType: thumb.type })
+  } catch { /* best-effort — the full image already rendered */ }
+}
+
 /** Sign many paths in one round-trip; returns a path → url map. */
 export async function getSignedPhotoUrls(supabase: Supabase, paths: string[]): Promise<Map<string, string>> {
   const result = new Map<string, string>()
