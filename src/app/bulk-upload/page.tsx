@@ -434,13 +434,13 @@ export default function BulkUploadPage() {
 
         {pickerWaiting && !loading && (
           <Portal>
-            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
+            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(16,20,22,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
               <div className="rounded-3xl px-8 py-7 flex flex-col items-center" style={{ background: '#fff', width: 'min(300px, 85%)', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
-                <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
-                <p className="text-sm font-semibold mb-1" style={{ color: '#0D4F57' }}>Preparing your photos…</p>
-                <p className="text-xs text-center mb-4" style={{ color: '#7D878D' }}>Large selections and iCloud photos can take a few seconds</p>
+                <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: 'var(--teal-600)', borderTopColor: 'transparent' }} />
+                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--teal-600)' }}>Preparing your photos…</p>
+                <p className="text-xs text-center mb-4" style={{ color: 'var(--slate)' }}>Large selections and iCloud photos can take a few seconds</p>
                 <button onClick={() => { pickerArmed.current = false; setPickerWaiting(false) }}
-                  className="text-xs px-4 py-2 rounded-xl" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                  className="text-xs px-4 py-2 rounded-xl" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
                   Cancel
                 </button>
               </div>
@@ -477,7 +477,7 @@ export default function BulkUploadPage() {
                   <p className="text-xs font-semibold mb-0.5" style={{ color: '#a8863e' }}>
                     First {FREE_BULK_LIMIT} of {freeCapped} photos loaded
                   </p>
-                  <p className="text-xs" style={{ color: '#7D878D' }}>
+                  <p className="text-xs" style={{ color: 'var(--slate)' }}>
                     Free includes {FREE_BULK_LIMIT} photos per import — Mimora Pro imports your whole camera roll at once.
                   </p>
                 </div>

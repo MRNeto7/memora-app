@@ -40,7 +40,7 @@ export function Toaster() {
           key={t.id}
           className="toast-in flex items-center gap-2.5 px-4 py-3 rounded-2xl"
           style={{
-            background: t.kind === 'error' ? 'rgba(120,32,32,0.82)' : 'rgba(13,79,87,0.82)',
+            background: t.kind === 'error' ? 'rgba(120,32,32,0.82)' : 'rgba(16,20,22,0.88)',
             backdropFilter: 'blur(16px) saturate(1.4)',
             WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
             border: '0.5px solid rgba(255,255,255,0.18)',
