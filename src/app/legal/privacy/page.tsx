@@ -4,13 +4,13 @@ import Link from 'next/link'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="min-h-screen" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3">
           <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </Link>
-          <h1 className="text-xl font-semibold text-white">Privacy policy</h1>
+          <h1 className="text-xl font-semibold">Privacy policy</h1>
         </div>
         <p className="text-xs mt-2 ml-12" style={{ color: 'rgba(255,255,255,0.5)' }}>Last updated: June 2026</p>
       </div>
@@ -64,9 +64,9 @@ Each of these services has their own privacy policies. We use them only as neces
             body: `For any privacy-related questions or data deletion requests, contact us at privacy@mimora.app`
           },
         ].map(section => (
-          <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(13,79,87,0.08)' }}>
-            <p className="font-semibold text-sm mb-2" style={{ color: '#0D4F57' }}>{section.title}</p>
-            <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: '#7D878D' }}>{section.body}</p>
+          <div key={section.title} className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
+            <p className="font-semibold text-sm mb-2" style={{ color: 'var(--teal-600)' }}>{section.title}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--slate)' }}>{section.body}</p>
           </div>
         ))}
       </div>

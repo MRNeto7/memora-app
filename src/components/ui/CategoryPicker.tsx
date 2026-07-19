@@ -28,9 +28,9 @@ export default function CategoryPicker({ venueType, mealType, onVenueType, onMea
               className="flex-shrink-0 rounded-full font-medium transition-all"
               style={{
                 padding: chipPad, fontSize,
-                background: active ? '#0D4F57' : '#fafaf9',
-                color: active ? '#EAE5DD' : '#7D878D',
-                border: `1px solid ${active ? '#0D4F57' : '#EAE5DD'}`,
+                background: active ? 'var(--teal-600)' : 'var(--stone-100)',
+                color: active ? 'var(--stone-400)' : 'var(--slate)',
+                border: `1px solid ${active ? 'var(--teal-600)' : 'var(--stone-400)'}`,
               }}
             >
               {t.emoji} {t.label}
@@ -49,9 +49,9 @@ export default function CategoryPicker({ venueType, mealType, onVenueType, onMea
               className="flex-shrink-0 rounded-full font-medium transition-all"
               style={{
                 padding: chipPad, fontSize,
-                background: active ? '#C9A86A' : '#fafaf9',
-                color: active ? '#fff' : '#7D878D',
-                border: `1px solid ${active ? '#C9A86A' : '#EAE5DD'}`,
+                background: active ? 'var(--gold-500)' : 'var(--stone-100)',
+                color: active ? '#fff' : 'var(--slate)',
+                border: `1px solid ${active ? 'var(--gold-500)' : 'var(--stone-400)'}`,
               }}
             >
               {t.emoji} {t.label}

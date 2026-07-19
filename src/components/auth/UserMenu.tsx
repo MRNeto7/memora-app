@@ -24,8 +24,8 @@ export default function UserMenu({ email }: UserMenuProps) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-        style={{ background: '#1e7a4c' }}
+        className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold"
+        style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}
       >
         {initials}
       </button>
@@ -42,7 +42,7 @@ export default function UserMenu({ email }: UserMenuProps) {
             <button
               onClick={handleSignOut}
               className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-50"
-              style={{ color: '#a32d2d' }}
+              style={{ color: 'var(--danger)' }}
             >
               Sign out
             </button>

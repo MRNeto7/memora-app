@@ -116,20 +116,20 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
   return (
     <Portal>
-      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
       <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none" style={{ padding: '12px 16px 88px' }}>
       <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ background: '#EAE5DD' }} />
+          <div className="w-10 h-1 rounded-full" style={{ background: 'var(--stone-400)' }} />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
           <div>
-            <p className="text-xs mb-0.5" style={{ color: '#7D878D' }}>Saving memory at</p>
-            <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>{venue.name}</h2>
+            <p className="text-xs mb-0.5" style={{ color: 'var(--slate)' }}>Saving memory at</p>
+            <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>{venue.name}</h2>
           </div>
           
         </div>
@@ -138,20 +138,20 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
         <div className="flex-1 overflow-y-auto px-5 py-4">
 
           {/* Venue mini card */}
-          <div className="flex gap-3 items-center rounded-2xl overflow-hidden mb-4" style={{ background: '#f5f2ed' }}>
+          <div className="flex gap-3 items-center rounded-2xl overflow-hidden mb-4" style={{ background: 'var(--stone-200)' }}>
             <div style={{ width: 60, height: 60, flexShrink: 0, overflow: 'hidden' }}>
               <PlacePhoto placeId={venue.google_place_id} width={120} fallbackInitials={venue.name.slice(0,2).toUpperCase()}
                 style={{ width: '100%', height: '100%' }} />
             </div>
             <div className="flex-1 pr-3">
-              <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>{venue.name}</p>
-              {venue.address && <p className="text-xs" style={{ color: '#7D878D' }}>{venue.address}</p>}
+              <p className="text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>{venue.name}</p>
+              {venue.address && <p className="text-xs" style={{ color: 'var(--slate)' }}>{venue.address}</p>}
             </div>
           </div>
 
           {/* Photos */}
           <div className="mb-4">
-            <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Photos <span style={{ fontWeight: 400 }}>(optional)</span></label>
+            <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Photos <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <div className="flex gap-2 overflow-x-auto pb-1">
               {photos.map((p, i) => (
                 <div key={i} className="relative flex-shrink-0" style={{ width: 80, height: 80 }}>
@@ -162,8 +162,8 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
                 </div>
               ))}
               <label className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
-                style={{ width: 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}>
-                <Icon name="camera" size={20} color="#C9A86A" />
+                style={{ width: 80, height: 80, background: 'var(--stone-200)', border: '2px dashed var(--gold-500)' }}>
+                <Icon name="camera" size={20} color="var(--gold-500)" />
                 <input type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoSelect} />
               </label>
             </div>
@@ -171,25 +171,25 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
           {/* Date */}
           <div className="mb-4">
-            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>When did you visit?</label>
+            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>When did you visit?</label>
             <input type="date" value={visitDate} onChange={e => setVisitDate(e.target.value)}
               className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-              style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9', color: '#0D4F57' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)', color: 'var(--teal-600)' }} />
           </div>
 
           {/* Dish */}
           <div className="mb-4">
-            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>What did you have? <span style={{ fontWeight: 400 }}>(optional)</span></label>
+            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>What did you have? <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <input type="text" value={dishName} onChange={e => setDishName(e.target.value)}
               placeholder="e.g. Half chicken, extra hot"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-              style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
           {/* Ratings */}
-          <div className="rounded-2xl p-4 mb-4" style={{ background: '#f5f2ed' }}>
+          <div className="rounded-2xl p-4 mb-4" style={{ background: 'var(--stone-200)' }}>
             <div className="mb-4">
-              <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Category</label>
+              <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Category</label>
               <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} compact />
             </div>
             <RatingSliders ratings={ratings} onChange={setRatings} />
@@ -197,24 +197,24 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
 
           {/* Notes */}
           <div className="mb-2">
-            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
+            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
               placeholder="What made it special?"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none resize-none"
-              style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+              style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
           </div>
 
-          {error && <div className="rounded-xl px-4 py-3 mt-2 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>{error}</div>}
+          {error && <div className="rounded-xl px-4 py-3 mt-2 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{error}</div>}
         </div>
 
         {/* Fixed footer */}
-        <div className="flex-shrink-0 px-5 pt-3 pb-5" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
+        <div className="flex-shrink-0 px-5 pt-3 pb-5" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
           <button onClick={handleSave} disabled={saving}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-            style={{ background: '#0D4F57', color: '#EAE5DD', opacity: saving ? 0.6 : 1 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving ? 0.6 : 1 }}>
             {saving ? 'Saving…' : '✓ Save memory'}
           </button>
-          <p className="text-center text-xs mt-2" style={{ color: '#b0babe' }}>This will remove it from your wishlist</p>
+          <p className="text-center text-xs mt-2" style={{ color: 'var(--slate-light)' }}>This will remove it from your wishlist</p>
         </div>
       </div>
     </div>

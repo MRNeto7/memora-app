@@ -151,7 +151,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
                 style={{
                   width: i === current ? 20 : 6,
                   height: 6,
-                  background: i === current ? '#C9A86A' : 'rgba(255,255,255,0.4)'
+                  background: i === current ? 'var(--gold-500)' : 'rgba(255,255,255,0.4)'
                 }} />
             ))}
           </div>
@@ -166,7 +166,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
                   className="flex-shrink-0 rounded-lg overflow-hidden"
                   style={{
                     width: 52, height: 52,
-                    border: i === current ? '2px solid #C9A86A' : '2px solid transparent',
+                    border: i === current ? '2px solid var(--gold-500)' : '2px solid transparent',
                     background: '#333',
                     position: 'relative',
                   }}>

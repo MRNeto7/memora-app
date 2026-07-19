@@ -15,6 +15,8 @@ import RatingSliders from '@/components/ui/RatingSliders'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from './PlacesSearch'
+import TagFriendsSection, { useFriends, FriendChips } from './TagFriends'
+import LinkedPhotos from './LinkedPhotos'
 import Lightbox from '@/components/media/Lightbox'
 import { toast } from '@/lib/toast'
 
@@ -50,6 +52,8 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [mealType, setMealType] = useState<MealType | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const friends = useFriends()
+  const [tagIds, setTagIds] = useState<Set<string>>(new Set())
   void debounceRef
 
   const overall = calcOverall(detailRatings)
@@ -122,14 +126,39 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
 
       if (me) { setSaveError(`Error: ${me.message}`); setSaving(false); return }
 
-      for (const photo of photos) {
-        const upload = await compressImage(photo.file)
-        const ext = upload.name.split('.').pop()
-        const path = `${user.id}/${newMemory.id}/${crypto.randomUUID()}.${ext}`
-        const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
-        if (!ue) await supabase.from('memory_photos').insert({ memory_id: newMemory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+      // Tag selected friends (friends-only enforced by RLS). Non-fatal:
+      // the memory is already saved either way.
+      if (tagIds.size > 0) {
+        const { error: te } = await supabase.from('memory_tags').insert(
+          [...tagIds].map(fid => ({ memory_id: newMemory.id, tagger_id: user.id, tagged_user_id: fid }))
+        )
+        if (te) toast('Memory saved, but tagging didn’t go through — you can tag from the memory.', 'error')
       }
+
+      // Optimistic: the memory row is saved — close the sheet now and let
+      // photos compress + upload in the background, refreshing again when
+      // they land. Capture what the closure needs; the component unmounts.
+      const pending = [...photos]
+      const userId = user.id
+      const memoryId = newMemory.id
       onUpdate()
+      if (pending.length > 0) {
+        void (async () => {
+          let failed = 0
+          for (const photo of pending) {
+            try {
+              const upload = await compressImage(photo.file)
+              const ext = upload.name.split('.').pop()
+              const path = `${userId}/${memoryId}/${crypto.randomUUID()}.${ext}`
+              const { error: ue } = await supabase.storage.from('memory-photos').upload(path, upload, { upsert: true, contentType: upload.type })
+              if (ue) { failed++; continue }
+              await supabase.from('memory_photos').insert({ memory_id: memoryId, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+            } catch { failed++ }
+          }
+          if (failed > 0) toast(`${failed === 1 ? 'A photo' : `${failed} photos`} didn't upload — open the memory and try adding ${failed === 1 ? 'it' : 'them'} again.`, 'error')
+          onUpdate()
+        })()
+      }
     } catch (err) { console.error(err); setSaveError('Something went wrong.') }
     finally { setSaving(false) }
   }
@@ -140,11 +169,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   return (
     <Portal>
       {/* Backdrop */}
-      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13,79,87,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
 
       {/* Centred modal card */}
       <div className="fixed z-[70] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
-      <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
+      <div className="sheet-enter glass-modal relative w-full rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
 
         {/* Scrollable content */}
@@ -155,7 +184,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             <>
               <div className="flex items-center justify-end px-4 pt-3 pb-1 flex-shrink-0">
                 <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+                  style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
               </div>
               <MemoryDetailView memory={memory} onUpdate={onUpdate} onClose={onClose} />
             </>
@@ -165,9 +194,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
           {isNew && (
             <div className="px-5 pt-5 pb-4">
               <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Save a memory</h2>
+              <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Save a memory</h2>
               <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(13,79,87,0.08)', color: '#7D878D', fontSize: 14 }}>✕</button>
+                style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
             </div>
 
               {/* Photos */}
@@ -182,21 +211,21 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                     </div>
                   ))}
                   <label className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl cursor-pointer"
-                    style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: '#f5f2ed', border: '2px dashed #C9A86A' }}>
-                    <Icon name="camera" size={photos.length === 0 ? 24 : 18} color="#C9A86A" />
-                    <span className="text-xs mt-1 text-center px-1" style={{ color: '#C9A86A', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
+                    style={{ width: photos.length === 0 ? '100%' : 80, height: 80, background: 'var(--stone-200)', border: '2px dashed var(--gold-500)' }}>
+                    <Icon name="camera" size={photos.length === 0 ? 24 : 18} color="var(--gold-500)" />
+                    <span className="text-xs mt-1 text-center px-1" style={{ color: 'var(--gold-500)', lineHeight: 1.3 }}>{photos.length === 0 ? 'Photos & videos' : '+'}</span>
                     <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handlePhotoSelect} />
                   </label>
                 </div>
               </div>
 
               {exifMessages.map((msg, i) => (
-                <div key={i} className="rounded-xl px-3 py-2.5 mb-3 text-xs leading-relaxed" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid #C9A86A' }}>{msg}</div>
+                <div key={i} className="rounded-xl px-3 py-2.5 mb-3 text-xs leading-relaxed" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid var(--gold-500)' }}>{msg}</div>
               ))}
 
               <div className="flex gap-2 mb-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: '#f0ede8', color: '#0D4F57' }}>
-                  <Icon name="clock" size={12} color="#0D4F57" />
+                <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: 'var(--stone-300)', color: 'var(--teal-600)' }}>
+                  <Icon name="clock" size={12} color="var(--teal-600)" />
                   {displayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   {detectedDate && <span className="ml-1 opacity-60">auto</span>}
                 </span>
@@ -210,16 +239,16 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               </div>
 
               <div className="mb-3">
-                <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
                 <input type="text" placeholder="e.g. Truffle pasta" value={dishName} onChange={e => setDishName(e.target.value)}
-                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
               </div>
 
-              <div className="mb-4 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+              <div className="mb-4 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
                 <div className="mb-4">
-                  <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>
+                  <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>
                     Category
-                    {(venueType || mealType) && <span className="ml-2" style={{ color: '#0D4F57' }}>✓ suggested — tap to change</span>}
+                    {(venueType || mealType) && <span className="ml-2" style={{ color: 'var(--teal-600)' }}>✓ suggested — tap to change</span>}
                   </label>
                   <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} />
                 </div>
@@ -227,22 +256,36 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               </div>
 
               <div className="mb-4">
-                <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
                 <textarea placeholder="What made it special?" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+                  className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
               </div>
 
-              {saveError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d' }}>{saveError}</div>}
+              {/* Tag friends — they'll be invited to save their own copy */}
+              {friends.length > 0 && (
+                <div className="mb-4">
+                  <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Who was there? <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                  <FriendChips friends={friends} selected={tagIds} onToggle={(id) => {
+                    setTagIds(prev => {
+                      const next = new Set(prev)
+                      if (next.has(id)) next.delete(id); else next.add(id)
+                      return next
+                    })
+                  }} />
+                </div>
+              )}
+
+              {saveError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{saveError}</div>}
             </div>
           )}
         </div>
 
         {/* Sticky footer for add mode */}
         {isNew && (
-          <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(13,79,87,0.08)' }}>
+          <div className="flex-shrink-0 px-5 py-4" style={{ borderTop: '0.5px solid rgba(16,20,22,0.08)' }}>
             <button onClick={handleSave} disabled={saving || !locationName.trim()}
-              className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm"
-              style={{ background: '#0D4F57', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
+              className="press w-full py-3.5 rounded-2xl font-semibold text-sm"
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: saving || !locationName.trim() ? 0.5 : 1 }}>
               {saving ? 'Saving…' : '✓ Save memory'}
             </button>
           </div>
@@ -262,9 +305,9 @@ function StarRow({ value, max = 5 }: { value: number; max?: number }) {
         return (
           <div key={i} style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
             {/* Grey base */}
-            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: '#d4cdc3' }}>★</span>
+            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: 'var(--stone-500)' }}>★</span>
             {/* Gold fill — clip with overflow hidden */}
-            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: '#C9A86A', overflow: 'hidden', width: `${fill}%`, whiteSpace: 'nowrap' }}>★</span>
+            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: 'var(--gold-500)', overflow: 'hidden', width: `${fill}%`, whiteSpace: 'nowrap' }}>★</span>
           </div>
         )
       })}
@@ -290,9 +333,13 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
     service: memory.rating_service ?? 0,
     ambiance: memory.rating_ambiance ?? 0,
   })
-  const [saving, setSaving] = useState(false)
   const [editVenueType, setEditVenueType] = useState<VenueType | null>((memory.venue_type as VenueType) ?? null)
   const [editMealType, setEditMealType] = useState<MealType | null>((memory.meal_type as MealType) ?? null)
+  // Optimistic edits — applied to the view immediately, reverted on failure.
+  // Also keeps the open sheet current: parents refetch the list on update
+  // but never refresh the `memory` object they're holding.
+  const [overrides, setOverrides] = useState<Partial<MemoryWithDetails>>({})
+  const shown = { ...memory, ...overrides }
 
   useEffect(() => {
     if (memory.venue?.google_place_id) {
@@ -301,10 +348,9 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
     }
   }, [memory.venue?.google_place_id])
 
-  async function handleSaveEdit() {
-    setSaving(true)
+  function handleSaveEdit() {
     const overall = calcOverall(editRatings)
-    await supabase.from('memories').update({
+    const patch = {
       dish_name: editDish || null,
       notes: editNotes || null,
       rating: overall > 0 ? overall : memory.rating,
@@ -313,8 +359,15 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
       rating_ambiance: editRatings.ambiance || null,
       venue_type: editVenueType,
       meal_type: editMealType,
-    }).eq('id', memory.id)
-    setSaving(false); setEditing(false); onUpdate()
+    }
+    // Optimistic: show the edits immediately, revert if the write fails
+    const previous = overrides
+    setOverrides(o => ({ ...o, ...patch }))
+    setEditing(false)
+    supabase.from('memories').update(patch).eq('id', memory.id).then(({ error }) => {
+      if (error) { setOverrides(previous); toast('Couldn’t save your edits — please try again.', 'error') }
+      else onUpdate()
+    })
   }
 
   const photos = memory.memory_photos
@@ -325,28 +378,28 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
     return (
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="font-semibold text-base" style={{ color: '#0D4F57' }}>Edit memory</h3>
-          <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-lg" style={{ color: '#7D878D', background: '#f5f2ed' }}>Cancel</button>
+          <h3 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>Edit memory</h3>
+          <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-lg" style={{ color: 'var(--slate)', background: 'var(--stone-200)' }}>Cancel</button>
         </div>
         <div className="mb-3">
-          <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Dish name</label>
+          <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Dish name</label>
           <input type="text" value={editDish} onChange={e => setEditDish(e.target.value)} placeholder="What did you have?"
-            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
         </div>
         <div className="mb-4">
-          <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Notes</label>
+          <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Notes</label>
           <textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} placeholder="What made it special?" rows={3}
-            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+            className="w-full text-sm px-4 py-2.5 rounded-xl outline-none resize-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
         </div>
-        <div className="mb-5 rounded-2xl p-4" style={{ background: '#f5f2ed' }}>
+        <div className="mb-5 rounded-2xl p-4" style={{ background: 'var(--stone-200)' }}>
           <div className="mb-4">
-            <label className="text-xs font-medium block mb-2" style={{ color: '#7D878D' }}>Category</label>
+            <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Category</label>
             <CategoryPicker venueType={editVenueType} mealType={editMealType} onVenueType={setEditVenueType} onMealType={setEditMealType} />
           </div>
           <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
         </div>
-        <button onClick={handleSaveEdit} disabled={saving} className="w-full py-3 rounded-2xl text-white font-semibold text-sm"
-          style={{ background: '#0D4F57', opacity: saving ? 0.6 : 1 }}>{saving ? 'Saving…' : 'Save changes'}</button>
+        <button onClick={handleSaveEdit} className="press w-full py-3 rounded-2xl font-semibold text-sm"
+          style={{ background: 'var(--stone-200)' }}>Save changes</button>
       </div>
     )
   }
@@ -355,24 +408,24 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
     <>
       {/* Photos — square crop, natural and clean */}
       {photos.length > 0 && (
-        <div className="relative overflow-hidden cursor-pointer" style={{ background: '#f5f2ed' }}
+        <div className="relative overflow-hidden cursor-pointer" style={{ background: 'var(--stone-200)' }}
           onClick={() => setLightboxOpen(true)}>
           <PhotoCarousel photos={photos} current={currentPhoto} onChange={setCurrentPhoto} />
           {photos.length > 1 && (
-            <div className="flex items-center justify-center gap-2 py-2" style={{ background: '#f5f2ed' }}>
+            <div className="flex items-center justify-center gap-2 py-2" style={{ background: 'var(--stone-200)' }}>
               {currentPhoto > 0 && (
                 <button onClick={() => setCurrentPhoto(p => p - 1)}
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>‹</button>
+                  style={{ background: 'rgba(16,20,22,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>‹</button>
               )}
               {photos.map((_, i) => (
                 <button key={i} onClick={() => setCurrentPhoto(i)} className="rounded-full transition-all"
-                  style={{ width: i === currentPhoto ? 18 : 6, height: 6, background: i === currentPhoto ? '#0D4F57' : '#b0babe' }} />
+                  style={{ width: i === currentPhoto ? 18 : 6, height: 6, background: i === currentPhoto ? 'var(--teal-600)' : 'var(--slate-light)' }} />
               ))}
               {currentPhoto < photos.length - 1 && (
                 <button onClick={() => setCurrentPhoto(p => p + 1)}
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(13,79,87,0.1)', color: '#0D4F57', fontSize: 16 }}>›</button>
+                  style={{ background: 'rgba(16,20,22,0.1)', color: 'var(--teal-600)', fontSize: 16 }}>›</button>
               )}
             </div>
           )}
@@ -382,9 +435,9 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
       <div className="px-5 pt-4 pb-5">
         {/* Title row */}
         <div className="flex items-start justify-between mb-1">
-          <h2 className="text-lg font-semibold leading-tight flex-1 mr-3" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Memory'}</h2>
+          <h2 className="text-lg font-semibold leading-tight flex-1 mr-3" style={{ color: 'var(--teal-600)' }}>{memory.venue?.name ?? 'Memory'}</h2>
           <button onClick={() => setEditing(true)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
-            style={{ background: '#f5f2ed', color: '#7D878D' }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Edit
           </button>
@@ -395,82 +448,88 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
 
         {/* Meta */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          {memory.venue?.address && <p className="text-xs" style={{ color: '#7D878D' }}>{memory.venue.address}</p>}
-          <span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span>
-          <p className="text-xs" style={{ color: '#7D878D' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-          {priceStr && <><span style={{ color: '#d4cdc3', fontSize: 10 }}>·</span><span className="text-xs" style={{ color: '#7D878D' }}>{priceStr}</span></>}
-          {venueTypeLabel(memory.venue_type) && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(13,79,87,0.08)', color: '#0D4F57' }}>
-              {venueTypeLabel(memory.venue_type)!.emoji} {venueTypeLabel(memory.venue_type)!.label}
+          {memory.venue?.address && <p className="text-xs" style={{ color: 'var(--slate)' }}>{memory.venue.address}</p>}
+          <span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span>
+          <p className="text-xs" style={{ color: 'var(--slate)' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+          {priceStr && <><span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span><span className="text-xs" style={{ color: 'var(--slate)' }}>{priceStr}</span></>}
+          {venueTypeLabel(shown.venue_type) && (
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,20,22,0.06)', color: 'var(--teal-600)' }}>
+              {venueTypeLabel(shown.venue_type)!.emoji} {venueTypeLabel(shown.venue_type)!.label}
             </span>
           )}
-          {mealTypeLabel(memory.meal_type) && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(201,168,106,0.14)', color: '#a8863e' }}>
-              {mealTypeLabel(memory.meal_type)!.emoji} {mealTypeLabel(memory.meal_type)!.label}
+          {mealTypeLabel(shown.meal_type) && (
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(201,168,106,0.14)', color: 'var(--gold-700)' }}>
+              {mealTypeLabel(shown.meal_type)!.emoji} {mealTypeLabel(shown.meal_type)!.label}
             </span>
           )}
           {venueDetails?.openNow !== null && venueDetails?.openNow !== undefined && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(13,79,87,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? '#0D4F57' : '#a32d2d' }}>
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: venueDetails.openNow ? 'rgba(16,20,22,0.08)' : 'rgba(163,45,45,0.07)', color: venueDetails.openNow ? 'var(--teal-600)' : 'var(--danger)' }}>
               {venueDetails.openNow ? 'Open' : 'Closed'}
             </span>
           )}
         </div>
 
         {/* Rating — overall is out of 10; stars show it on a 5-star scale */}
-        {memory.rating && (
-          <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
+        {shown.rating && (
+          <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
             <div className="flex items-center gap-1.5 flex-1">
-              <StarRow value={memory.rating / 2} max={5} />
-              <span className="text-sm font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}/10</span>
+              <StarRow value={shown.rating / 2} max={5} />
+              <span className="text-sm font-semibold" style={{ color: 'var(--gold-500)' }}>{shown.rating}/10</span>
             </div>
             {venueDetails?.rating && (
-              <span className="text-xs" style={{ color: '#7D878D' }}>Google {venueDetails.rating}★</span>
+              <span className="text-xs" style={{ color: 'var(--slate)' }}>Google {venueDetails.rating}★</span>
             )}
           </div>
         )}
 
         {/* Breakdown bars — only categories the user actually rated */}
-        {(memory.rating_food || memory.rating_service || memory.rating_ambiance) && (
-          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: '#0D4F57' }}>Breakdown</p>
+        {(shown.rating_food || shown.rating_service || shown.rating_ambiance) && (
+          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--teal-600)' }}>Breakdown</p>
             {([
-              ['Food & drink', memory.rating_food],
-              ['Service', memory.rating_service],
-              ['Ambiance', memory.rating_ambiance],
+              ['Food & drink', shown.rating_food],
+              ['Service', shown.rating_service],
+              ['Ambiance', shown.rating_ambiance],
             ] as const).filter(([, val]) => val).map(([label, val]) => (
               <div key={label} className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs w-20 flex-shrink-0" style={{ color: '#7D878D' }}>{label}</span>
+                <span className="text-xs w-20 flex-shrink-0" style={{ color: 'var(--slate)' }}>{label}</span>
                 <div className="flex gap-0.5 flex-1">
                   {Array.from({ length: 10 }, (_, i) => (
-                    <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < val! ? '#C9A86A' : '#d4cdc3', opacity: i < val! ? 1 : 0.4 }} />
+                    <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < val! ? 'var(--gold-500)' : 'var(--stone-500)', opacity: i < val! ? 1 : 0.4 }} />
                   ))}
                 </div>
-                <span className="text-xs font-medium w-4 text-right" style={{ color: '#C9A86A' }}>{val}</span>
+                <span className="text-xs font-medium w-4 text-right" style={{ color: 'var(--gold-500)' }}>{val}</span>
               </div>
             ))}
           </div>
         )}
 
         {/* Dish + notes inline */}
-        {(memory.dish_name || memory.notes) && (
-          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: '#f5f2ed' }}>
-            {memory.dish_name && <p className="text-xs font-semibold mb-0.5" style={{ color: '#0D4F57' }}>{memory.dish_name}</p>}
-            {memory.notes && <p className="text-xs leading-relaxed" style={{ color: '#7D878D' }}>{memory.notes}</p>}
+        {(shown.dish_name || shown.notes) && (
+          <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+            {shown.dish_name && <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--teal-600)' }}>{shown.dish_name}</p>}
+            {shown.notes && <p className="text-xs leading-relaxed" style={{ color: 'var(--slate)' }}>{shown.notes}</p>}
           </div>
         )}
+
+        {/* Photos added on linked copies (e.g. the friend you tagged) */}
+        <LinkedPhotos memory={memory} onUpdate={onUpdate} />
+
+        {/* Tag friends — invites them to save their own linked copy */}
+        <TagFriendsSection memoryId={memory.id} />
 
         {/* Action buttons */}
         <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
           {venueDetails?.website && (
             <a href={venueDetails.website} target="_blank" rel="noopener noreferrer"
               className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-              style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Website
             </a>
           )}
           {venueDetails?.phone && (
-            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            <a href={`tel:${venueDetails.phone}`} className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
@@ -479,7 +538,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
               ?? `https://www.google.com/search?q=${encodeURIComponent(((memory.venue?.name ?? '') + ' ' + (memory.venue?.address ?? '')).trim())}`}
             target="_blank" rel="noopener noreferrer"
             className="flex-1 py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-            style={{ background: '#f5f2ed', color: '#0D4F57' }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             {venueDetails?.website ? 'Website' : 'Search'}
           </a>
@@ -521,7 +580,7 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
     getSignedPhotoUrl(supabase, storagePath).then(u => { if (u) setUrl(u) })
   }, [storagePath])
 
-  if (!url) return <div className="animate-pulse" style={{ height: 200, background: '#EAE5DD' }} />
+  if (!url) return <div className="animate-pulse" style={{ height: 200, background: 'var(--stone-400)' }} />
 
   if (isVideo) {
     return (
@@ -535,7 +594,7 @@ function CarouselPhoto({ storagePath }: { storagePath: string }) {
     <img
       src={url}
       alt=""
-      style={{ width: '100%', height: 'auto', maxHeight: '45vh', objectFit: 'contain', background: '#f5f2ed', display: 'block' }}
+      style={{ width: '100%', height: 'auto', maxHeight: '45vh', objectFit: 'contain', background: 'var(--stone-200)', display: 'block' }}
     />
   )
 }
@@ -560,10 +619,10 @@ function PublicToggle({ memoryId, initialValue, venue, onUpdate }: { memoryId: s
   return (
     <div className="flex items-center gap-2 mb-3">
       <button onClick={toggle}
-        style={{ width: 36, height: 20, borderRadius: 10, background: isPublic ? '#0D4F57' : '#d4cdc3', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+        style={{ width: 36, height: 20, borderRadius: 10, background: isPublic ? 'var(--teal-600)' : 'var(--stone-500)', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
         <div style={{ position: 'absolute', top: 2, left: isPublic ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
       </button>
-      <span className="text-xs" style={{ color: isPublic ? '#0D4F57' : '#7D878D' }}>
+      <span className="text-xs" style={{ color: isPublic ? 'var(--teal-600)' : 'var(--slate)' }}>
         {isPublic ? 'Shared — friends you’ve added can see this' : 'Private — only you can see this'}
       </span>
     </div>

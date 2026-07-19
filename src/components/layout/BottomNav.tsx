@@ -62,10 +62,10 @@ export default function BottomNav() {
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center mb-1"
                 style={{
-                  background: isActive('/') ? '#C9A86A' : '#0D4F57',
+                  background: isActive('/') ? 'var(--gold-500)' : 'var(--teal-600)',
                   boxShadow: isActive('/')
                     ? '0 6px 24px rgba(201,168,106,0.45)'
-                    : '0 4px 20px rgba(13,79,87,0.35)',
+                    : '0 4px 20px rgba(16,20,22,0.35)',
                   border: '3px solid rgba(255,255,255,0.7)',
                   transition: 'background 0.3s ease, box-shadow 0.3s ease',
                 }}
@@ -76,7 +76,7 @@ export default function BottomNav() {
                   <line x1="15" y1="6" x2="15" y2="21"/>
                 </svg>
               </div>
-              <span className="text-xs font-medium" style={{ color: isActive('/') ? '#C9A86A' : '#0D4F57', fontSize: 10 }}>
+              <span className="text-xs font-medium" style={{ color: isActive('/') ? 'var(--gold-500)' : 'var(--teal-600)', fontSize: 10 }}>
                 Map
               </span>
             </div>
@@ -117,23 +117,23 @@ function NavItem({ href, label, active, badge = 0, children }: {
     <Link href={href} className="press flex flex-col items-center gap-0.5" style={{ textDecoration: 'none', minWidth: 48, padding: '2px 0' }}>
       <div style={{
         position: 'relative',
-        color: active ? '#0D4F57' : '#7D878D',
+        color: active ? 'var(--teal-600)' : 'var(--slate)',
         transform: active ? 'translateY(-1px) scale(1.08)' : 'none',
         transition: 'transform 0.3s var(--spring), color 0.2s ease',
       }}>
         {badge > 0 && (
           <span style={{
             position: 'absolute', top: -4, right: -8, minWidth: 15, height: 15, padding: '0 4px',
-            borderRadius: 8, background: '#C9A86A', color: '#fff', fontSize: 9, fontWeight: 700,
+            borderRadius: 8, background: 'var(--gold-500)', color: '#fff', fontSize: 9, fontWeight: 700,
             display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
             boxShadow: '0 1px 4px rgba(201,168,106,0.5)',
           }}>{badge > 9 ? '9+' : badge}</span>
         )}
         {children}
       </div>
-      <span style={{ fontSize: 10, color: active ? '#0D4F57' : '#7D878D', fontWeight: active ? 600 : 400, transition: 'color 0.2s ease' }}>{label}</span>
+      <span style={{ fontSize: 10, color: active ? 'var(--teal-600)' : 'var(--slate)', fontWeight: active ? 600 : 400, transition: 'color 0.2s ease' }}>{label}</span>
       <div style={{
-        width: 4, height: 4, borderRadius: '50%', background: '#C9A86A', marginTop: 1,
+        width: 4, height: 4, borderRadius: '50%', background: 'var(--gold-500)', marginTop: 1,
         opacity: active ? 1 : 0, transform: active ? 'scale(1)' : 'scale(0)',
         transition: 'opacity 0.25s ease, transform 0.3s var(--spring)',
       }} />

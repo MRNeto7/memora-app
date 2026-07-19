@@ -61,11 +61,11 @@ export default function PlacePhoto({ placeId, width = 400, style, fallbackInitia
     return (
       <div style={{
         ...style,
-        background: tried ? '#1a3a40' : '#0D4F57',
+        background: tried ? '#1a3a40' : 'var(--teal-600)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       }}>
         {tried ? (
-          <span style={{ color: '#C9A86A', fontWeight: 700, fontSize: typeof style?.width === 'number' && style.width < 60 ? 13 : 18, letterSpacing: 1 }}>
+          <span style={{ color: 'var(--gold-500)', fontWeight: 700, fontSize: typeof style?.width === 'number' && style.width < 60 ? 13 : 18, letterSpacing: 1 }}>
             {fallbackInitials ?? '?'}
           </span>
         ) : (

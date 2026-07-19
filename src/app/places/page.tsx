@@ -81,14 +81,17 @@ export default function PlacesPage() {
       }, {} as Record<string, MemoryWithDetails[]>)
     : { [sortBy === 'name' ? 'A–Z' : 'Top rated']: sortedMemories }
 
+  // Flat display order → per-card stagger delay on first render
+  const memoryOrder = new Map(sortedMemories.map((m, i) => [m.id, i]))
+
   return (
-    <div className="page-enter min-h-screen flex flex-col" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
 
       {/* Header */}
       <div className="page-header" style={{ paddingBottom: 0 }}>
         <div className="px-5 mb-4">
-          <h1 className="text-xl font-semibold text-white">Places</h1>
-          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <h1 className="text-xl font-semibold">Places</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>
             {memories.length} memories · {wishlist.length} on wishlist
           </p>
         </div>
@@ -99,8 +102,8 @@ export default function PlacesPage() {
             <button key={t} onClick={() => setTab(t)}
               className="px-5 py-2.5 text-sm font-medium rounded-t-xl transition-all"
               style={{
-                background: tab === t ? '#EAE5DD' : 'transparent',
-                color: tab === t ? '#0D4F57' : 'rgba(255,255,255,0.6)',
+                background: tab === t ? 'var(--stone-200)' : 'transparent',
+                color: tab === t ? 'var(--teal-600)' : 'var(--slate)',
               }}>
               {t === 'memories' ? `Memories (${memories.length})` : `Wishlist (${wishlist.length})`}
             </button>
@@ -115,11 +118,11 @@ export default function PlacesPage() {
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             {([['date', 'Date'], ['name', 'Name'], ['rating', 'Rating']] as const).map(([opt, label]) => (
               <button key={opt} onClick={() => setSortBy(opt)}
-                className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
+                className="glass press flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium"
                 style={{
-                  background: sortBy === opt ? '#0D4F57' : '#fff',
-                  color: sortBy === opt ? '#EAE5DD' : '#7D878D',
-                  border: `0.5px solid ${sortBy === opt ? '#0D4F57' : 'rgba(13,79,87,0.12)'}`,
+                  background: sortBy === opt ? 'var(--stone-200)' : undefined,
+                  color: sortBy === opt ? 'var(--teal-600)' : 'var(--slate)',
+                  border: sortBy === opt ? '0.5px solid var(--teal-600)' : undefined,
                 }}>
                 {label}
               </button>
@@ -166,14 +169,14 @@ export default function PlacesPage() {
         )}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <p className="text-sm" style={{ color: '#7D878D' }}>Loading…</p>
+            <p className="text-sm" style={{ color: 'var(--slate)' }}>Loading…</p>
           </div>
         ) : loadError ? (
           <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-            <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>Couldn&apos;t load your places</h2>
-            <p className="text-sm mb-4" style={{ color: '#7D878D' }}>Check your connection and try again</p>
+            <h2 className="font-semibold text-base mb-2" style={{ color: 'var(--teal-600)' }}>Couldn&apos;t load your places</h2>
+            <p className="text-sm mb-4" style={{ color: 'var(--slate)' }}>Check your connection and try again</p>
             <button onClick={retryFetch} className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
               Retry
             </button>
           </div>
@@ -185,13 +188,13 @@ export default function PlacesPage() {
               Object.entries(grouped).map(([month, items]) => (
                 <div key={month} className="mb-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#7D878D' }}>{month}</p>
-                    <div className="flex-1 h-px" style={{ background: 'rgba(13,79,87,0.1)' }} />
-                    <p className="text-xs" style={{ color: '#b0babe' }}>{items.length}</p>
+                    <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--slate)' }}>{month}</p>
+                    <div className="flex-1 h-px" style={{ background: 'rgba(16,20,22,0.1)' }} />
+                    <p className="text-xs" style={{ color: 'var(--slate-light)' }}>{items.length}</p>
                   </div>
                   <div className="flex flex-col gap-3">
                     {items.map(m => (
-                      <MemoryCard key={m.id} memory={m} onClick={() => setSelectedMemory(m)} />
+                      <MemoryCard key={m.id} memory={m} index={memoryOrder.get(m.id) ?? 0} onClick={() => setSelectedMemory(m)} />
                     ))}
                   </div>
                 </div>
@@ -205,8 +208,8 @@ export default function PlacesPage() {
               <EmptyState icon="bookmark" title="Your wishlist is empty" sub="Add restaurants from the map or search for places to visit" />
             ) : (
               <div className="flex flex-col gap-3">
-                {wishlist.map(item => (
-                  <WishlistCard key={item.id} item={item} onClick={() => setSelectedWishlist(item)} onVisited={() => {}} onRemove={async () => {
+                {wishlist.map((item, i) => (
+                  <WishlistCard key={item.id} item={item} index={i} onClick={() => setSelectedWishlist(item)} onVisited={() => {}} onRemove={async () => {
                     await supabase.from('wishlists').delete().eq('id', item.id)
                     fetchAll()
                   }} />
@@ -217,9 +220,9 @@ export default function PlacesPage() {
             {/* Add to wishlist button */}
             <button
               onClick={() => setShowAddWishlist(true)}
-              className="w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: '#0D4F57', color: '#EAE5DD' }}>
-              <span style={{ fontSize: 18, color: '#C9A86A' }}>+</span>
+              className="press w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
+              <span style={{ fontSize: 18, color: 'var(--gold-500)' }}>+</span>
               Add a restaurant
             </button>
           </>
@@ -240,7 +243,7 @@ export default function PlacesPage() {
   )
 }
 
-function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: () => void }) {
+function MemoryCard({ memory, index, onClick }: { memory: MemoryWithDetails; index: number; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const supabase = createClient()
   const firstPhoto = memory.memory_photos?.[0]
@@ -251,15 +254,15 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
   }, [firstPhoto?.storage_path])
 
   return (
-    <button onClick={onClick} className="w-full text-left rounded-2xl overflow-hidden active:scale-99 transition-transform"
-      style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <button onClick={onClick} className="glass-card rise w-full text-left rounded-2xl overflow-hidden"
+      style={{ animationDelay: `${Math.min(index, 12) * 0.03}s` }}>
       <div className="flex">
-        <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: '#EAE5DD', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
+        <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: 'var(--stone-400)', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
             ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
-            : <div className="w-full h-full flex items-center justify-center" style={{ background: '#f0ede8' }}>
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: '#0D4F57' }}>
-                  <span className="text-white text-xs font-bold">{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
+            : <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--stone-300)' }}>
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'var(--stone-200)' }}>
+                  <span className="text-xs font-bold" style={{ color: 'var(--slate)' }}>{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>
                 </div>
               </div>
           }
@@ -271,21 +274,21 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
         </div>
         <div className="flex-1 px-3 py-3 min-w-0">
           <div className="flex items-start justify-between mb-0.5">
-            <p className="font-semibold text-sm leading-tight flex-1 mr-2" style={{ color: '#0D4F57' }}>{memory.venue?.name ?? 'Unknown'}</p>
+            <p className="font-semibold text-sm leading-tight flex-1 mr-2" style={{ color: 'var(--teal-600)' }}>{memory.venue?.name ?? 'Unknown'}</p>
             {memory.rating && (
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Icon name="star" size={10} color="#C9A86A" fill="#C9A86A" />
-                <span className="text-xs font-semibold" style={{ color: '#C9A86A' }}>{memory.rating}</span>
+                <Icon name="star" size={10} color="var(--gold-500)" fill="#C9A86A" />
+                <span className="text-xs font-semibold" style={{ color: 'var(--gold-500)' }}>{memory.rating}</span>
               </div>
             )}
           </div>
           {memory.venue?.address && (
-            <p className="text-xs mb-0.5" style={{ color: '#7D878D', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+            <p className="text-xs mb-0.5" style={{ color: 'var(--slate)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
               {memory.venue.address}
             </p>
           )}
-          {memory.dish_name && <p className="text-xs italic mb-0.5" style={{ color: '#7D878D' }}>{memory.dish_name}</p>}
-          <p className="text-xs" style={{ color: '#b0babe' }}>
+          {memory.dish_name && <p className="text-xs italic mb-0.5" style={{ color: 'var(--slate)' }}>{memory.dish_name}</p>}
+          <p className="text-xs" style={{ color: 'var(--slate-light)' }}>
             {new Date(memory.visited_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
           </p>
         </div>
@@ -294,17 +297,19 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
   )
 }
 
-function WishlistCard({ item, onClick, onRemove }: {
+function WishlistCard({ item, index, onClick, onRemove }: {
   item: WishlistItem
+  index: number
   onClick: () => void
   onVisited: () => void
   onRemove: () => void
 }) {
-  const priorityColors = ['', '#b0babe', '#C9A86A', '#0D4F57']
+  const priorityColors = ['', '#b0babe', '#C9A86A', '#0D4F57'] // hex: alpha suffix appended
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <div className="glass-card rise rounded-2xl overflow-hidden"
+      style={{ animationDelay: `${Math.min(index, 12) * 0.03}s` }}>
       <button onClick={onClick} className="w-full text-left">
         <div className="flex">
           {/* Restaurant photo */}
@@ -318,7 +323,7 @@ function WishlistCard({ item, onClick, onRemove }: {
           </div>
           <div className="flex-1 px-4 py-3">
             <div className="flex items-start justify-between mb-1">
-              <p className="font-semibold text-sm flex-1 mr-2 leading-tight" style={{ color: '#0D4F57' }}>{item.venue.name}</p>
+              <p className="font-semibold text-sm flex-1 mr-2 leading-tight" style={{ color: 'var(--teal-600)' }}>{item.venue.name}</p>
               {item.priority > 0 && (
                 <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                   style={{ background: `${priorityColors[item.priority]}18`, color: priorityColors[item.priority], border: `0.5px solid ${priorityColors[item.priority]}40` }}>
@@ -326,8 +331,8 @@ function WishlistCard({ item, onClick, onRemove }: {
                 </span>
               )}
             </div>
-            {item.venue.address && <p className="text-xs mb-1" style={{ color: '#7D878D', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{item.venue.address}</p>}
-            {item.notes && <p className="text-xs italic truncate" style={{ color: '#7D878D' }}>{item.notes}</p>}
+            {item.venue.address && <p className="text-xs mb-1" style={{ color: 'var(--slate)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{item.venue.address}</p>}
+            {item.notes && <p className="text-xs italic truncate" style={{ color: 'var(--slate)' }}>{item.notes}</p>}
           </div>
         </div>
       </button>
@@ -340,10 +345,10 @@ function EmptyState({ icon, title, sub }: { icon: IconName; title: string; sub: 
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: '#fff', marginBottom: 16 }}>
-        <Icon name={icon} size={30} color="#C9A86A" strokeWidth={1.4} />
+        <Icon name={icon} size={30} color="var(--gold-500)" strokeWidth={1.4} />
       </div>
-      <h2 className="font-semibold text-base mb-2" style={{ color: '#0D4F57' }}>{title}</h2>
-      <p className="text-sm" style={{ color: '#7D878D' }}>{sub}</p>
+      <h2 className="font-semibold text-base mb-2" style={{ color: 'var(--teal-600)' }}>{title}</h2>
+      <p className="text-sm" style={{ color: 'var(--slate)' }}>{sub}</p>
     </div>
   )
 }

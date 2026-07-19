@@ -1,23 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --teal:       #0D4F57;
-  --teal-light: #1a6b75;
-  --teal-pale:  #e8f2f3;
-  --stone:      #EAE5DD;
-  --stone-dark: #d4cdc3;
+  /* ══ EDITORIAL MONO PALETTE ═══════════════════════
+     Instagram-style: pure white surfaces, ink text,
+     light-grey buttons — photos bring the colour.
+     Variable NAMES keep their legacy ramp identity
+     (teal-* = ink scale, stone-* = paper scale) so no
+     component changes were needed; a semantic rename
+     (--ink/--paper/--accent) lands with the restyle
+     pass. Gold survives solely for ratings. */
+  --teal:       var(--teal-600);
+  --teal-light: var(--teal-400);
+  --teal-pale:  var(--teal-100);
+  --stone:      var(--stone-400);
+  --stone-dark: var(--stone-500);
   --gold:       #C9A86A;
   --gold-light: #e8d5a8;
   --gold-dark:  #a8863e;
-  --slate:      #7D878D;
-  --slate-light:#b0babe;
-  --slate-pale: #f4f5f5;
+  --slate:      #6B7280;
+  --slate-light:#9CA3AF;
+  --slate-pale: #F3F4F6;
   --brand:      var(--teal);
-  --brand-dark: #0a3d44;
+  --brand-dark: var(--teal-800);
   --brand-light: var(--teal-pale);
   --accent:     var(--gold);
 
   --nav-height: 80px;
+
+  /* Ink scale (was teal) — text and primary CTAs */
+  --teal-900: #000000;
+  --teal-800: #101214;
+  --teal-700: #131619;
+  --teal-600: #16191B;  /* primary ink */
+  --teal-500: #23272B;
+  --teal-400: #3A4045;
+  --teal-300: #6B7280;
+  --teal-200: #C4C9CE;
+  --teal-100: #F1F2F4;
+
+  /* Gold — ratings and stars only */
+  --gold-900: #7d6329;
+  --gold-700: #a8863e;
+  --gold-500: #C9A86A;
+  --gold-300: #e8d5a8;
+  --gold-100: #f6ecd6;
+
+  --danger: #a32d2d;
+
+  /* Paper scale (was stone) — surfaces and greys */
+  --stone-500: #E5E7EB; /* hairlines, borders */
+  --stone-400: #FFFFFF; /* page background, text on ink */
+  --stone-300: #F6F7F8;
+  --stone-200: #F1F2F4; /* light-grey buttons + insets */
+  --stone-100: #FAFAFA;
+
+  /* ── Elevation scale ─────────────────────────────
+     Neutral ink-tinted lift on white. */
+  --shadow-resting:  0 1px 2px rgba(16,20,22,0.04), 0 2px 8px rgba(16,20,22,0.05);
+  --shadow-raised:   0 2px 4px rgba(16,20,22,0.05), 0 8px 20px rgba(16,20,22,0.10);
+  --shadow-floating: 0 4px 12px rgba(16,20,22,0.08), 0 24px 48px rgba(16,20,22,0.18);
+
+  /* ── Motion ──────────────────────────────────────
+     One expressive spring, one soft iOS-sheet spring,
+     and a standard duration scale. */
+  --spring:      cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 0.2s;
+  --dur-base: 0.3s;
+  --dur-slow: 0.45s;
 }
 
 * { box-sizing: border-box; }
@@ -53,24 +103,30 @@ body {
 .safe-top    { padding-top: env(safe-area-inset-top, 0px); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-/* Page header — teal gradient that respects notch (Apple Sports-style depth) */
+/* Page header — clean white band that respects the notch */
 .page-header {
-  background: linear-gradient(180deg, #136570 0%, #0D4F57 60%, #0B454C 100%);
+  background: var(--stone-400);
+  border-bottom: 0.5px solid var(--stone-500);
   padding-top: env(safe-area-inset-top, 0px);
 }
 .page-header-content {
   padding: 16px 20px 0;
 }
 
-/* ── Glass materials ─────────────────────────────── */
+/* ── Glass materials ───────────────────────────────
+   One reusable frosted material (.glass) plus three
+   tuned variants. All lift via the elevation tokens —
+   no ad-hoc shadows. */
 
-/* Frosted card on the stone background */
+/* Canonical frosted material — white card with a hairline, so edges
+   stay visible on the white page. .glass-card is a legacy alias. */
+.glass,
 .glass-card {
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   backdrop-filter: blur(20px) saturate(1.5);
-  border: 0.5px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 2px 12px rgba(13, 79, 87, 0.06), 0 0.5px 0 rgba(13, 79, 87, 0.04);
+  border: 0.5px solid rgba(16, 20, 22, 0.08);
+  box-shadow: var(--shadow-resting);
 }
 
 /* Frosted chip/panel on dark teal surfaces (headers) */
@@ -83,50 +139,74 @@ body {
 
 /* Floating pill — nav, overlay controls */
 .glass-pill {
-  background: rgba(234, 229, 221, 0.78);
+  background: rgba(255, 255, 255, 0.85);
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
   backdrop-filter: blur(24px) saturate(1.6);
-  border: 0.5px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 0 8px 32px rgba(13, 79, 87, 0.18), 0 1px 2px rgba(13, 79, 87, 0.08);
+  border: 0.5px solid rgba(16, 20, 22, 0.08);
+  box-shadow: var(--shadow-raised);
+}
+
+/* Near-opaque frost for modal/sheet cards — depth without
+   sacrificing text legibility over the blurred backdrop */
+.glass-modal {
+  background: rgba(255, 255, 255, 0.96);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  border: 0.5px solid rgba(16, 20, 22, 0.06);
+  box-shadow: var(--shadow-floating);
 }
 
 /* ── Motion ──────────────────────────────────────── */
-
-/* Springy ease used everywhere */
-:root { --spring: cubic-bezier(0.22, 1, 0.36, 1); }
+/* Spring curves + durations live in :root above. */
 
 /* Content rising into place on page load */
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(14px) scale(0.985); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.page-enter { animation: rise-in 0.45s var(--spring) both; }
+.page-enter { animation: rise-in var(--dur-slow) var(--spring) both; }
 
-/* Staggered list/card entrances */
+/* Staggered list/card entrances. For dynamic lists, keep the
+   .rise class and set `animation-delay` inline per index
+   (see the Places list — ~30ms apart). */
 .rise { animation: rise-in 0.5s var(--spring) both; }
 .rise-1 { animation: rise-in 0.5s var(--spring) 0.04s both; }
 .rise-2 { animation: rise-in 0.5s var(--spring) 0.08s both; }
 .rise-3 { animation: rise-in 0.5s var(--spring) 0.12s both; }
 
-/* Sheets/modals springing up */
+/* Sheets springing up — soft iOS spring, a touch more travel */
 @keyframes sheet-up {
-  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  from { opacity: 0; transform: translateY(32px) scale(0.955); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.sheet-enter { animation: sheet-up 0.4s var(--spring) both; }
+.sheet-enter { animation: sheet-up var(--dur-slow) var(--spring-soft) both; }
+
+/* Modals — fade + subtle scale up from centre */
+@keyframes fade-scale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.modal-enter { animation: fade-scale var(--dur-base) var(--spring) both; }
 
 /* Backdrop fading in */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 .backdrop-enter { animation: fade-in 0.25s ease-out both; }
 
-/* Tactile press — anything tappable */
+/* Tactile press — anything tappable. Unlayered CSS beats Tailwind's
+   layered utilities, so this must also carry the colour transitions
+   that `transition-all` was providing on toggle buttons. */
 .press {
-  transition: transform 0.25s var(--spring), opacity 0.2s ease;
+  transition:
+    transform var(--dur-fast) var(--spring),
+    opacity var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
 }
 .press:active { transform: scale(0.96); }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter, .rise, .rise-1, .rise-2, .rise-3, .sheet-enter, .backdrop-enter { animation: none; }
+  .page-enter, .rise, .rise-1, .rise-2, .rise-3,
+  .sheet-enter, .modal-enter, .backdrop-enter { animation: none; }
   .press, .press:active { transition: none; transform: none; }
 }
 

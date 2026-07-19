@@ -363,16 +363,16 @@ export default function BulkUploadPage() {
   }
 
   return (
-    <div className="page-enter min-h-screen" style={{ background: '#EAE5DD', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
       <div className="page-header px-5 pb-5">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <Link href="/profile" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16191B" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </Link>
           <div>
-            <h1 className="text-xl font-semibold text-white">Bulk upload</h1>
-            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Import multiple photos at once</p>
+            <h1 className="text-xl font-semibold">Bulk upload</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--slate)' }}>Import multiple photos at once</p>
           </div>
         </div>
       </div>
@@ -381,7 +381,7 @@ export default function BulkUploadPage() {
 
         {isPro === null && (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
+            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--teal-600)', borderTopColor: 'transparent' }} />
           </div>
         )}
 
@@ -392,15 +392,15 @@ export default function BulkUploadPage() {
             <label
               htmlFor="bulk-file-input"
               className="rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4"
-              style={{ background: '#fff', border: '2px dashed #C9A86A' }}
+              style={{ background: '#fff', border: '2px dashed var(--gold-500)' }}
             >
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: '#f5f2ed' }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--stone-200)' }}>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </div>
-              <p className="font-semibold text-base mb-1" style={{ color: '#0D4F57' }}>Select photos from camera roll</p>
-              <p className="text-sm" style={{ color: '#7D878D', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
+              <p className="font-semibold text-base mb-1" style={{ color: 'var(--teal-600)' }}>Select photos from camera roll</p>
+              <p className="text-sm" style={{ color: 'var(--slate)', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
               {isPro === false && (
-                <p className="text-xs mt-2 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.12)', color: '#a8863e' }}>
+                <p className="text-xs mt-2 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.12)', color: 'var(--gold-700)' }}>
                   Free includes {FREE_BULK_LIMIT} photos per import · Pro is unlimited
                 </p>
               )}
@@ -408,7 +408,7 @@ export default function BulkUploadPage() {
 
             {/* How it works */}
             <div className="rounded-2xl p-4" style={{ background: 'rgba(201,168,106,0.1)', border: '0.5px solid rgba(201,168,106,0.25)' }}>
-              <p className="text-xs font-semibold mb-2" style={{ color: '#C9A86A' }}>How bulk upload works</p>
+              <p className="text-xs font-semibold mb-2" style={{ color: 'var(--gold-500)' }}>How bulk upload works</p>
               {[
                 'Select as many food photos as you like',
                 'We read the date and location from each photo',
@@ -416,8 +416,8 @@ export default function BulkUploadPage() {
                 'Confirm each group, add details, and save in seconds',
               ].map(t => (
                 <div key={t} className="flex items-start gap-2 mb-1.5">
-                  <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#C9A86A' }} />
-                  <p className="text-xs" style={{ color: '#7D878D' }}>{t}</p>
+                  <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: 'var(--gold-500)' }} />
+                  <p className="text-xs" style={{ color: 'var(--slate)' }}>{t}</p>
                 </div>
               ))}
             </div>
@@ -454,18 +454,18 @@ export default function BulkUploadPage() {
 
         {loading && (
           <Portal>
-            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(13,79,87,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
+            <div className="fixed inset-0 z-[80] flex items-center justify-center" style={{ background: 'rgba(16,20,22,0.45)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }}>
               <div className="rounded-3xl px-8 py-7 flex flex-col items-center" style={{ background: '#fff', width: 'min(300px, 85%)', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
-                <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: '#0D4F57', borderTopColor: 'transparent' }} />
+                <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: 'var(--teal-600)', borderTopColor: 'transparent' }} />
                 {progress ? (
                   <>
-                    <p className="text-sm font-semibold mb-2.5" style={{ color: '#0D4F57' }}>Reading photos… {progress.done} of {progress.total}</p>
+                    <p className="text-sm font-semibold mb-2.5" style={{ color: 'var(--teal-600)' }}>Reading photos… {progress.done} of {progress.total}</p>
                     <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#e5ded3' }}>
-                      <div style={{ width: `${Math.round((progress.done / progress.total) * 100)}%`, height: '100%', background: '#C9A86A', transition: 'width 0.25s ease' }} />
+                      <div style={{ width: `${Math.round((progress.done / progress.total) * 100)}%`, height: '100%', background: 'var(--gold-500)', transition: 'width 0.25s ease' }} />
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm" style={{ color: '#7D878D' }}>Grouping your photos…</p>
+                  <p className="text-sm" style={{ color: 'var(--slate)' }}>Grouping your photos…</p>
                 )}
               </div>
             </div>
@@ -490,18 +490,18 @@ export default function BulkUploadPage() {
             )}
             {/* Summary bar */}
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>
                 {pending.length} {pending.length === 1 ? 'group' : 'groups'} to save
-                {saved.length > 0 && <span style={{ color: '#7D878D' }}> · {saved.length} saved</span>}
+                {saved.length > 0 && <span style={{ color: 'var(--slate)' }}> · {saved.length} saved</span>}
               </p>
               <div className="flex gap-2">
-                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
                   Add more
                 </label>
                 {ready.length > 1 && (
                   <button onClick={saveAll} disabled={savingAll}
                     className="press text-xs px-3 py-1.5 rounded-lg font-semibold"
-                    style={{ background: '#0D4F57', color: '#EAE5DD', opacity: savingAll ? 0.6 : 1 }}>
+                    style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: savingAll ? 0.6 : 1 }}>
                     {savingAll ? (saveProgress ? `Saving ${saveProgress.done} of ${saveProgress.total}…` : 'Saving…') : `Save all (${ready.length})`}
                   </button>
                 )}
@@ -510,7 +510,7 @@ export default function BulkUploadPage() {
 
             {/* Untagged warning */}
             {untagged.length > 0 && (
-              <div className="rounded-2xl px-4 py-3 mb-4 text-xs" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid #C9A86A' }}>
+              <div className="rounded-2xl px-4 py-3 mb-4 text-xs" style={{ background: '#fff9e6', color: '#7a4b0a', borderLeft: '3px solid var(--gold-500)' }}>
                 {untagged.length} photo{untagged.length > 1 ? 's' : ''} had no location data (often stripped by WhatsApp or screenshots) — they&apos;re grouped by time below, just type the location in.
               </div>
             )}
@@ -530,13 +530,13 @@ export default function BulkUploadPage() {
             </div>
 
             {pending.length === 0 && saved.length > 0 && (
-              <div className="mt-4 rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
-                <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: '#0D4F57' }}>
-                  <Icon name="check" size={20} color="#C9A86A" strokeWidth={2.5} />
+              <div className="mt-4 rounded-2xl p-5 flex flex-col items-center text-center" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--stone-200)' }}>
+                  <Icon name="check" size={20} color="var(--gold-500)" strokeWidth={2.5} />
                 </div>
-                <p className="font-semibold" style={{ color: '#0D4F57' }}>All done!</p>
-                <p className="text-sm mt-1 mb-4" style={{ color: '#7D878D' }}>{saved.length} {saved.length === 1 ? 'memory' : 'memories'} saved to your map</p>
-                <Link href="/" className="inline-block px-6 py-3 rounded-2xl text-sm font-semibold no-underline" style={{ background: '#0D4F57', color: '#EAE5DD' }}>
+                <p className="font-semibold" style={{ color: 'var(--teal-600)' }}>All done!</p>
+                <p className="text-sm mt-1 mb-4" style={{ color: 'var(--slate)' }}>{saved.length} {saved.length === 1 ? 'memory' : 'memories'} saved to your map</p>
+                <Link href="/" className="inline-block px-6 py-3 rounded-2xl text-sm font-semibold no-underline" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
                   View on map
                 </Link>
               </div>
@@ -559,21 +559,21 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
 
   if (group.saved) {
     return (
-      <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#f0faf4', border: '1px solid rgba(13,79,87,0.15)' }}>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#0D4F57' }}>
+      <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#f0faf4', border: '1px solid rgba(16,20,22,0.15)' }}>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--stone-200)' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div>
-          <p className="text-sm font-semibold" style={{ color: '#0D4F57' }}>{(group.selectedPlace?.name ?? group.locationQuery) || 'Memory'} saved</p>
-          <p className="text-xs" style={{ color: '#7D878D' }}>{group.photos.length} photo{group.photos.length > 1 ? 's' : ''} · {group.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
-          {group.error && <p className="text-xs mt-0.5" style={{ color: '#a32d2d' }}>{group.error}</p>}
+          <p className="text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>{(group.selectedPlace?.name ?? group.locationQuery) || 'Memory'} saved</p>
+          <p className="text-xs" style={{ color: 'var(--slate)' }}>{group.photos.length} photo{group.photos.length > 1 ? 's' : ''} · {group.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
+          {group.error && <p className="text-xs mt-0.5" style={{ color: 'var(--danger)' }}>{group.error}</p>}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(13,79,87,0.06)' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
       {/* Photo strip */}
       <div className="flex gap-1 p-2 overflow-x-auto">
         {group.photos.slice(0, 6).map((photo, i) => (
@@ -589,26 +589,26 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
           </div>
         ))}
         {group.photos.length > 6 && (
-          <div className="flex-shrink-0 rounded-xl flex items-center justify-center" style={{ width: 72, height: 72, background: '#f5f2ed' }}>
-            <span className="text-xs font-semibold" style={{ color: '#7D878D' }}>+{group.photos.length - 6}</span>
+          <div className="flex-shrink-0 rounded-xl flex items-center justify-center" style={{ width: 72, height: 72, background: 'var(--stone-200)' }}>
+            <span className="text-xs font-semibold" style={{ color: 'var(--slate)' }}>+{group.photos.length - 6}</span>
           </div>
         )}
       </div>
 
       {group.photos.length > 1 && (
-        <p className="px-3 -mt-0.5 mb-1 text-xs" style={{ color: '#b0babe' }}>Wrong group? Tap the ⤢ on a photo to move it to its own memory.</p>
+        <p className="px-3 -mt-0.5 mb-1 text-xs" style={{ color: 'var(--slate-light)' }}>Wrong group? Tap the ⤢ on a photo to move it to its own memory.</p>
       )}
 
       <div className="px-4 pb-2">
         {/* Date + count */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs font-semibold" style={{ color: '#0D4F57' }}>
+            <p className="text-xs font-semibold" style={{ color: 'var(--teal-600)' }}>
               {group.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
-            <p className="text-xs" style={{ color: '#7D878D' }}>{group.photos.length} photo{group.photos.length > 1 ? 's' : ''}</p>
+            <p className="text-xs" style={{ color: 'var(--slate)' }}>{group.photos.length} photo{group.photos.length > 1 ? 's' : ''}</p>
           </div>
-          <button onClick={() => setExpanded(!expanded)} className="text-xs px-2 py-1 rounded-lg" style={{ background: '#f5f2ed', color: '#7D878D' }}>
+          <button onClick={() => setExpanded(!expanded)} className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
             {expanded ? 'Collapse' : 'Edit'}
           </button>
         </div>
@@ -627,15 +627,15 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
 
             {/* Dish */}
             <div className="mb-3">
-              <label className="text-xs font-medium block mb-1" style={{ color: '#7D878D' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
+              <label className="text-xs font-medium block mb-1" style={{ color: 'var(--slate)' }}>Dish <span style={{ fontWeight: 400 }}>(optional)</span></label>
               <input type="text" value={group.dishName} onChange={e => onUpdate({ dishName: e.target.value })}
                 placeholder="What did you have?"
                 className="w-full text-sm px-3 py-2 rounded-xl outline-none"
-                style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+                style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
             </div>
 
             {/* Ratings */}
-            <div className="mb-3 rounded-xl p-3" style={{ background: '#f5f2ed' }}>
+            <div className="mb-3 rounded-xl p-3" style={{ background: 'var(--stone-200)' }}>
               <div className="mb-3">
                 <CategoryPicker compact venueType={group.venueType} mealType={group.mealType}
                   onVenueType={v => onUpdate({ venueType: v })} onMealType={m => onUpdate({ mealType: m })} />
@@ -645,27 +645,27 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
 
             {/* Notes */}
             <div className="mb-3">
-              <label className="text-xs font-medium block mb-1" style={{ color: '#7D878D' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
+              <label className="text-xs font-medium block mb-1" style={{ color: 'var(--slate)' }}>Notes <span style={{ fontWeight: 400 }}>(optional)</span></label>
               <input type="text" value={group.notes} onChange={e => onUpdate({ notes: e.target.value })}
                 placeholder="Quick thought…"
                 className="w-full text-sm px-3 py-2 rounded-xl outline-none"
-                style={{ border: '1.5px solid #EAE5DD', background: '#fafaf9' }} />
+                style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
             </div>
           </>
         )}
 
-        {group.error && <p className="text-xs mb-2" style={{ color: '#a32d2d' }}>{group.error}</p>}
+        {group.error && <p className="text-xs mb-2" style={{ color: 'var(--danger)' }}>{group.error}</p>}
 
         {/* Actions */}
         <div className="flex gap-2 pb-1">
           <button onClick={onSave} disabled={group.saving || !group.locationQuery.trim()}
             className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
-            style={{ background: '#0D4F57', color: '#EAE5DD', opacity: group.saving || !group.locationQuery.trim() ? 0.5 : 1 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)', opacity: group.saving || !group.locationQuery.trim() ? 0.5 : 1 }}>
             {group.saving ? 'Saving…' : '✓ Save memory'}
           </button>
           <button onClick={onDismiss}
             className="px-3 py-2.5 rounded-xl text-xs font-medium"
-            style={{ background: '#f5f2ed', color: '#7D878D' }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
             Skip
           </button>
         </div>

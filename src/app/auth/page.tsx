@@ -67,30 +67,30 @@ export default function AuthPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5"
-      style={{ background: '#0D4F57' }}
+      style={{ background: 'var(--stone-400)' }}
     >
       {/* Logo */}
       <div className="flex flex-col items-center mb-8">
-        <div className="mb-4 rounded-3xl overflow-hidden" style={{ width: 96, height: 96, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+        <div className="mb-4 rounded-3xl overflow-hidden" style={{ width: 96, height: 96, boxShadow: 'var(--shadow-raised)' }}>
           <Image src="/logo.png" alt="Mimora" width={96} height={96} className="w-full h-full object-cover" priority />
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: '#EAE5DD' }}>Mimora</h1>
-        <p className="text-sm mt-1.5" style={{ color: 'rgba(234,229,221,0.55)' }}>Pin your food memories to the map</p>
+        <h1 className="text-3xl font-semibold tracking-tight" style={{ color: 'var(--teal-600)' }}>Mimora</h1>
+        <p className="text-sm mt-1.5" style={{ color: 'var(--slate)' }}>Pin your food memories to the map</p>
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: '#EAE5DD' }}>
+      <div className="w-full max-w-sm rounded-3xl p-6" style={{ background: 'var(--stone-400)', border: '0.5px solid var(--stone-500)' }}>
 
         {/* Tab toggle */}
-        <div className="flex rounded-2xl p-1 mb-6" style={{ background: 'rgba(13,79,87,0.08)' }}>
+        <div className="flex rounded-2xl p-1 mb-6" style={{ background: 'rgba(16,20,22,0.08)' }}>
           {(['signin', 'signup'] as const).map((m) => (
             <button
               key={m}
               onClick={() => { setMode(m); setError(null); setSuccess(null) }}
               className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
               style={{
-                background: mode === m ? '#0D4F57' : 'transparent',
-                color: mode === m ? '#EAE5DD' : '#7D878D',
+                background: mode === m ? '#fff' : 'transparent',
+                color: mode === m ? 'var(--teal-600)' : 'var(--slate)',
               }}
             >
               {m === 'signin' ? 'Sign in' : 'Create account'}
@@ -101,7 +101,7 @@ export default function AuthPage() {
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="mb-3">
-            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Email</label>
+            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Email</label>
             <input
               type="email"
               placeholder="you@example.com"
@@ -110,13 +110,13 @@ export default function AuthPage() {
               required
               autoComplete="email"
               className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-              style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: '#0D4F57' }}
+              style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
             />
           </div>
 
           {/* Password */}
           <div className="mb-3">
-            <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Password</label>
+            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -126,13 +126,13 @@ export default function AuthPage() {
                 required
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 className="w-full text-sm px-4 py-3 rounded-xl outline-none pr-12"
-                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: '#0D4F57' }}
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
-                style={{ color: '#7D878D' }}
+                style={{ color: 'var(--slate)' }}
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -142,7 +142,7 @@ export default function AuthPage() {
           {/* Confirm password (signup only) */}
           {mode === 'signup' && (
             <div className="mb-3">
-              <label className="text-xs font-medium block mb-1.5" style={{ color: '#7D878D' }}>Confirm password</label>
+              <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Confirm password</label>
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Re-enter your password"
@@ -151,7 +151,7 @@ export default function AuthPage() {
                 required
                 autoComplete="new-password"
                 className="w-full text-sm px-4 py-3 rounded-xl outline-none"
-                style={{ background: '#fff', border: '1px solid rgba(13,79,87,0.12)', color: '#0D4F57' }}
+                style={{ background: '#fff', border: '1px solid rgba(16,20,22,0.12)', color: 'var(--teal-600)' }}
               />
             </div>
           )}
@@ -163,7 +163,7 @@ export default function AuthPage() {
                 type="button"
                 onClick={() => handleForgotPassword(email, supabase, setSuccess, setError)}
                 className="text-xs"
-                style={{ color: '#7D878D' }}
+                style={{ color: 'var(--slate)' }}
               >
                 Forgot password?
               </button>
@@ -172,12 +172,12 @@ export default function AuthPage() {
 
           {/* Error / success */}
           {error && (
-            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: '#a32d2d', borderLeft: '3px solid #a32d2d' }}>
+            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)', borderLeft: '3px solid var(--danger)' }}>
               {error}
             </div>
           )}
           {success && (
-            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(13,79,87,0.08)', color: '#0D4F57', borderLeft: '3px solid #0D4F57' }}>
+            <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--teal-600)', borderLeft: '3px solid var(--teal-600)' }}>
               {success}
             </div>
           )}
@@ -188,8 +188,8 @@ export default function AuthPage() {
             disabled={loading}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-opacity"
             style={{
-              background: '#0D4F57',
-              color: '#EAE5DD',
+              background: 'var(--stone-200)',
+              color: 'var(--teal-600)',
               opacity: loading ? 0.6 : 1,
             }}
           >
@@ -197,7 +197,7 @@ export default function AuthPage() {
           </button>
         </form>
 
-        <p className="text-xs text-center mt-5" style={{ color: '#7D878D' }}>
+        <p className="text-xs text-center mt-5" style={{ color: 'var(--slate)' }}>
           By continuing you agree to Mimora&apos;s terms and privacy policy.
         </p>
       </div>

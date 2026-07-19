@@ -62,10 +62,10 @@ export default function PlacesSearch({ value, onChange, onSelect, selectedPlace 
 
   return (
     <div>
-      <label className="text-xs mb-1 block font-medium" style={{ color: '#7D878D' }}>
+      <label className="text-xs mb-1 block font-medium" style={{ color: 'var(--slate)' }}>
         Restaurant or bar
         {selectedPlace && (
-          <span className="ml-2" style={{ color: '#0D4F57' }}>✓ linked to Google Maps</span>
+          <span className="ml-2" style={{ color: 'var(--teal-600)' }}>✓ linked to Google Maps</span>
         )}
       </label>
       <input
@@ -76,12 +76,12 @@ export default function PlacesSearch({ value, onChange, onSelect, selectedPlace 
         onChange={(e) => onChange(e.target.value)}
         className="w-full text-sm px-4 py-3 rounded-xl outline-none"
         style={{
-          border: `1.5px solid ${selectedPlace ? '#0D4F57' : '#EAE5DD'}`,
-          background: '#fafaf9',
+          border: `1.5px solid ${selectedPlace ? 'var(--teal-600)' : 'var(--stone-400)'}`,
+          background: 'var(--stone-100)',
         }}
       />
       {!ready && (
-        <p className="text-xs mt-1" style={{ color: '#b0babe' }}>Loading search…</p>
+        <p className="text-xs mt-1" style={{ color: 'var(--slate-light)' }}>Loading search…</p>
       )}
     </div>
   )
