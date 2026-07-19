@@ -141,6 +141,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       const userId = user.id
       const memoryId = newMemory.id
       onUpdate()
+      toast(pending.length > 0 ? 'Memory saved — photos uploading in the background' : 'Memory saved')
       if (pending.length > 0) {
         void (async () => {
           let failed = 0

@@ -64,6 +64,7 @@ export default function TaggedMemorySheet({ tagId, memoryId, taggerName, onClose
       }
       await supabase.from('memory_tags').update({ status: 'saved' }).eq('id', tagId)
       if (failedPhotos > 0) toast(`Saved, but ${failedPhotos === 1 ? 'one photo' : `${failedPhotos} photos`} couldn’t be copied.`, 'error')
+      else toast('Saved to your memories')
       onChanged()
     } finally {
       setSaving(false)

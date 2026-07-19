@@ -134,6 +134,7 @@ export default function CapturePage() {
         if (path) await supabase.from('memory_photos').insert({ memory_id: memory.id, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
       }
 
+      toast('Memory saved')
       router.push('/places')
     } catch (err) {
       console.error(err)

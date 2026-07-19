@@ -101,6 +101,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
       // Remove from wishlist
       await supabase.from('wishlists').delete().eq('id', wishlistId)
 
+      toast('Memory saved')
       onSaved()
     } catch (err) {
       console.error(err)
