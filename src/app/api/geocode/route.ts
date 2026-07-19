@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid lat/lng' }, { status: 400 })
   }
 
-  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  const key = process.env.GOOGLE_MAPS_SERVER_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
   if (!key) {
     console.error('Google Maps API key missing')
     return NextResponse.json({ error: 'API key missing' }, { status: 500 })
