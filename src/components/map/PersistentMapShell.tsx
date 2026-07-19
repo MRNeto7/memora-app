@@ -173,7 +173,7 @@ export default function PersistentMapShell() {
           gestureHandling="greedy"
           style={{ width: '100%', height: '100%' }}
         >
-          {showWishlist && wishlist.map(venue => (
+          {showWishlist && wishlist.filter(v => !(v.lat === 0 && v.lng === 0)).map(venue => (
             <AdvancedMarker
               key={`wish-${venue.id}`}
               position={{ lat: venue.lat, lng: venue.lng }}
@@ -188,8 +188,8 @@ export default function PersistentMapShell() {
             onSelect={(m) => { setSelected(m); setShowAddSheet(false) }}
           />
           <FitToData points={[
-            ...memories.filter(m => m.venue).map(m => ({ lat: m.venue!.lat, lng: m.venue!.lng })),
-            ...wishlist.map(v => ({ lat: v.lat, lng: v.lng })),
+            ...memories.filter(m => m.venue && !(m.venue.lat === 0 && m.venue.lng === 0)).map(m => ({ lat: m.venue!.lat, lng: m.venue!.lng })),
+            ...wishlist.filter(v => !(v.lat === 0 && v.lng === 0)).map(v => ({ lat: v.lat, lng: v.lng })),
           ]} />
         </Map>
 
@@ -364,16 +364,24 @@ function ClusteredMarkers({
     }
   }, [map])
 
+  // Refetches produce a new `memories` array with mostly the same ids, so
+  // React reuses the AdvancedMarker elements and their ref callbacks never
+  // re-fire. Rebuild the clusterer from the still-mounted markers instead
+  // of wiping it — wiping left it empty and the pins vanished until a
+  // toggle forced a remount.
   useEffect(() => {
     if (!clusterer.current) return
     clusterer.current.clearMarkers()
-    markerRefs.current = {}
+    const live = Object.values(markerRefs.current)
+    if (live.length > 0) clusterer.current.addMarkers(live as unknown as google.maps.Marker[])
   }, [memories])
 
   return (
     <>
       {memories.map((memory) => {
-        if (!memory.venue) return null
+        // No venue, or a venue saved without a location (0,0 = "Null
+        // Island" in the Atlantic) — nothing sensible to pin.
+        if (!memory.venue || (memory.venue.lat === 0 && memory.venue.lng === 0)) return null
         return (
           <AdvancedMarker
             key={memory.id}
@@ -383,6 +391,8 @@ function ClusteredMarkers({
               if (marker && clusterer.current) {
                 markerRefs.current[memory.id] = marker
                 clusterer.current.addMarker(marker as unknown as google.maps.Marker)
+              } else if (!marker) {
+                delete markerRefs.current[memory.id]
               }
             }}
           >

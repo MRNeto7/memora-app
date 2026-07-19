@@ -136,7 +136,6 @@ export default function PlacesPage() {
                 style={{
                   background: sortBy === opt ? 'var(--stone-200)' : undefined,
                   color: sortBy === opt ? 'var(--teal-600)' : 'var(--slate)',
-                  border: sortBy === opt ? '0.5px solid var(--teal-600)' : undefined,
                 }}>
                 {label}
               </button>
@@ -153,7 +152,7 @@ export default function PlacesPage() {
                 style={{
                   background: venueFilter === t.value ? 'var(--stone-200)' : '#fff',
                   color: venueFilter === t.value ? 'var(--teal-600)' : 'var(--slate)',
-                  border: `0.5px solid ${venueFilter === t.value ? 'var(--teal-600)' : 'rgba(16,20,22,0.12)'}`,
+                  border: '0.5px solid rgba(16,20,22,0.12)',
                 }}>
                 <span style={{ fontSize: 11 }}>{t.emoji}</span>{t.label}
               </button>
@@ -163,9 +162,9 @@ export default function PlacesPage() {
               <button key={t.value} onClick={() => setMealFilter(mealFilter === t.value ? null : t.value)}
                 className="flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1"
                 style={{
-                  background: mealFilter === t.value ? 'var(--gold-100)' : '#fff',
-                  color: mealFilter === t.value ? 'var(--gold-700)' : 'var(--slate)',
-                  border: `0.5px solid ${mealFilter === t.value ? 'var(--gold-500)' : 'rgba(16,20,22,0.12)'}`,
+                  background: mealFilter === t.value ? 'var(--stone-200)' : '#fff',
+                  color: mealFilter === t.value ? 'var(--teal-600)' : 'var(--slate)',
+                  border: '0.5px solid rgba(16,20,22,0.12)',
                 }}>
                 <span style={{ fontSize: 11 }}>{t.emoji}</span>{t.label}
               </button>
@@ -173,7 +172,7 @@ export default function PlacesPage() {
           </div>
         )}
 
-        {(venueFilter || mealFilter) && filteredMemories.length === 0 && !loading && (
+        {tab === 'memories' && (venueFilter || mealFilter) && filteredMemories.length === 0 && !loading && (
           <div className="rounded-2xl p-6 text-center" style={{ background: '#fff', border: '0.5px solid rgba(16,20,22,0.08)' }}>
             <p className="text-sm mb-1" style={{ color: 'var(--teal-600)' }}>No memories match these filters</p>
             <button onClick={() => { setVenueFilter(null); setMealFilter(null) }} className="text-xs font-semibold" style={{ color: 'var(--gold-700)' }}>
@@ -182,8 +181,10 @@ export default function PlacesPage() {
           </div>
         )}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <p className="text-sm" style={{ color: 'var(--slate)' }}>Loading…</p>
+          <div className="flex flex-col gap-3 pt-1">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="rounded-2xl animate-pulse" style={{ height: 88, background: 'var(--stone-200)', opacity: 1 - i * 0.2 }} />
+            ))}
           </div>
         ) : loadError ? (
           <div className="flex flex-col items-center justify-center py-24 px-6 text-center">

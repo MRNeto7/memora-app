@@ -67,8 +67,10 @@ export default function MemoriesPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="text-sm" style={{ color: 'var(--slate)' }}>Loading…</div>
+        <div className="flex flex-col gap-3 px-4 pt-4">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="rounded-2xl animate-pulse" style={{ height: 88, background: 'var(--stone-200)', opacity: 1 - i * 0.2 }} />
+          ))}
         </div>
       ) : loadError ? (
         <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
