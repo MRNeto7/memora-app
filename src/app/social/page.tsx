@@ -91,8 +91,11 @@ export default function SocialPage() {
   async function handleSearch() {
     if (!searchId.trim()) return
     setSearching(true); setSearchError(''); setSearchResult(null)
-    const { data } = await supabase.from('users').select('id, memora_id, display_name').eq('memora_id', searchId.trim().toUpperCase()).single()
-    if (data) setSearchResult({ ...data, memora_id: data.memora_id ?? '' })
+    // RPC, not a direct table read — users' rows aren't broadly readable
+    // under RLS; this looks up exact IDs with minimal fields (migration 008)
+    const { data } = await supabase.rpc('find_user_by_memora_id', { search_id: searchId.trim() })
+    const match = data?.[0]
+    if (match) setSearchResult({ id: match.id, display_name: match.display_name, memora_id: match.memora_id ?? '' })
     else setSearchError('No user found with that Mimora ID.')
     setSearching(false)
   }
