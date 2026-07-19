@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
   if (!placeId || !PLACE_ID_PATTERN.test(placeId)) return NextResponse.json({ url: null })
 
-  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  const key = process.env.GOOGLE_MAPS_SERVER_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
   if (!key) {
     console.error('Google Maps API key missing')
     return NextResponse.json({ url: null }, { status: 500 })
