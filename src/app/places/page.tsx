@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrl, getThumbUrl } from '@/lib/storage'
+import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import MemorySheet from '@/components/memory/MemorySheet'
 import WishlistSheet from '@/components/wishlist/WishlistSheet'
@@ -46,8 +47,8 @@ export default function PlacesPage() {
       supabase.from('wishlists').select('*, venue:venues(*)').order('priority', { ascending: false }).order('added_at', { ascending: false }),
     ])
     setLoadError(Boolean(memError || wishError))
-    if (mems) setMemories(mems as MemoryWithDetails[])
-    if (wish) setWishlist(wish as WishlistItem[])
+    if (mems) { setMemories(mems as MemoryWithDetails[]); void saveCached(supabase, CACHE_KEYS.memories, mems) }
+    if (wish) { setWishlist(wish as WishlistItem[]); void saveCached(supabase, CACHE_KEYS.wishlistList, wish) }
     setLoading(false)
   }
 
@@ -58,8 +59,21 @@ export default function PlacesPage() {
   }
 
   useEffect(() => {
-    const load = async () => { await fetchAll() }
+    // Offline snapshot first for instant paint, then the network refresh
+    const load = async () => {
+      const [mems, wish] = await Promise.all([
+        loadCached<MemoryWithDetails[]>(supabase, CACHE_KEYS.memories),
+        loadCached<WishlistItem[]>(supabase, CACHE_KEYS.wishlistList),
+      ])
+      if (mems || wish) {
+        if (mems) setMemories(mems)
+        if (wish) setWishlist(wish)
+        setLoading(false)
+      }
+      await fetchAll()
+    }
     load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Filter, then sort and group

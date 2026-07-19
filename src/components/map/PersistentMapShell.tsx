@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrls, thumbPath } from '@/lib/storage'
+import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { useNotifications, NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
@@ -74,13 +75,17 @@ export default function PersistentMapShell() {
       .from('wishlists')
       .select('id, notes, priority, added_at, venue:venues(id, name, lat, lng, address, google_place_id)')
     if (error) throw error
-    if (data) setWishlist(data.filter(w => w.venue).map(w => ({
-      ...w.venue!,
-      wishlistId: w.id,
-      wishlistNotes: w.notes,
-      wishlistPriority: w.priority,
-      wishlistAddedAt: w.added_at,
-    })))
+    if (data) {
+      const mapped = data.filter(w => w.venue).map(w => ({
+        ...w.venue!,
+        wishlistId: w.id,
+        wishlistNotes: w.notes,
+        wishlistPriority: w.priority,
+        wishlistAddedAt: w.added_at,
+      }))
+      setWishlist(mapped)
+      void saveCached(supabase, CACHE_KEYS.wishlistMap, mapped)
+    }
   }
 
   async function fetchMemories() {
@@ -91,6 +96,7 @@ export default function PersistentMapShell() {
     if (error) throw error
     if (data) {
       setMemories(data as MemoryWithDetails[])
+      void saveCached(supabase, CACHE_KEYS.memories, data)
       // Warm the signed-URL cache for every pin's thumbnail in ONE
       // round-trip, instead of a request per pin as markers mount.
       const pinThumbs = (data as MemoryWithDetails[])
@@ -109,6 +115,23 @@ export default function PersistentMapShell() {
       setLoadError(true)
     }
   }
+
+  // Hydrate pins from the offline snapshot for instant paint (and
+  // airplane mode) — the network refresh below replaces it when it lands.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const [mems, wish] = await Promise.all([
+        loadCached<MemoryWithDetails[]>(supabase, CACHE_KEYS.memories),
+        loadCached<WishlistVenue[]>(supabase, CACHE_KEYS.wishlistMap),
+      ])
+      if (cancelled) return
+      if (mems) setMemories(prev => (prev.length === 0 ? mems : prev))
+      if (wish) setWishlist(prev => (prev.length === 0 ? wish : prev))
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Refetch whenever the map becomes visible again — cheap data refresh,
   // no map remount (so no billed Maps load on tab switches).

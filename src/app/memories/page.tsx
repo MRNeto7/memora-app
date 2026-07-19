@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getThumbUrl } from '@/lib/storage'
+import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import Icon from '@/components/ui/Icon'
 import MemorySheet from '@/components/memory/MemorySheet'
@@ -20,7 +21,10 @@ export default function MemoriesPage() {
       .select('*, venue:venues(*), memory_photos(*)')
       .order('visited_at', { ascending: false })
     if (error) setLoadError(true)
-    else { setLoadError(false); if (data) setMemories(data as MemoryWithDetails[]) }
+    else {
+      setLoadError(false)
+      if (data) { setMemories(data as MemoryWithDetails[]); void saveCached(supabase, CACHE_KEYS.memories, data) }
+    }
     setLoading(false)
   }
 
@@ -31,8 +35,14 @@ export default function MemoriesPage() {
   }
 
   useEffect(() => {
-    const load = async () => { await fetchMemories() }
+    // Offline snapshot first for instant paint, then the network refresh
+    const load = async () => {
+      const cached = await loadCached<MemoryWithDetails[]>(supabase, CACHE_KEYS.memories)
+      if (cached) { setMemories(cached); setLoading(false) }
+      await fetchMemories()
+    }
     load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Group by month
