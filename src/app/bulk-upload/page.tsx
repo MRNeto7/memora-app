@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { toast } from '@/lib/toast'
+import { nativePickerAvailable, pickImagesNatively } from '@/lib/nativePicker'
 import { createClient } from '@/lib/supabase/client'
 import { readPhotoExif, fuzzCoordinates } from '@/lib/exif'
 import { validateMediaFile, uploadPhotoWithThumb } from '@/lib/uploads'
@@ -145,12 +146,8 @@ export default function BulkUploadPage() {
     }
   }, [])
 
-  function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    pickerArmed.current = false
-    if (waitTimeout.current) clearTimeout(waitTimeout.current)
-    setPickerWaiting(false)
-    let files = Array.from(e.target.files ?? [])
-    e.target.value = '' // allow re-selecting the same photos later
+  function ingestFiles(incoming: File[]) {
+    let files = incoming
     if (!files.length) return
     // Free tier: cap each bulk import, but load the first batch rather than block
     if (isPro === false && files.length > FREE_BULK_LIMIT) {
@@ -160,6 +157,29 @@ export default function BulkUploadPage() {
       setFreeCapped(null)
     }
     processFiles(files)
+  }
+
+  function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    pickerArmed.current = false
+    if (waitTimeout.current) clearTimeout(waitTimeout.current)
+    setPickerWaiting(false)
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = '' // allow re-selecting the same photos later
+    ingestFiles(files)
+  }
+
+  // Rebuilt shells have the native picker: its sheet dismisses the moment
+  // the user confirms, so the copy phase runs behind our own overlay
+  // instead of a frozen-looking system sheet. Web-input shells fall back
+  // to arming the focus-based overlay.
+  function armOrPickNatively(e: React.MouseEvent) {
+    if (!nativePickerAvailable()) { pickerArmed.current = true; return }
+    e.preventDefault()
+    setPickerWaiting(true)
+    void pickImagesNatively().then(files => {
+      setPickerWaiting(false)
+      if (files && files.length > 0) ingestFiles(files)
+    })
   }
 
   async function processFiles(files: File[]) {
@@ -407,7 +427,7 @@ export default function BulkUploadPage() {
               htmlFor="bulk-file-input"
               className="rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4"
               style={{ background: '#fff', border: '2px dashed var(--gold-500)' }}
-              onClick={() => { pickerArmed.current = true }}
+              onClick={armOrPickNatively}
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--stone-200)' }}>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -447,7 +467,7 @@ export default function BulkUploadPage() {
           accept="image/*"
           multiple
           className="hidden"
-          onClick={() => { pickerArmed.current = true }}
+          onClick={armOrPickNatively}
           onChange={handleFilesSelected}
         />
 
@@ -510,7 +530,7 @@ export default function BulkUploadPage() {
                 {saved.length > 0 && <span style={{ color: 'var(--slate)' }}> · {saved.length} saved</span>}
               </p>
               <div className="flex gap-2">
-                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }} onClick={() => { pickerArmed.current = true }}>
+                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }} >
                   Add more
                 </label>
                 {ready.length > 1 && (

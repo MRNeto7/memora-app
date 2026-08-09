@@ -49,7 +49,7 @@ export default function CapturePage() {
 
   // Note: don't auto-trigger — programmatic file input clicks crash Capacitor WebViews
 
-  function handleFiles(files: FileList | null) {
+  function handleFiles(files: FileList | File[] | null) {
     if (!files || files.length === 0) return
     addPhotos(Array.from(files))
   }
