@@ -257,7 +257,10 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                     const next = !v
                     if (next) {
                       setSelectedPlace(null)
+                      setVenueType('home')
                       if (!locationName.trim()) { setLocationName('Home cooking'); setLocationQuery('Home cooking') }
+                    } else if (venueType === 'home') {
+                      setVenueType(null)
                     }
                     return next
                   })

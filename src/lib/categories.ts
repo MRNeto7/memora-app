@@ -1,7 +1,7 @@
 // Venue + meal categories. Ratings only mean something in context —
 // an 8 at a street-food stall is not an 8 at a Michelin star.
 
-export type VenueType = 'fast_food' | 'cafe' | 'restaurant' | 'high_end' | 'street_food' | 'pub'
+export type VenueType = 'fast_food' | 'cafe' | 'restaurant' | 'high_end' | 'street_food' | 'pub' | 'home'
 export type MealType = 'breakfast' | 'lunch' | 'dinner'
 
 export const VENUE_TYPES: { value: VenueType; label: string; emoji: string }[] = [
@@ -11,6 +11,7 @@ export const VENUE_TYPES: { value: VenueType; label: string; emoji: string }[] =
   { value: 'high_end',    label: 'High end',    emoji: '✨' },
   { value: 'street_food', label: 'Street food', emoji: '🌮' },
   { value: 'fast_food',   label: 'Fast food',   emoji: '🍔' },
+  { value: 'home',        label: 'Home-cooked', emoji: '🏠' },
 ]
 
 export const MEAL_TYPES: { value: MealType; label: string; emoji: string }[] = [
