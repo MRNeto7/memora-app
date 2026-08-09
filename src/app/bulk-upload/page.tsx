@@ -180,7 +180,12 @@ export default function BulkUploadPage() {
     setPickerWaiting(true)
     void pickImagesNatively().then(files => {
       setPickerWaiting(false)
-      if (files && files.length > 0) ingestFiles(files)
+      if (files === null) return // cancelled
+      if (files.length === 0) {
+        toast('Couldn’t read those photos from your library — please try again.', 'error')
+        return
+      }
+      ingestFiles(files)
     })
   }
 

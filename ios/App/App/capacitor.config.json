@@ -21,6 +21,7 @@
 		}
 	},
 	"packageClassList": [
-		"CAPCameraPlugin"
+		"CAPCameraPlugin",
+		"FilesystemPlugin"
 	]
 }
