@@ -7,7 +7,7 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrls, thumbPath } from '@/lib/storage'
 import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
-import { MICHELIN_LONDON, ExploreVenue } from '@/lib/explore'
+import { EXPLORE_VENUES, ExploreVenue } from '@/lib/explore'
 import { toast } from '@/lib/toast'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { useNotifications, NotificationItem } from '@/lib/notifications'
@@ -223,15 +223,13 @@ export default function PersistentMapShell() {
               <WishlistPin name={venue.name} isSelected={selectedWishlist?.id === venue.id} />
             </AdvancedMarker>
           ))}
-          {showExplore && MICHELIN_LONDON.map(v => (
-            <AdvancedMarker
-              key={`explore-${v.name}`}
-              position={{ lat: v.lat, lng: v.lng }}
-              onClick={() => { setSelectedExplore(v); setSelected(null); setSelectedWishlist(null); setShowAddSheet(false) }}
-            >
-              <ExplorePin name={v.name} stars={v.stars} isSelected={selectedExplore?.name === v.name} />
-            </AdvancedMarker>
-          ))}
+          {showExplore && (
+            <ExploreClusteredMarkers
+              venues={EXPLORE_VENUES}
+              selected={selectedExplore}
+              onSelect={(v) => { setSelectedExplore(v); setSelected(null); setSelectedWishlist(null); setShowAddSheet(false) }}
+            />
+          )}
           <ClusteredMarkers
             memories={showMemories ? memories : []}
             selected={selected}
@@ -550,5 +548,71 @@ function ExplorePin({ name, stars, isSelected }: { name: string; stars: number; 
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
       }}>{'★'.repeat(stars)} {name}</div>
     </div>
+  )
+}
+
+
+// Clustered explore layer — ~190 static pins worldwide need grouping so
+// zoomed-out views show tidy ★-count badges instead of a pin blizzard.
+function ExploreClusteredMarkers({ venues, selected, onSelect }: {
+  venues: ExploreVenue[]
+  selected: ExploreVenue | null
+  onSelect: (v: ExploreVenue) => void
+}) {
+  const map = useMap()
+  const clusterer = useRef<MarkerClusterer | null>(null)
+  const markerRefs = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
+
+  useEffect(() => {
+    if (!map) return
+    if (!clusterer.current) {
+      clusterer.current = new MarkerClusterer({
+        map,
+        renderer: {
+          render: ({ count, position }) => {
+            const el = document.createElement('div')
+            el.style.cssText = `
+              width: 40px; height: 40px; border-radius: 50%;
+              background: #fff; border: 0.5px solid rgba(16,20,22,0.15);
+              display: flex; align-items: center; justify-content: center;
+              color: #16191B; font-size: 12px; font-weight: 600;
+              box-shadow: 0 4px 12px rgba(16,20,22,0.18);
+              cursor: pointer;
+            `
+            el.textContent = `★${count}`
+            return new google.maps.marker.AdvancedMarkerElement({ position, content: el })
+          },
+        },
+      })
+    }
+  }, [map])
+
+  // Layer toggled off → clear the clusterer with it
+  useEffect(() => {
+    return () => { clusterer.current?.clearMarkers(); markerRefs.current = {} }
+  }, [])
+
+  return (
+    <>
+      {venues.map(v => (
+        <AdvancedMarker
+          key={`explore-${v.name}`}
+          position={{ lat: v.lat, lng: v.lng }}
+          onClick={() => onSelect(v)}
+          ref={(marker) => {
+            if (marker && clusterer.current) {
+              markerRefs.current[v.name] = marker
+              clusterer.current.addMarker(marker as unknown as google.maps.Marker)
+            } else if (!marker) {
+              const m = markerRefs.current[v.name]
+              if (m && clusterer.current) clusterer.current.removeMarker(m as unknown as google.maps.Marker)
+              delete markerRefs.current[v.name]
+            }
+          }}
+        >
+          <ExplorePin name={v.name} stars={v.stars} isSelected={selected?.name === v.name} />
+        </AdvancedMarker>
+      ))}
+    </>
   )
 }
