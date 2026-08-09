@@ -29,7 +29,7 @@ export default function WishlistSheet({ item, onClose, onUpdate }: WishlistSheet
   const [priority, setPriority] = useState(item.priority)
 
   // Hex, not var() — these get an alpha suffix appended (`${c}15`)
-  const priorityColors = ['', '#7D878D', '#C9A86A', '#0D4F57']
+  const priorityColors = ['', '#6B7280', '#C9A86A', '#16191B']
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
   function handleSave() {

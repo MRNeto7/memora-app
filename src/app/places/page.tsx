@@ -331,7 +331,7 @@ function WishlistCard({ item, index, onClick, onRemove }: {
   onVisited: () => void
   onRemove: () => void
 }) {
-  const priorityColors = ['', '#b0babe', '#C9A86A', '#0D4F57'] // hex: alpha suffix appended
+  const priorityColors = ['', '#9CA3AF', '#C9A86A', '#16191B'] // hex: alpha suffix appended
   const priorityLabels = ['', 'Low', 'Medium', 'Must visit']
 
   return (
