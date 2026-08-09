@@ -584,6 +584,10 @@ function ExploreClusteredMarkers({ venues, selected, onSelect }: {
           },
         },
       })
+      // Marker refs fire BEFORE this effect creates the clusterer — sweep
+      // in everything already mounted or nothing ever gets clustered
+      const live = Object.values(markerRefs.current)
+      if (live.length > 0) clusterer.current.addMarkers(live as unknown as google.maps.Marker[])
     }
   }, [map])
 
