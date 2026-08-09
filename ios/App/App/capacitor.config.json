@@ -20,5 +20,7 @@
 			"splashImmersive": true
 		}
 	},
-	"packageClassList": []
+	"packageClassList": [
+		"CAPCameraPlugin"
+	]
 }
