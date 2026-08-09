@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from '@/lib/toast'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import PlacesSearch from '@/components/memory/PlacesSearch'
@@ -54,7 +55,9 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
         user_id: user.id, venue_id: venueId, notes: notes || null, priority
       })
       if (we) { setError(we.code === '23505' ? 'This restaurant is already on your wishlist.' : we.message); setSaving(false); return }
+      toast('Added to your wishlist')
       onSaved()
+      onClose() // auto-close on success — leaving the sheet open read as frozen
     } catch (e) {
       console.error(e)
       setError('Something went wrong.')

@@ -121,18 +121,46 @@ export default function PersistentMapShell() {
     }
   }
 
-  // Explore pins have no Google place id — venues are created from the
-  // curated data (deduped by exact name) and added to the wishlist.
+  // Explore venues are curated data without a Google place link. At add
+  // time, resolve the real place through our places API (one lookup, cached
+  // on the venue row forever) so the wishlist entry gets photos and venue
+  // details like any other. Falls back to the curated facts if no
+  // confident match.
+  async function resolveExplorePlace(v: ExploreVenue): Promise<{ placeId: string; address: string; lat: number; lng: number } | null> {
+    try {
+      const res = await fetch(`/api/places?q=${encodeURIComponent(v.name)}&lat=${v.lat}&lng=${v.lng}`)
+      const data = await res.json()
+      const c = (data.places ?? [])[0]
+      if (!c?.placeId) return null
+      // Trust the match only if it's near the curated coords (~2km)
+      const dLat = Math.abs(c.lat - v.lat), dLng = Math.abs(c.lng - v.lng)
+      if (dLat > 0.02 || dLng > 0.03) return null
+      return { placeId: c.placeId, address: c.address, lat: c.lat, lng: c.lng }
+    } catch { return null }
+  }
+
   async function addExploreToWishlist(v: ExploreVenue) {
     const { data: { session } } = await supabase.auth.getSession()
     const uid = session?.user?.id
     if (!uid) return
+    const resolved = await resolveExplorePlace(v)
     let venueId: string | null = null
-    const { data: existing } = await supabase.from('venues').select('id').eq('name', v.name).limit(1)
-    if (existing && existing[0]) venueId = existing[0].id
-    else {
+    const { data: existing } = await supabase.from('venues').select('id, google_place_id').eq('name', v.name).limit(1)
+    if (existing && existing[0]) {
+      venueId = existing[0].id
+      // Earlier adds may predate place resolution — upgrade in place
+      if (!existing[0].google_place_id && resolved) {
+        await supabase.from('venues').update({ google_place_id: resolved.placeId, address: resolved.address, lat: resolved.lat, lng: resolved.lng }).eq('id', venueId)
+      }
+    } else {
       const { data: nv } = await supabase.from('venues')
-        .insert({ name: v.name, lat: v.lat, lng: v.lng, address: v.address, google_place_id: null })
+        .insert({
+          name: v.name,
+          lat: resolved?.lat ?? v.lat,
+          lng: resolved?.lng ?? v.lng,
+          address: resolved?.address ?? v.address,
+          google_place_id: resolved?.placeId ?? null,
+        })
         .select('id').single()
       venueId = nv?.id ?? null
     }
@@ -140,6 +168,14 @@ export default function PersistentMapShell() {
     const { error } = await supabase.from('wishlists').insert({ user_id: uid, venue_id: venueId })
     if (error && error.code !== '23505') { toast('Couldn’t add — please try again.', 'error'); return }
     toast(error?.code === '23505' ? 'Already on your wishlist' : `${v.name} added to your wishlist`)
+    setSelectedExplore(null)
+    void fetchWishlist()
+  }
+
+  async function removeExploreFromWishlist(wishlistId: string, name: string) {
+    const { error } = await supabase.from('wishlists').delete().eq('id', wishlistId)
+    if (error) { toast('Couldn’t remove — please try again.', 'error'); return }
+    toast(`${name} removed from your wishlist`)
     setSelectedExplore(null)
     void fetchWishlist()
   }
@@ -338,12 +374,23 @@ export default function PersistentMapShell() {
             {'★'.repeat(selectedExplore.stars)}<span className="ml-1.5" style={{ color: 'var(--slate)' }}>Michelin-starred · 2025 guide</span>
           </p>
           <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>{selectedExplore.address}</p>
-          <button onClick={() => addExploreToWishlist(selectedExplore)}
-            className="press w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
-            <Icon name="bookmark" size={14} color="var(--gold-500)" />
-            Add to wishlist
-          </button>
+          {(() => {
+            const entry = wishlist.find(w => w.name === selectedExplore.name)
+            return entry ? (
+              <button onClick={() => removeExploreFromWishlist(entry.wishlistId, selectedExplore.name)}
+                className="press w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>
+                Remove from wishlist
+              </button>
+            ) : (
+              <button onClick={() => addExploreToWishlist(selectedExplore)}
+                className="press w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
+                <Icon name="bookmark" size={14} color="var(--gold-500)" />
+                Add to wishlist
+              </button>
+            )
+          })()}
         </div>
       )}
 
