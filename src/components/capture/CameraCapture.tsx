@@ -2,7 +2,6 @@
 
 import Portal from '@/components/ui/Portal'
 import Icon from '@/components/ui/Icon'
-import { nativePickerAvailable, pickImagesNatively } from '@/lib/nativePicker'
 
 // Camera-first capture screen. A live in-page viewfinder (getUserMedia) is
 // blocked by iOS for a remote-loaded WebView, so the shutter opens the real
@@ -32,20 +31,6 @@ export default function CameraCapture({ onFiles, onClose }: {
         </label>
         <p className="text-xs mt-3 font-semibold" style={{ color: 'var(--teal-600)' }}>Tap to open camera</p>
 
-        {/* Library */}
-        <label className="cursor-pointer mt-12 flex items-center gap-2 px-5 py-2.5 rounded-full"
-          style={{ background: 'var(--stone-200)' }}
-          onClick={e => {
-            // Native picker (rebuilt shells): sheet closes on confirm and the
-            // copy runs while our UI is visible
-            if (!nativePickerAvailable()) return
-            e.preventDefault()
-            pickImagesNatively().then(files => { if (files && files.length > 0) onFiles(files) })
-          }}>
-          <Icon name="image" size={18} color="var(--slate)" />
-          <span className="text-sm" style={{ color: 'var(--teal-600)' }}>Choose from library</span>
-          <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => onFiles(e.target.files)} />
-        </label>
       </div>
     </Portal>
   )
