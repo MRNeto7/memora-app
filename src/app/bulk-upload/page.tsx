@@ -169,12 +169,14 @@ export default function BulkUploadPage() {
   }
 
   // Rebuilt shells have the native picker: its sheet dismisses the moment
-  // the user confirms, so the copy phase runs behind our own overlay
-  // instead of a frozen-looking system sheet. Web-input shells fall back
-  // to arming the focus-based overlay.
-  function armOrPickNatively(e: React.MouseEvent) {
-    if (!nativePickerAvailable()) { pickerArmed.current = true; return }
-    e.preventDefault()
+  // the user confirms, so the copy phase runs behind the 'Preparing your
+  // photos' overlay instead of a frozen-looking system sheet. Detected
+  // once on mount; when ready, the entry points render as real buttons
+  // (label/htmlFor taps have proven unreliable in this WebView).
+  const [nativeReady, setNativeReady] = useState(false)
+  useEffect(() => { setNativeReady(nativePickerAvailable()) }, [])
+
+  function openNativePicker() {
     setPickerWaiting(true)
     void pickImagesNatively().then(files => {
       setPickerWaiting(false)
@@ -421,25 +423,33 @@ export default function BulkUploadPage() {
 
         {isPro !== null && groups.length === 0 && !loading && (
           <>
-            {/* Upload area — the input is tapped directly via the label;
-                a JS .click() on a file input is unreliable in the Capacitor WebView */}
-            <label
-              htmlFor="bulk-file-input"
-              className="rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4"
-              style={{ background: '#fff', border: '2px dashed var(--gold-500)' }}
-              onClick={armOrPickNatively}
-            >
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--stone-200)' }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              </div>
-              <p className="font-semibold text-base mb-1" style={{ color: 'var(--teal-600)' }}>Select photos from camera roll</p>
-              <p className="text-sm" style={{ color: 'var(--slate)', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
-              {isPro === false && (
-                <p className="text-xs mt-2 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.12)', color: 'var(--gold-700)' }}>
-                  Free includes {FREE_BULK_LIMIT} photos per import · Pro is unlimited
-                </p>
-              )}
-            </label>
+            {/* Upload area. Native shells get a real button (taps always
+                fire) driving PHPicker; web shells keep the label/htmlFor
+                input — a JS .click() on a file input is unreliable in the
+                Capacitor WebView */}
+            {(() => {
+              const tileInner = (
+                <>
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--stone-200)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  </div>
+                  <p className="font-semibold text-base mb-1" style={{ color: 'var(--teal-600)' }}>Select photos from camera roll</p>
+                  <p className="text-sm" style={{ color: 'var(--slate)', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
+                  {isPro === false && (
+                    <p className="text-xs mt-2 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.12)', color: 'var(--gold-700)' }}>
+                      Free includes {FREE_BULK_LIMIT} photos per import · Pro is unlimited
+                    </p>
+                  )}
+                </>
+              )
+              const tileClass = 'rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4 w-full'
+              const tileStyle = { background: '#fff', border: '2px dashed var(--gold-500)' }
+              return nativeReady ? (
+                <button type="button" onClick={openNativePicker} className={tileClass} style={tileStyle}>{tileInner}</button>
+              ) : (
+                <label htmlFor="bulk-file-input" className={tileClass} style={tileStyle}>{tileInner}</label>
+              )
+            })()}
 
             {/* How it works */}
             <div className="rounded-2xl p-4" style={{ background: 'rgba(201,168,106,0.1)', border: '0.5px solid rgba(201,168,106,0.25)' }}>
@@ -467,7 +477,7 @@ export default function BulkUploadPage() {
           accept="image/*"
           multiple
           className="hidden"
-          onClick={armOrPickNatively}
+          onClick={() => { pickerArmed.current = true }}
           onChange={handleFilesSelected}
         />
 
@@ -477,7 +487,7 @@ export default function BulkUploadPage() {
               <div className="rounded-3xl px-8 py-7 flex flex-col items-center" style={{ background: '#fff', width: 'min(300px, 85%)', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
                 <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-4" style={{ borderColor: 'var(--teal-600)', borderTopColor: 'transparent' }} />
                 <p className="text-sm font-semibold mb-1" style={{ color: 'var(--teal-600)' }}>Preparing your photos…</p>
-                <p className="text-xs text-center mb-4" style={{ color: 'var(--slate)' }}>Large selections and iCloud photos can take a few seconds</p>
+                <p className="text-xs text-center mb-4" style={{ color: 'var(--slate)' }}>Copying from your library — large selections and iCloud photos can take a minute. Hang tight, nothing is frozen.</p>
                 <button onClick={() => { pickerArmed.current = false; setPickerWaiting(false) }}
                   className="text-xs px-4 py-2 rounded-xl" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
                   Cancel
@@ -530,9 +540,15 @@ export default function BulkUploadPage() {
                 {saved.length > 0 && <span style={{ color: 'var(--slate)' }}> · {saved.length} saved</span>}
               </p>
               <div className="flex gap-2">
-                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }} >
-                  Add more
-                </label>
+                {nativeReady ? (
+                  <button type="button" onClick={openNativePicker} className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
+                    Add more
+                  </button>
+                ) : (
+                  <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
+                    Add more
+                  </label>
+                )}
                 {ready.length > 1 && (
                   <button onClick={saveAll} disabled={savingAll}
                     className="press text-xs px-3 py-1.5 rounded-lg font-semibold"
