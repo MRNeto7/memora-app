@@ -226,7 +226,6 @@ export default function PersistentMapShell() {
           {showExplore && (
             <ExploreClusteredMarkers
               venues={EXPLORE_VENUES}
-              selected={selectedExplore}
               onSelect={(v) => { setSelectedExplore(v); setSelected(null); setSelectedWishlist(null); setShowAddSheet(false) }}
             />
           )}
@@ -527,96 +526,61 @@ function WishlistPin({ name, isSelected }: { name: string; isSelected: boolean }
   )
 }
 
-// Explore pin — curated venue (Michelin layer): white circle, gold star
-function ExplorePin({ name, stars, isSelected }: { name: string; stars: number; isSelected: boolean }) {
-  const size = isSelected ? 42 : 34
-  return (
-    <div className="flex flex-col items-center" style={{ cursor: 'pointer' }}>
-      <div style={{
-        width: size, height: size, borderRadius: '50%',
-        background: isSelected ? 'var(--gold-500)' : '#fff',
-        border: `2px solid ${isSelected ? '#fff' : 'rgba(16,20,22,0.15)'}`,
-        boxShadow: '0 2px 8px rgba(16,20,22,0.18)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 0.2s ease',
-        fontSize: isSelected ? 16 : 13, color: isSelected ? '#fff' : 'var(--gold-500)',
-      }}>★</div>
-      <div style={{
-        marginTop: 2, background: 'rgba(255,255,255,0.95)', borderRadius: 6,
-        padding: '2px 6px', fontSize: 10, fontWeight: 600, color: 'var(--teal-600)',
-        maxWidth: 90, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-      }}>{'★'.repeat(stars)} {name}</div>
-    </div>
-  )
-}
 
 
-// Clustered explore layer — ~190 static pins worldwide need grouping so
-// zoomed-out views show tidy ★-count badges instead of a pin blizzard.
-function ExploreClusteredMarkers({ venues, selected, onSelect }: {
+// Clustered explore layer. Built imperatively: markers are handed to the
+// clusterer at construction so it owns them outright — the React-marker +
+// ref-timing approach left the clusterer empty and pins unclustered.
+function ExploreClusteredMarkers({ venues, onSelect }: {
   venues: ExploreVenue[]
-  selected: ExploreVenue | null
   onSelect: (v: ExploreVenue) => void
 }) {
   const map = useMap()
-  const clusterer = useRef<MarkerClusterer | null>(null)
-  const markerRefs = useRef<Record<string, google.maps.marker.AdvancedMarkerElement>>({})
+  const onSelectRef = useRef(onSelect)
+  onSelectRef.current = onSelect
 
   useEffect(() => {
     if (!map) return
-    if (!clusterer.current) {
-      clusterer.current = new MarkerClusterer({
-        map,
-        renderer: {
-          render: ({ count, position }) => {
-            const el = document.createElement('div')
-            el.style.cssText = `
-              width: 40px; height: 40px; border-radius: 50%;
-              background: #fff; border: 0.5px solid rgba(16,20,22,0.15);
-              display: flex; align-items: center; justify-content: center;
-              color: #16191B; font-size: 12px; font-weight: 600;
-              box-shadow: 0 4px 12px rgba(16,20,22,0.18);
-              cursor: pointer;
-            `
-            el.textContent = `★${count}`
-            return new google.maps.marker.AdvancedMarkerElement({ position, content: el })
-          },
-        },
+    const markers = venues.map(v => {
+      const el = document.createElement('div')
+      el.style.cssText = 'display:flex;flex-direction:column;align-items:center;cursor:pointer;'
+      const label = `${'★'.repeat(v.stars)} ${v.name}`.replace(/</g, '&lt;')
+      el.innerHTML = `
+        <div style="width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid rgba(16,20,22,0.15);box-shadow:0 2px 8px rgba(16,20,22,0.18);display:flex;align-items:center;justify-content:center;font-size:13px;color:#C9A86A;">★</div>
+        <div style="margin-top:2px;background:rgba(255,255,255,0.95);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:600;color:#16191B;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.1);">${label}</div>`
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: v.lat, lng: v.lng },
+        content: el,
+        gmpClickable: true,
       })
-      // Marker refs fire BEFORE this effect creates the clusterer — sweep
-      // in everything already mounted or nothing ever gets clustered
-      const live = Object.values(markerRefs.current)
-      if (live.length > 0) clusterer.current.addMarkers(live as unknown as google.maps.Marker[])
+      marker.addListener('click', () => onSelectRef.current(v))
+      return marker
+    })
+    const clusterer = new MarkerClusterer({
+      map,
+      markers: markers as unknown as google.maps.Marker[],
+      renderer: {
+        render: ({ count, position }) => {
+          const el = document.createElement('div')
+          el.style.cssText = `
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #fff; border: 0.5px solid rgba(16,20,22,0.15);
+            display: flex; align-items: center; justify-content: center;
+            color: #16191B; font-size: 12px; font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16,20,22,0.18);
+            cursor: pointer;
+          `
+          el.textContent = `★${count}`
+          return new google.maps.marker.AdvancedMarkerElement({ position, content: el })
+        },
+      },
+    })
+    return () => {
+      clusterer.clearMarkers()
+      markers.forEach(m => { m.map = null })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map])
 
-  // Layer toggled off → clear the clusterer with it
-  useEffect(() => {
-    return () => { clusterer.current?.clearMarkers(); markerRefs.current = {} }
-  }, [])
-
-  return (
-    <>
-      {venues.map(v => (
-        <AdvancedMarker
-          key={`explore-${v.name}`}
-          position={{ lat: v.lat, lng: v.lng }}
-          onClick={() => onSelect(v)}
-          ref={(marker) => {
-            if (marker && clusterer.current) {
-              markerRefs.current[v.name] = marker
-              clusterer.current.addMarker(marker as unknown as google.maps.Marker)
-            } else if (!marker) {
-              const m = markerRefs.current[v.name]
-              if (m && clusterer.current) clusterer.current.removeMarker(m as unknown as google.maps.Marker)
-              delete markerRefs.current[v.name]
-            }
-          }}
-        >
-          <ExplorePin name={v.name} stars={v.stars} isSelected={selected?.name === v.name} />
-        </AdvancedMarker>
-      ))}
-    </>
-  )
+  return null
 }
