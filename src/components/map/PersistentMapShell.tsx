@@ -7,6 +7,8 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrls, thumbPath } from '@/lib/storage'
 import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
+import { MICHELIN_LONDON, ExploreVenue } from '@/lib/explore'
+import { toast } from '@/lib/toast'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { useNotifications, NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
@@ -43,6 +45,8 @@ export default function PersistentMapShell() {
   const [wishlist, setWishlist] = useState<WishlistVenue[]>([])
   const [showMemories, setShowMemories] = useState(true)
   const [showWishlist, setShowWishlist] = useState(true)
+  const [showExplore, setShowExplore] = useState(false)
+  const [selectedExplore, setSelectedExplore] = useState<ExploreVenue | null>(null)
   const [loadError, setLoadError] = useState(false)
   const router = useRouter()
   const { items: notifications } = useNotifications()
@@ -115,6 +119,29 @@ export default function PersistentMapShell() {
         .map(p => thumbPath(p))
       if (pinThumbs.length > 0) void getSignedPhotoUrls(supabase, pinThumbs)
     }
+  }
+
+  // Explore pins have no Google place id — venues are created from the
+  // curated data (deduped by exact name) and added to the wishlist.
+  async function addExploreToWishlist(v: ExploreVenue) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) return
+    let venueId: string | null = null
+    const { data: existing } = await supabase.from('venues').select('id').eq('name', v.name).limit(1)
+    if (existing && existing[0]) venueId = existing[0].id
+    else {
+      const { data: nv } = await supabase.from('venues')
+        .insert({ name: v.name, lat: v.lat, lng: v.lng, address: v.address, google_place_id: null })
+        .select('id').single()
+      venueId = nv?.id ?? null
+    }
+    if (!venueId) { toast('Couldn’t add — please try again.', 'error'); return }
+    const { error } = await supabase.from('wishlists').insert({ user_id: uid, venue_id: venueId })
+    if (error && error.code !== '23505') { toast('Couldn’t add — please try again.', 'error'); return }
+    toast(error?.code === '23505' ? 'Already on your wishlist' : `${v.name} added to your wishlist`)
+    setSelectedExplore(null)
+    void fetchWishlist()
   }
 
   async function loadAll() {
@@ -196,6 +223,15 @@ export default function PersistentMapShell() {
               <WishlistPin name={venue.name} isSelected={selectedWishlist?.id === venue.id} />
             </AdvancedMarker>
           ))}
+          {showExplore && MICHELIN_LONDON.map(v => (
+            <AdvancedMarker
+              key={`explore-${v.name}`}
+              position={{ lat: v.lat, lng: v.lng }}
+              onClick={() => { setSelectedExplore(v); setSelected(null); setSelectedWishlist(null); setShowAddSheet(false) }}
+            >
+              <ExplorePin name={v.name} stars={v.stars} isSelected={selectedExplore?.name === v.name} />
+            </AdvancedMarker>
+          ))}
           <ClusteredMarkers
             memories={showMemories ? memories : []}
             selected={selected}
@@ -266,8 +302,7 @@ export default function PersistentMapShell() {
         {/* Logo + count */}
         <div className="glass-pill flex items-center gap-2 px-3 py-1.5 rounded-2xl pointer-events-auto">
           <img src="/logo.png" alt="Mimora" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover' }} />
-          <span className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>Mimora</span>
-          <span className="text-xs" style={{ color: 'var(--slate)' }}>· {memories.length}</span>
+          <span className="text-xs font-semibold" style={{ color: 'var(--slate)' }}>{memories.length}</span>
         </div>
         {/* Toggles */}
         <div className="flex gap-1.5 pointer-events-auto">
@@ -283,10 +318,39 @@ export default function PersistentMapShell() {
             <div className="w-2 h-2 rounded-full" style={{ background: showWishlist ? '#fff' : 'var(--slate-light)' }} />
             Wishlist
           </button>
+          <button onClick={() => { setShowExplore(v => { const next = !v; if (!next) setSelectedExplore(null); return next }) }}
+            className="glass-pill press flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+            style={{ background: showExplore ? 'var(--stone-200)' : undefined, color: showExplore ? 'var(--teal-600)' : 'var(--slate)' }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: showExplore ? 'var(--gold-500)' : 'var(--slate-light)' }} />
+            Explore
+          </button>
         </div>
       </div>
 
-      <AddMemoryButton onClick={() => { setShowAddSheet(true); setSelected(null) }} />
+      {/* Explore venue card — curated data, add straight to wishlist */}
+      {selectedExplore && (
+        <div className="rise absolute left-4 right-4 z-20 rounded-2xl p-4"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 108px)', background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(20px) saturate(1.4)', WebkitBackdropFilter: 'blur(20px) saturate(1.4)', border: '0.5px solid rgba(16,20,22,0.1)', boxShadow: 'var(--shadow-raised)' }}>
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <p className="font-semibold text-base leading-tight" style={{ color: 'var(--teal-600)' }}>{selectedExplore.name}</p>
+            <button onClick={() => setSelectedExplore(null)}
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--stone-200)', color: 'var(--slate)', fontSize: 12 }}>✕</button>
+          </div>
+          <p className="text-xs mb-0.5" style={{ color: 'var(--gold-700)' }}>
+            {'★'.repeat(selectedExplore.stars)}<span className="ml-1.5" style={{ color: 'var(--slate)' }}>Michelin-starred · 2025 guide</span>
+          </p>
+          <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>{selectedExplore.address}</p>
+          <button onClick={() => addExploreToWishlist(selectedExplore)}
+            className="press w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+            style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
+            <Icon name="bookmark" size={14} color="var(--gold-500)" />
+            Add to wishlist
+          </button>
+        </div>
+      )}
+
+      <AddMemoryButton onClick={() => { setShowAddSheet(true); setSelected(null); setSelectedExplore(null) }} />
 
       {selected && (
         <MemorySheet memory={selected} onClose={() => setSelected(null)} onUpdate={loadAll} />
@@ -461,6 +525,30 @@ function WishlistPin({ name, isSelected }: { name: string; isSelected: boolean }
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         transition: 'all 0.2s ease',
       }}>{name}</div>
+    </div>
+  )
+}
+
+// Explore pin — curated venue (Michelin layer): white circle, gold star
+function ExplorePin({ name, stars, isSelected }: { name: string; stars: number; isSelected: boolean }) {
+  const size = isSelected ? 42 : 34
+  return (
+    <div className="flex flex-col items-center" style={{ cursor: 'pointer' }}>
+      <div style={{
+        width: size, height: size, borderRadius: '50%',
+        background: isSelected ? 'var(--gold-500)' : '#fff',
+        border: `2px solid ${isSelected ? '#fff' : 'rgba(16,20,22,0.15)'}`,
+        boxShadow: '0 2px 8px rgba(16,20,22,0.18)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s ease',
+        fontSize: isSelected ? 16 : 13, color: isSelected ? '#fff' : 'var(--gold-500)',
+      }}>★</div>
+      <div style={{
+        marginTop: 2, background: 'rgba(255,255,255,0.95)', borderRadius: 6,
+        padding: '2px 6px', fontSize: 10, fontWeight: 600, color: 'var(--teal-600)',
+        maxWidth: 90, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+      }}>{'★'.repeat(stars)} {name}</div>
     </div>
   )
 }
