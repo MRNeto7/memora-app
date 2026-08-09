@@ -145,24 +145,30 @@ export default function PersistentMapShell() {
     if (!uid) return
     const resolved = await resolveExplorePlace(v)
     let venueId: string | null = null
-    const { data: existing } = await supabase.from('venues').select('id, google_place_id').eq('name', v.name).limit(1)
-    if (existing && existing[0]) {
-      venueId = existing[0].id
-      // Earlier adds may predate place resolution — upgrade in place
-      if (!existing[0].google_place_id && resolved) {
-        await supabase.from('venues').update({ google_place_id: resolved.placeId, address: resolved.address, lat: resolved.lat, lng: resolved.lng }).eq('id', venueId)
+    if (resolved) {
+      const { data: byPlace } = await supabase.from('venues').select('id').eq('google_place_id', resolved.placeId).limit(1)
+      if (byPlace && byPlace[0]) venueId = byPlace[0].id
+    }
+    if (!venueId) {
+      const { data: byName } = await supabase.from('venues').select('id, google_place_id').eq('name', v.name).limit(1)
+      const nameMatch = byName?.[0]
+      // A photo-less name match can't be enriched in place (venues RLS has
+      // no update policy), so a fresh row with the place id wins over
+      // reusing a row that will never get a photo.
+      if (nameMatch && (nameMatch.google_place_id || !resolved)) {
+        venueId = nameMatch.id
+      } else {
+        const { data: nv } = await supabase.from('venues')
+          .insert({
+            name: v.name,
+            lat: resolved?.lat ?? v.lat,
+            lng: resolved?.lng ?? v.lng,
+            address: resolved?.address ?? v.address,
+            google_place_id: resolved?.placeId ?? null,
+          })
+          .select('id').single()
+        venueId = nv?.id ?? null
       }
-    } else {
-      const { data: nv } = await supabase.from('venues')
-        .insert({
-          name: v.name,
-          lat: resolved?.lat ?? v.lat,
-          lng: resolved?.lng ?? v.lng,
-          address: resolved?.address ?? v.address,
-          google_place_id: resolved?.placeId ?? null,
-        })
-        .select('id').single()
-      venueId = nv?.id ?? null
     }
     if (!venueId) { toast('Couldn’t add — please try again.', 'error'); return }
     const { error } = await supabase.from('wishlists').insert({ user_id: uid, venue_id: venueId })
