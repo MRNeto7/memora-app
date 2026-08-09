@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getSignedPhotoUrl, getThumbUrl } from '@/lib/storage'
+import { getSignedPhotoUrl, getThumbUrl, recoverImageUrl } from '@/lib/storage'
 import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import MemorySheet from '@/components/memory/MemorySheet'
@@ -105,7 +105,7 @@ export default function PlacesPage() {
   const memoryOrder = new Map(sortedMemories.map((m, i) => [m.id, i]))
 
   return (
-    <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+    <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 'calc(112px + env(safe-area-inset-bottom, 0px))' }}>
 
       {/* Header */}
       <div className="page-header" style={{ paddingBottom: 0 }}>
@@ -266,6 +266,7 @@ export default function PlacesPage() {
 
 function MemoryCard({ memory, index, onClick }: { memory: MemoryWithDetails; index: number; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [retried, setRetried] = useState(false)
   const supabase = createClient()
   const firstPhoto = memory.memory_photos?.[0]
 
@@ -280,7 +281,12 @@ function MemoryCard({ memory, index, onClick }: { memory: MemoryWithDetails; ind
       <div className="flex">
         <div className="flex-shrink-0 relative" style={{ width: 76, height: 76, background: 'var(--stone-400)', overflow: 'hidden', borderRadius: 12, margin: 6, flexShrink: 0 }}>
           {photoUrl
-            ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }} />
+            ? <img src={photoUrl} className="w-full h-full" style={{ objectFit: 'cover', display: 'block' }}
+                onError={() => {
+                  if (retried || !firstPhoto) return
+                  setRetried(true)
+                  recoverImageUrl(supabase, firstPhoto.storage_path).then(u => { if (u) setPhotoUrl(u) })
+                }} />
             : <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--stone-300)' }}>
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'var(--stone-200)' }}>
                   <span className="text-xs font-bold" style={{ color: 'var(--slate)' }}>{memory.venue?.name?.slice(0, 2).toUpperCase() ?? 'M'}</span>

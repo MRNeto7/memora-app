@@ -1,5 +1,5 @@
 import type { createClient } from '@/lib/supabase/client'
-import { getBlob, putBlob } from '@/lib/imageCache'
+import { getBlob, putBlob, removeBlob } from '@/lib/imageCache'
 
 type Supabase = ReturnType<typeof createClient>
 
@@ -152,6 +152,25 @@ export async function getThumbUrl(supabase: Supabase, path: string): Promise<str
 
   void backfillThumb(supabase, path)
   return getSignedPhotoUrl(supabase, path)
+}
+
+/**
+ * Self-heal for a broken <img>: drop every cached form of the photo
+ * (object URL, signed-URL cache, IndexedDB bytes — any of which can go
+ * stale or corrupt in the WKWebView) and return a fresh full-size signed
+ * URL straight from Supabase. Wire to <img onError>.
+ */
+export async function recoverImageUrl(supabase: Supabase, path: string): Promise<string | null> {
+  for (const p of [path, thumbPath(path)]) {
+    const obj = objectUrls.get(p)
+    if (obj) { URL.revokeObjectURL(obj); objectUrls.delete(p) }
+    memoryCache.delete(p)
+    blobFetchInFlight.delete(p)
+    void removeBlob(p)
+  }
+  persistToSession()
+  const { data } = await supabase.storage.from('memory-photos').createSignedUrl(path, SIGN_TTL_SECONDS)
+  return data?.signedUrl ?? null
 }
 
 async function backfillThumb(supabase: Supabase, path: string) {

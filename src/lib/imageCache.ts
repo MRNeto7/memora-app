@@ -31,6 +31,12 @@ function openDb(): Promise<IDBDatabase | null> {
   return dbPromise
 }
 
+// Rows store raw bytes + mime, NOT Blob objects — WebKit has a history of
+// corrupting Blobs persisted in IndexedDB (they resurface as broken images
+// until an app restart). ArrayBuffers round-trip reliably; the Blob is
+// rebuilt on read. Legacy Blob rows are still readable.
+interface StoredImage { path: string; buf?: ArrayBuffer; type?: string; blob?: Blob; lastUsed: number }
+
 export async function getBlob(path: string): Promise<Blob | null> {
   const db = await openDb()
   if (!db) return null
@@ -40,10 +46,11 @@ export async function getBlob(path: string): Promise<Blob | null> {
       const store = tx.objectStore(STORE)
       const req = store.get(path)
       req.onsuccess = () => {
-        const row = req.result as { path: string; blob: Blob; lastUsed: number } | undefined
+        const row = req.result as StoredImage | undefined
         if (!row) return resolve(null)
         store.put({ ...row, lastUsed: Date.now() }) // touch for LRU
-        resolve(row.blob)
+        if (row.buf) return resolve(new Blob([row.buf], { type: row.type || 'image/jpeg' }))
+        resolve(row.blob ?? null)
       }
       req.onerror = () => resolve(null)
     } catch {
@@ -56,11 +63,20 @@ export async function putBlob(path: string, blob: Blob): Promise<void> {
   const db = await openDb()
   if (!db) return
   try {
-    db.transaction(STORE, 'readwrite').objectStore(STORE).put({ path, blob, lastUsed: Date.now() })
+    const buf = await blob.arrayBuffer()
+    db.transaction(STORE, 'readwrite').objectStore(STORE).put({ path, buf, type: blob.type, lastUsed: Date.now() })
   } catch {
     return // quota exceeded — cache is best-effort
   }
   void evictIfNeeded(db)
+}
+
+export async function removeBlob(path: string): Promise<void> {
+  const db = await openDb()
+  if (!db) return
+  try {
+    db.transaction(STORE, 'readwrite').objectStore(STORE).delete(path)
+  } catch { /* best-effort */ }
 }
 
 // Trim least-recently-used entries once over the cap. Uses the lastUsed

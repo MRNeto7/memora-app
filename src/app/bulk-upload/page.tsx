@@ -259,6 +259,23 @@ export default function BulkUploadPage() {
     })
   }
 
+  // Combine a group with the one above it — for photos sent later (e.g.
+  // received from friends) that fall outside the 2-hour auto-group window
+  function mergeGroupUp(groupId: string) {
+    setGroups(prev => {
+      const idx = prev.findIndex(g => g.id === groupId)
+      if (idx <= 0) return prev
+      const target = prev[idx - 1]
+      const source = prev[idx]
+      const photos = [...target.photos, ...source.photos]
+        .sort((a, b) => (a.takenAt?.getTime() ?? 0) - (b.takenAt?.getTime() ?? 0))
+      const next = [...prev]
+      next[idx - 1] = { ...target, photos }
+      next.splice(idx, 1)
+      return next
+    })
+  }
+
   async function saveGroup(group: MemoryGroup) {
     updateGroup(group.id, { saving: true, error: null })
     try {
@@ -389,6 +406,7 @@ export default function BulkUploadPage() {
               htmlFor="bulk-file-input"
               className="rounded-2xl p-8 flex flex-col items-center text-center cursor-pointer mb-4"
               style={{ background: '#fff', border: '2px dashed var(--gold-500)' }}
+              onClick={() => { pickerArmed.current = true }}
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--stone-200)' }}>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A86A" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -491,7 +509,7 @@ export default function BulkUploadPage() {
                 {saved.length > 0 && <span style={{ color: 'var(--slate)' }}> · {saved.length} saved</span>}
               </p>
               <div className="flex gap-2">
-                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
+                <label htmlFor="bulk-file-input" className="text-xs px-3 py-1.5 rounded-lg cursor-pointer flex items-center" style={{ background: 'var(--stone-200)', color: 'var(--slate)' }} onClick={() => { pickerArmed.current = true }}>
                   Add more
                 </label>
                 {ready.length > 1 && (
@@ -513,7 +531,7 @@ export default function BulkUploadPage() {
 
             {/* Groups */}
             <div className="flex flex-col gap-4">
-              {groups.map(group => (
+              {groups.map((group, gi) => (
                 <GroupCard
                   key={group.id}
                   group={group}
@@ -521,6 +539,7 @@ export default function BulkUploadPage() {
                   onSave={() => saveGroup(group)}
                   onDismiss={() => dismissGroup(group.id)}
                   onSplit={i => splitPhoto(group.id, i)}
+                  onMergeUp={gi > 0 && !groups[gi - 1].saved && !group.saved ? () => mergeGroupUp(group.id) : undefined}
                 />
               ))}
             </div>
@@ -544,12 +563,13 @@ export default function BulkUploadPage() {
   )
 }
 
-function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
+function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit, onMergeUp }: {
   group: MemoryGroup
   onUpdate: (u: Partial<MemoryGroup>) => void
   onSave: () => void
   onDismiss: () => void
   onSplit: (photoIndex: number) => void
+  onMergeUp?: () => void
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -593,6 +613,17 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit }: {
 
       {group.photos.length > 1 && (
         <p className="px-3 -mt-0.5 mb-1 text-xs" style={{ color: 'var(--slate-light)' }}>Wrong group? Tap the ⤢ on a photo to move it to its own memory.</p>
+      )}
+
+      {/* Photos sent later miss the 2-hour auto-group window — allow
+          combining with the group above */}
+      {onMergeUp && (
+        <button onClick={onMergeUp}
+          className="press mx-3 mb-1 px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1"
+          style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          Same meal as the group above? Merge them
+        </button>
       )}
 
       <div className="px-4 pb-2">

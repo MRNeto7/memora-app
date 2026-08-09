@@ -87,7 +87,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
   return (
     <div className="page-enter min-h-screen flex flex-col" style={{ background: 'var(--stone-400)', paddingBottom: 80 }}>
       {/* Header */}
-      <div style={{ background: 'var(--stone-400)', borderBottom: '0.5px solid var(--stone-500)', paddingTop: 48, paddingBottom: 0 }}>
+      <div style={{ background: 'var(--stone-400)', borderBottom: '0.5px solid var(--stone-500)', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', paddingBottom: 0 }}>
         <div className="px-5 mb-4 flex items-center gap-3">
           <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
             style={{ background: 'var(--stone-200)' }}>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getThumbUrl } from '@/lib/storage'
+import { getThumbUrl, recoverImageUrl } from '@/lib/storage'
 import { loadCached, saveCached, CACHE_KEYS } from '@/lib/offlineData'
 import { MemoryWithDetails } from '@/lib/types/database'
 import Icon from '@/components/ui/Icon'
@@ -133,6 +133,7 @@ export default function MemoriesPage() {
 
 function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: () => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [retried, setRetried] = useState(false)
   const supabase = createClient()
   const firstPhoto = memory.memory_photos?.[0]
 
@@ -162,7 +163,12 @@ function MemoryCard({ memory, onClick }: { memory: MemoryWithDetails; onClick: (
           style={{ width: 88, height: 88, background: 'var(--stone-400)', position: 'relative', overflow: 'hidden' }}
         >
           {photoUrl ? (
-            <img src={photoUrl} alt="" className="w-full h-full object-cover" />
+            <img src={photoUrl} alt="" className="w-full h-full object-cover"
+              onError={() => {
+                if (retried || !firstPhoto) return
+                setRetried(true)
+                recoverImageUrl(supabase, firstPhoto.storage_path).then(u => { if (u) setPhotoUrl(u) })
+              }} />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div

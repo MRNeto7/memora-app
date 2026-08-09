@@ -53,7 +53,7 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
       const { error: we } = await supabase.from('wishlists').insert({
         user_id: user.id, venue_id: venueId, notes: notes || null, priority
       })
-      if (we) { setError(we.message); setSaving(false); return }
+      if (we) { setError(we.code === '23505' ? 'This restaurant is already on your wishlist.' : we.message); setSaving(false); return }
       onSaved()
     } catch (e) {
       console.error(e)

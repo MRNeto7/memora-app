@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MemoryWithDetails } from '@/lib/types/database'
 import { createClient } from '@/lib/supabase/client'
-import { getThumbUrl } from '@/lib/storage'
+import { getThumbUrl, recoverImageUrl } from '@/lib/storage'
 
 interface MemoryPinProps {
   memory: MemoryWithDetails
@@ -12,6 +12,7 @@ interface MemoryPinProps {
 
 export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const retriedRef = useRef(false)
   const supabase = createClient()
 
   const firstPhoto = memory.memory_photos?.[0]
@@ -51,6 +52,11 @@ export default function MemoryPin({ memory, isSelected }: MemoryPinProps) {
             src={photoUrl}
             alt="Memory"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={() => {
+              if (retriedRef.current || !firstPhoto) return
+              retriedRef.current = true
+              recoverImageUrl(supabase, firstPhoto.storage_path).then(u => { if (u) setPhotoUrl(u) })
+            }}
           />
         ) : (
           <div
