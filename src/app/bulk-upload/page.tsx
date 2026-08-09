@@ -259,19 +259,20 @@ export default function BulkUploadPage() {
     })
   }
 
-  // Combine a group with the one above it — for photos sent later (e.g.
-  // received from friends) that fall outside the 2-hour auto-group window
-  function mergeGroupUp(groupId: string) {
+  // Combine one group into any other — for photos sent later (e.g.
+  // received from friends) that fall outside the 2-hour auto-group
+  // window. The destination keeps its venue/date/ratings; photos merge
+  // in timestamp order.
+  function mergeInto(sourceId: string, targetId: string) {
     setGroups(prev => {
-      const idx = prev.findIndex(g => g.id === groupId)
-      if (idx <= 0) return prev
-      const target = prev[idx - 1]
-      const source = prev[idx]
-      const photos = [...target.photos, ...source.photos]
+      const si = prev.findIndex(g => g.id === sourceId)
+      const ti = prev.findIndex(g => g.id === targetId)
+      if (si === -1 || ti === -1 || si === ti) return prev
+      const photos = [...prev[ti].photos, ...prev[si].photos]
         .sort((a, b) => (a.takenAt?.getTime() ?? 0) - (b.takenAt?.getTime() ?? 0))
       const next = [...prev]
-      next[idx - 1] = { ...target, photos }
-      next.splice(idx, 1)
+      next[ti] = { ...prev[ti], photos }
+      next.splice(si, 1)
       return next
     })
   }
@@ -531,7 +532,7 @@ export default function BulkUploadPage() {
 
             {/* Groups */}
             <div className="flex flex-col gap-4">
-              {groups.map((group, gi) => (
+              {groups.map(group => (
                 <GroupCard
                   key={group.id}
                   group={group}
@@ -539,7 +540,13 @@ export default function BulkUploadPage() {
                   onSave={() => saveGroup(group)}
                   onDismiss={() => dismissGroup(group.id)}
                   onSplit={i => splitPhoto(group.id, i)}
-                  onMergeUp={gi > 0 && !groups[gi - 1].saved && !group.saved ? () => mergeGroupUp(group.id) : undefined}
+                  mergeTargets={group.saved ? [] : groups
+                    .filter(g => g.id !== group.id && !g.saved)
+                    .map(g => ({
+                      id: g.id,
+                      label: `${g.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · ${(g.selectedPlace?.name || g.locationQuery || g.suggestedVenue || 'Unnamed place')} · ${g.photos.length} photo${g.photos.length > 1 ? 's' : ''}`,
+                    }))}
+                  onMergeInto={targetId => mergeInto(group.id, targetId)}
                 />
               ))}
             </div>
@@ -563,15 +570,17 @@ export default function BulkUploadPage() {
   )
 }
 
-function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit, onMergeUp }: {
+function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit, mergeTargets, onMergeInto }: {
   group: MemoryGroup
   onUpdate: (u: Partial<MemoryGroup>) => void
   onSave: () => void
   onDismiss: () => void
   onSplit: (photoIndex: number) => void
-  onMergeUp?: () => void
+  mergeTargets: { id: string; label: string }[]
+  onMergeInto: (targetId: string) => void
 }) {
   const [expanded, setExpanded] = useState(true)
+  const [showMerge, setShowMerge] = useState(false)
 
   if (group.saved) {
     return (
@@ -616,14 +625,28 @@ function GroupCard({ group, onUpdate, onSave, onDismiss, onSplit, onMergeUp }: {
       )}
 
       {/* Photos sent later miss the 2-hour auto-group window — allow
-          combining with the group above */}
-      {onMergeUp && (
-        <button onClick={onMergeUp}
-          className="press mx-3 mb-1 px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1"
-          style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-          Same meal as the group above? Merge them
-        </button>
+          combining this group into any other pending one */}
+      {mergeTargets.length > 0 && (
+        <div className="mx-3 mb-1">
+          <button onClick={() => setShowMerge(v => !v)}
+            className="press px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1"
+            style={{ background: 'var(--stone-200)', color: 'var(--slate)' }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 7l4-4 4 4M12 3v11M20 17a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4"/></svg>
+            {showMerge ? 'Cancel merge' : 'Same meal as another group? Merge…'}
+          </button>
+          {showMerge && (
+            <div className="mt-1.5 rounded-xl overflow-hidden" style={{ border: '0.5px solid rgba(16,20,22,0.1)' }}>
+              <p className="px-3 py-1.5 text-xs" style={{ background: 'var(--stone-100)', color: 'var(--slate)' }}>Move these photos into:</p>
+              {mergeTargets.map(t => (
+                <button key={t.id} onClick={() => { setShowMerge(false); onMergeInto(t.id) }}
+                  className="press w-full text-left px-3 py-2.5 text-xs font-medium"
+                  style={{ background: '#fff', borderTop: '0.5px solid rgba(16,20,22,0.06)', color: 'var(--teal-600)' }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       <div className="px-4 pb-2">
