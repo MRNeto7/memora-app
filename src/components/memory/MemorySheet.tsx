@@ -63,12 +63,12 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
     const files = Array.from(e.target.files ?? [])
     const { accepted: allAccepted, rejected } = await filterMediaFiles(files, {
       allowVideo: isPro === true,
-      videoRejectionMessage: 'Video memories are part of Mimora Pro — coming soon.',
+      videoRejectionMessage: 'Videos aren’t supported just yet — photos only for now.',
     })
     let accepted = allAccepted
     if (isPro !== true && photos.length + accepted.length > FREE_PHOTOS_PER_MEMORY) {
       accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
-      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+      rejected.push(`Memories can include up to ${FREE_PHOTOS_PER_MEMORY} photos.`)
     }
     if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
     const newPhotos: PhotoEntry[] = []
@@ -375,13 +375,13 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
     const files = Array.from(e.target.files ?? [])
     const { accepted: allAccepted, rejected } = await filterMediaFiles(files, {
       allowVideo: isPro === true,
-      videoRejectionMessage: 'Video memories are part of Mimora Pro — coming soon.',
+      videoRejectionMessage: 'Videos aren’t supported just yet — photos only for now.',
     })
     let accepted = allAccepted
     const kept = memory.memory_photos.length - removedPhotoIds.size + addedPhotos.length
     if (isPro !== true && kept + accepted.length > FREE_PHOTOS_PER_MEMORY) {
       accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - kept))
-      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+      rejected.push(`Memories can include up to ${FREE_PHOTOS_PER_MEMORY} photos.`)
     }
     if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
     const newPhotos: PhotoEntry[] = []

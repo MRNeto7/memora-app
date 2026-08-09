@@ -226,27 +226,27 @@ export default function PersistentMapShell() {
           className="rise absolute left-4 right-4 z-20 flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
           style={{
             top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
-            background: 'rgba(16,20,22,0.88)',
+            background: 'rgba(255,255,255,0.94)',
             backdropFilter: 'blur(20px) saturate(1.4)',
             WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
-            border: '0.5px solid rgba(201,168,106,0.4)',
-            boxShadow: '0 8px 28px rgba(16,20,22,0.35)',
+            border: '0.5px solid rgba(16,20,22,0.1)',
+            boxShadow: 'var(--shadow-raised)',
           }}>
-          <Icon name={bannerItem.kind === 'friend_request' ? 'friend-add' : 'camera'} size={22} color="var(--gold-500)" strokeWidth={1.8} />
+          <Icon name={bannerItem.kind === 'friend_request' ? 'friend-add' : 'camera'} size={22} color="var(--slate)" strokeWidth={1.8} />
 
           <span className="flex-1">
             {bannerItem.kind === 'friend_request' && (
               <>
-                <span className="block text-xs font-semibold" style={{ color: 'var(--gold-500)' }}>Friend request</span>
-                <span className="block text-sm font-semibold text-white">{bannerItem.name} wants to add you</span>
+                <span className="block text-xs font-semibold" style={{ color: 'var(--slate)' }}>Friend request</span>
+                <span className="block text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>{bannerItem.name} wants to add you</span>
               </>
             )}
             {bannerItem.kind === 'anniversary' && (
               <>
-                <span className="block text-xs font-semibold" style={{ color: 'var(--gold-500)' }}>
+                <span className="block text-xs font-semibold" style={{ color: 'var(--slate)' }}>
                   On this day · {bannerItem.yearsAgo} {bannerItem.yearsAgo === 1 ? 'year' : 'years'} ago
                 </span>
-                <span className="block text-sm font-semibold text-white">{bannerItem.title}</span>
+                <span className="block text-sm font-semibold" style={{ color: 'var(--teal-600)' }}>{bannerItem.title}</span>
               </>
             )}
           </span>
@@ -254,7 +254,7 @@ export default function PersistentMapShell() {
             role="button"
             onClick={e => { e.stopPropagation(); dismissBanner(bannerItem.id) }}
             className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
+            style={{ background: 'var(--stone-200)', color: 'var(--slate)', fontSize: 12 }}>
             ✕
           </span>
         </button>

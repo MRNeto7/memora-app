@@ -56,7 +56,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center text-center py-14 px-6">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--stone-200)' }}>
-                  <Icon name="bell" size={22} color="var(--gold-500)" />
+                  <Icon name="bell" size={22} color="var(--slate)" />
                 </div>
                 <p className="text-sm font-semibold mb-1" style={{ color: 'var(--teal-600)' }}>You&apos;re all caught up</p>
                 <p className="text-xs" style={{ color: 'var(--slate)' }}>Friend requests and memory throwbacks will show here.</p>
@@ -87,7 +87,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
                     )}
                     {item.kind === 'anniversary' && (
                       <button onClick={() => { onClose(); router.push('/memories') }} className="text-left w-full">
-                        <p className="text-xs font-semibold" style={{ color: 'var(--gold-500)' }}>On this day · {item.yearsAgo} {item.yearsAgo === 1 ? 'year' : 'years'} ago</p>
+                        <p className="text-xs font-semibold" style={{ color: 'var(--slate)' }}>On this day · {item.yearsAgo} {item.yearsAgo === 1 ? 'year' : 'years'} ago</p>
                         <p className="text-sm" style={{ color: 'var(--teal-600)' }}>{item.title}</p>
                       </button>
                     )}
@@ -97,7 +97,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
                           <span className="font-semibold">{item.taggerName}</span> tagged you in a memory{item.venueName ? <> at <span className="font-semibold">{item.venueName}</span></> : ''}
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: 'var(--slate-light)' }}>{timeAgo(item.at)}</p>
-                        <p className="text-xs mt-1 font-semibold" style={{ color: 'var(--gold-500)' }}>Tap to view and save your copy</p>
+                        <p className="text-xs mt-1 font-semibold" style={{ color: 'var(--teal-600)' }}>Tap to view and save your copy</p>
                       </button>
                     )}
                   </div>

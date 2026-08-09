@@ -51,7 +51,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
     let accepted = allAccepted
     if (isPro !== true && photos.length + accepted.length > FREE_PHOTOS_PER_MEMORY) {
       accepted = accepted.slice(0, Math.max(0, FREE_PHOTOS_PER_MEMORY - photos.length))
-      rejected.push(`Free plan includes ${FREE_PHOTOS_PER_MEMORY} photos per memory — Mimora Pro (coming soon) unlocks unlimited photos.`)
+      rejected.push(`Memories can include up to ${FREE_PHOTOS_PER_MEMORY} photos.`)
     }
     if (rejected.length > 0) toast(rejected[0] + (rejected.length > 1 ? ` (+${rejected.length - 1} more)` : ''), 'error')
     const newPhotos: PhotoEntry[] = []

@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/client'
 
 type Supabase = ReturnType<typeof createClient>
 
-// Free-tier limits. Pro (is_pro on the users row) removes all of them.
+// Usage limits — the app is free, and these caps keep storage and API
+// costs bounded per user. (is_pro survives in the schema; unused for now.)
 export const FREE_MEMORY_LIMIT = 50
 export const FREE_PHOTOS_PER_MEMORY = 3
 export const FREE_BULK_LIMIT = 10
@@ -47,7 +48,7 @@ export async function checkMemoryAllowance(supabase: Supabase, userId: string, i
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
   if ((count ?? 0) >= FREE_MEMORY_LIMIT) {
-    return `Your free plan is full (${FREE_MEMORY_LIMIT} memories). Mimora Pro — coming soon — unlocks unlimited memories.`
+    return `You've reached the ${FREE_MEMORY_LIMIT}-memory limit for now — delete an old memory to make room.`
   }
   return null
 }

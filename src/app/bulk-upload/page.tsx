@@ -12,7 +12,6 @@ import RatingSliders from '@/components/ui/RatingSliders'
 import CategoryPicker from '@/components/ui/CategoryPicker'
 import { VenueType, MealType, mealTypeFromDate } from '@/lib/categories'
 import Icon from '@/components/ui/Icon'
-import ProUpsell from '@/components/pro/ProUpsell'
 import Portal from '@/components/ui/Portal'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 import Link from 'next/link'
@@ -442,7 +441,7 @@ export default function BulkUploadPage() {
                   <p className="text-sm" style={{ color: 'var(--slate)', maxWidth: 260 }}>Choose multiple food photos — we&apos;ll group them into memories automatically by date and location</p>
                   {isPro === false && (
                     <p className="text-xs mt-2 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.12)', color: 'var(--gold-700)' }}>
-                      Free includes {FREE_BULK_LIMIT} photos per import · Pro is unlimited
+                      Up to {FREE_BULK_LIMIT} photos per import
                     </p>
                   )}
                 </>
@@ -532,7 +531,7 @@ export default function BulkUploadPage() {
                     First {FREE_BULK_LIMIT} of {freeCapped} photos loaded
                   </p>
                   <p className="text-xs" style={{ color: 'var(--slate)' }}>
-                    Free includes {FREE_BULK_LIMIT} photos per import — Mimora Pro imports your whole camera roll at once.
+                    Imports are capped at {FREE_BULK_LIMIT} photos at a time — run another import for the rest.
                   </p>
                 </div>
                 <button onClick={() => setFreeCapped(null)} className="flex-shrink-0" style={{ color: '#b0babe', fontSize: 14, lineHeight: 1 }}>✕</button>

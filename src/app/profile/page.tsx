@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { useNotifications } from '@/lib/notifications'
 import { useIsPro, FREE_MEMORY_LIMIT, FREE_PHOTOS_PER_MEMORY } from '@/lib/pro'
 import NotificationCenter from '@/components/notifications/NotificationCenter'
-import ProUpsell from '@/components/pro/ProUpsell'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 
@@ -26,7 +25,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
-  const [showProInfo, setShowProInfo] = useState(false)
   const isPro = useIsPro()
   const { items: notifications, loading: notifLoading, unreadCount, reload: reloadNotifications, markAllSeen } = useNotifications()
   const router = useRouter()
@@ -192,7 +190,6 @@ export default function ProfilePage() {
         </div>
 
         {/* Plan */}
-        <PlanCard isPro={isPro} onLearnMore={() => setShowProInfo(true)} />
 
         {/* Notifications */}
         <button onClick={openNotifications}
@@ -271,67 +268,10 @@ export default function ProfilePage() {
         />
       )}
 
-      {showProInfo && (
-        <Portal>
-          <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={() => setShowProInfo(false)} />
-          <div className="fixed z-[70] flex items-center justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, padding: '16px' }}>
-            <div className="sheet-enter pointer-events-auto" style={{ width: 'min(420px, 100%)' }}>
-              <ProUpsell />
-              <button onClick={() => setShowProInfo(false)} className="w-full mt-3 py-3 rounded-2xl text-sm font-medium" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', color: 'var(--teal-600)' }}>
-                Close
-              </button>
-            </div>
-          </div>
-        </Portal>
-      )}
     </div>
   )
 }
 
-// Free vs Pro plan card — makes the free-tier limits explicit
-function PlanCard({ isPro, onLearnMore }: { isPro: boolean | null; onLearnMore: () => void }) {
-  if (isPro === null) return null
-
-  if (isPro) {
-    return (
-      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%)', boxShadow: '0 4px 16px rgba(16,20,22,0.2)' }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(201,168,106,0.2)', border: '0.5px solid rgba(201,168,106,0.4)' }}>
-          <Icon name="sparkle" size={20} color="var(--gold-500)" strokeWidth={1.5} />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-white">Mimora Pro</p>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>All features unlocked</p>
-        </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: 'rgba(201,168,106,0.25)', color: 'var(--gold-500)' }}>Active</span>
-      </div>
-    )
-  }
-
-  const limits = [
-    `Up to ${FREE_MEMORY_LIMIT} memories`,
-    `${FREE_PHOTOS_PER_MEMORY} photos per memory`,
-    'Photos only — video is Pro',
-    'Bulk upload is Pro',
-  ]
-  return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--slate)' }}>Free plan</p>
-        <button onClick={onLearnMore} className="press text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--stone-200)', color: 'var(--teal-600)' }}>
-          See Mimora Pro
-        </button>
-      </div>
-      <div className="px-4 pb-4">
-        {limits.map(l => (
-          <div key={l} className="flex items-center gap-2.5 py-1">
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--gold-500)', flexShrink: 0 }} />
-            <p className="text-xs" style={{ color: 'var(--slate)' }}>{l}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function PrivacyToggleRow({ label, sub, value, onChange }: { label: string; sub: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
