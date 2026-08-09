@@ -541,7 +541,6 @@ function ExploreClusteredMarkers({ venues, onSelect }: {
 
   useEffect(() => {
     if (!map) return
-    try { // TEMP DIAGNOSTIC — remove after clustering verification
     const markers = venues.map(v => {
       const el = document.createElement('div')
       el.style.cssText = 'display:flex;flex-direction:column;align-items:center;cursor:pointer;'
@@ -576,13 +575,9 @@ function ExploreClusteredMarkers({ venues, onSelect }: {
         },
       },
     })
-    toast(`Explore v3: ${markers.length} pins clustered`)
     return () => {
       clusterer.clearMarkers()
       markers.forEach(m => { m.map = null })
-    }
-    } catch (e) { // TEMP DIAGNOSTIC
-      toast(`Explore error: ${e instanceof Error ? e.message : String(e)}`, 'error')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map])
