@@ -7,6 +7,8 @@ import { NotificationItem } from '@/lib/notifications'
 import Icon from '@/components/ui/Icon'
 import Portal from '@/components/ui/Portal'
 import TaggedMemorySheet from '@/components/memory/TaggedMemorySheet'
+import MemorySheet from '@/components/memory/MemorySheet'
+import { MemoryWithDetails } from '@/lib/types/database'
 
 type TaggedItem = Extract<NotificationItem, { kind: 'tagged' }>
 
@@ -31,6 +33,16 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
   const router = useRouter()
   const supabase = createClient()
   const [viewTag, setViewTag] = useState<TaggedItem | null>(null)
+  const [viewMemory, setViewMemory] = useState<MemoryWithDetails | null>(null)
+
+  // Open the actual memory, like the map banner does — dumping the user on
+  // the list made them hunt for it
+  async function openAnniversary(memoryId: string) {
+    const { data } = await supabase.from('memories')
+      .select('*, venue:venues(*), memory_photos(*)').eq('id', memoryId).single()
+    if (data) setViewMemory(data as MemoryWithDetails)
+    else { onClose(); router.push('/memories') }
+  }
 
   async function respond(requestId: string, accept: boolean) {
     await supabase.from('friend_requests').update({ status: accept ? 'accepted' : 'declined' }).eq('id', requestId)
@@ -86,7 +98,7 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
                       </button>
                     )}
                     {item.kind === 'anniversary' && (
-                      <button onClick={() => { onClose(); router.push('/memories') }} className="text-left w-full">
+                      <button onClick={() => openAnniversary(item.memoryId)} className="text-left w-full">
                         <p className="text-xs font-semibold" style={{ color: 'var(--slate)' }}>On this day · {item.yearsAgo} {item.yearsAgo === 1 ? 'year' : 'years'} ago</p>
                         <p className="text-sm" style={{ color: 'var(--teal-600)' }}>{item.title}</p>
                       </button>
@@ -107,6 +119,15 @@ export default function NotificationCenter({ items, loading, onClose, onChanged 
           </div>
         </div>
       </div>
+
+      {/* Anniversary tap → the memory itself */}
+      {viewMemory && (
+        <MemorySheet
+          memory={viewMemory}
+          onClose={() => setViewMemory(null)}
+          onUpdate={() => { setViewMemory(null); onChanged() }}
+        />
+      )}
 
       {/* Tagged-memory preview + save-a-copy flow */}
       {viewTag && (
