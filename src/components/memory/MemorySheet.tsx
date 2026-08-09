@@ -50,6 +50,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const [detectedDate, setDetectedDate] = useState<Date | null>(null)
   const [venueType, setVenueType] = useState<VenueType | null>(null)
   const [mealType, setMealType] = useState<MealType | null>(null)
+  const [homeCooked, setHomeCooked] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const { friends, loaded: friendsLoaded } = useFriends()
@@ -105,7 +106,11 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       if (allowanceError) { setSaveError(allowanceError); setSaving(false); return }
 
       let venueId: string | null = null
-      const venueData = { name: locationName.trim(), lat: selectedPlace?.lat ?? detectedLat ?? 0, lng: selectedPlace?.lng ?? detectedLng ?? 0, google_place_id: selectedPlace?.placeId ?? null, address: selectedPlace?.address ?? null }
+      // Home-cooked: deliberately no coordinates (0,0 keeps it off the map)
+      // and no place link — the location is just a label
+      const venueData = homeCooked
+        ? { name: locationName.trim() || 'Home cooking', lat: 0, lng: 0, google_place_id: null, address: null }
+        : { name: locationName.trim(), lat: selectedPlace?.lat ?? detectedLat ?? 0, lng: selectedPlace?.lng ?? detectedLng ?? 0, google_place_id: selectedPlace?.placeId ?? null, address: selectedPlace?.address ?? null }
       if (selectedPlace?.placeId) {
         const { data: ev } = await supabase.from('venues').select('id').eq('google_place_id', selectedPlace.placeId).single()
         if (ev) { venueId = ev.id } else { const { data: nv } = await supabase.from('venues').insert(venueData).select('id').single(); venueId = nv?.id ?? null }
@@ -142,6 +147,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       const pending = [...photos]
       const userId = user.id
       const memoryId = newMemory.id
+      // Home-cooked: photo EXIF GPS is the user's home — never store it
+      // (photo rows are friend-readable when the memory is shared)
+      const stripGps = homeCooked
       onUpdate()
       toast(pending.length > 0 ? 'Memory saved — photos uploading in the background' : 'Memory saved')
       if (pending.length > 0) {
@@ -151,7 +159,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
             try {
               const path = await uploadPhotoWithThumb(supabase, userId, memoryId, photo.file)
               if (!path) { failed++; continue }
-              await supabase.from('memory_photos').insert({ memory_id: memoryId, storage_path: path, lat: photo.lat, lng: photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
+              await supabase.from('memory_photos').insert({ memory_id: memoryId, storage_path: path, lat: stripGps ? null : photo.lat, lng: stripGps ? null : photo.lng, taken_at: photo.takenAt?.toISOString() ?? null })
             } catch { failed++ }
           }
           if (failed > 0) toast(`${failed === 1 ? 'A photo' : `${failed} photos`} didn't upload — open the memory and try adding ${failed === 1 ? 'it' : 'them'} again.`, 'error')
@@ -231,10 +239,33 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
               </div>
 
               <div className="mb-3">
-                <PlacesSearch value={locationQuery}
-                  onChange={(v) => { setLocationQuery(v); setLocationName(v); setSelectedPlace(null) }}
-                  onSelect={(p) => { setSelectedPlace(p); setLocationName(p.name); setLocationQuery(p.name); setDetectedLat(p.lat); setDetectedLng(p.lng); setVenueType(prev => prev ?? venueTypeFromGoogle(p.googleTypes)) }}
-                  selectedPlace={selectedPlace} />
+                {homeCooked ? (
+                  <div>
+                    <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--slate)' }}>Name this kitchen</label>
+                    <input type="text" placeholder="Home cooking" value={locationQuery}
+                      onChange={e => { setLocationQuery(e.target.value); setLocationName(e.target.value) }}
+                      className="w-full text-sm px-4 py-2.5 rounded-xl outline-none" style={{ border: '1.5px solid var(--stone-500)', background: 'var(--stone-100)' }} />
+                  </div>
+                ) : (
+                  <PlacesSearch value={locationQuery}
+                    onChange={(v) => { setLocationQuery(v); setLocationName(v); setSelectedPlace(null) }}
+                    onSelect={(p) => { setSelectedPlace(p); setLocationName(p.name); setLocationQuery(p.name); setDetectedLat(p.lat); setDetectedLng(p.lng); setVenueType(prev => prev ?? venueTypeFromGoogle(p.googleTypes)) }}
+                    selectedPlace={selectedPlace} />
+                )}
+                <button type="button" onClick={() => {
+                  setHomeCooked(v => {
+                    const next = !v
+                    if (next) {
+                      setSelectedPlace(null)
+                      if (!locationName.trim()) { setLocationName('Home cooking'); setLocationQuery('Home cooking') }
+                    }
+                    return next
+                  })
+                }}
+                  className="press mt-2 text-xs px-2.5 py-1.5 rounded-lg"
+                  style={{ background: homeCooked ? 'var(--stone-200)' : 'transparent', color: homeCooked ? 'var(--teal-600)' : 'var(--slate)', border: '0.5px solid rgba(16,20,22,0.12)' }}>
+                  🏠 {homeCooked ? 'Home-cooked — no location will be saved' : 'Home-cooked? No restaurant needed'}
+                </button>
               </div>
 
               <div className="mb-3">

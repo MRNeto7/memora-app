@@ -289,7 +289,6 @@ function PrivacyToggleRow({ label, sub, value, onChange }: { label: string; sub:
 
 function PrivacyToggles() {
   const supabase = createClient()
-  const [memoriesPublic, setMemoriesPublic] = React.useState(false)
   const [wishlistPublic, setWishlistPublic] = React.useState(false)
   const [userId, setUserId] = React.useState<string | null>(null)
 
@@ -298,24 +297,23 @@ function PrivacyToggles() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       setUserId(user.id)
-      const { data } = await supabase.from('users').select('profile_public, wishlist_public').eq('id', user.id).single()
-      if (data) { setMemoriesPublic(data.profile_public ?? false); setWishlistPublic(data.wishlist_public ?? false) }
+      const { data } = await supabase.from('users').select('wishlist_public').eq('id', user.id).single()
+      if (data) setWishlistPublic(data.wishlist_public ?? false)
     }
     load()
   }, [])
 
-  async function toggle(field: 'profile_public' | 'wishlist_public', value: boolean) {
+  async function toggle(value: boolean) {
     if (!userId) return
-    const patch = field === 'profile_public' ? { profile_public: value } : { wishlist_public: value }
-    await supabase.from('users').update(patch).eq('id', userId)
+    await supabase.from('users').update({ wishlist_public: value }).eq('id', userId)
   }
 
+  // Memory sharing is controlled per-memory (the Shared toggle on each
+  // memory) — no master switch. The old "Share memories with friends"
+  // toggle actually flipped profile_public, a pre-friends-era flag that
+  // made the whole profile world-readable; removed (see migration 012).
   return (
-    <>
-      <PrivacyToggleRow label="Share memories with friends" sub="Only friends you’ve added can see memories you mark as shared" value={memoriesPublic}
-        onChange={v => { setMemoriesPublic(v); toggle('profile_public', v) }} />
-      <PrivacyToggleRow label="Share wishlist with friends" sub="Only friends you’ve added can see your wishlist" value={wishlistPublic}
-        onChange={v => { setWishlistPublic(v); toggle('wishlist_public', v) }} />
-    </>
+    <PrivacyToggleRow label="Share wishlist with friends" sub="Only friends you’ve added can see your wishlist" value={wishlistPublic}
+      onChange={v => { setWishlistPublic(v); toggle(v) }} />
   )
 }
