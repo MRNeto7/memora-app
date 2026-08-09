@@ -42,15 +42,18 @@ export async function getBlob(path: string): Promise<Blob | null> {
   if (!db) return null
   return new Promise(resolve => {
     try {
-      const tx = db.transaction(STORE, 'readwrite')
-      const store = tx.objectStore(STORE)
-      const req = store.get(path)
+      // Read with a READONLY transaction — the LRU touch used to run in
+      // the same readwrite txn, and IndexedDB serialises writers, so a
+      // screenful of images queued behind each other on load.
+      const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(path)
       req.onsuccess = () => {
         const row = req.result as StoredImage | undefined
         if (!row) return resolve(null)
-        store.put({ ...row, lastUsed: Date.now() }) // touch for LRU
-        if (row.buf) return resolve(new Blob([row.buf], { type: row.type || 'image/jpeg' }))
-        resolve(row.blob ?? null)
+        resolve(row.buf ? new Blob([row.buf], { type: row.type || 'image/jpeg' }) : row.blob ?? null)
+        // Fire-and-forget LRU touch in its own transaction, off the read path
+        try {
+          db.transaction(STORE, 'readwrite').objectStore(STORE).put({ ...row, lastUsed: Date.now() })
+        } catch { /* touch is best-effort */ }
       }
       req.onerror = () => resolve(null)
     } catch {

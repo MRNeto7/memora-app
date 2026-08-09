@@ -26,9 +26,9 @@ async function fromBlobCache(path: string): Promise<string | null> {
 function cacheBlobInBackground(path: string, url: string) {
   if (typeof window === 'undefined' || VIDEO_RE.test(path) || blobFetchInFlight.has(path)) return
   blobFetchInFlight.add(path)
-  void fetch(url)
+  queueBackgroundFetch(() => fetch(url)
     .then(async r => { if (r.ok) await putBlob(path, await r.blob()) })
-    .catch(() => { blobFetchInFlight.delete(path) }) // retry later if it failed
+    .catch(() => { blobFetchInFlight.delete(path) })) // retry later if it failed
 }
 
 // Signed URLs must stay stable across page navigations: a fresh URL has a
@@ -130,29 +130,53 @@ export async function getThumbUrl(supabase: Supabase, path: string): Promise<str
   }
 
   if (url) {
-    try {
-      const res = await fetch(url)
-      if (res.ok) {
-        const blob = await res.blob()
-        void putBlob(tp, blob)
-        const obj = URL.createObjectURL(blob)
-        objectUrls.set(tp, obj)
-        return obj
-      }
-      // Signed-but-missing object — drop the poisoned entry so a future
-      // call re-checks after the backfill lands.
-      memoryCache.delete(tp)
-      persistToSession()
-    } catch {
-      // Network failure (offline, blocked) — the signed URL may still
-      // work in an <img>, so serve it rather than falling to full size.
-      return url
-    }
+    // Return the signed URL IMMEDIATELY so <img> renders progressively —
+    // awaiting the pixels here made every pin wait for a full download
+    // and the map felt slow. Validation runs in the background: pixels
+    // feed the offline cache; a 404 (thumb not generated yet) scrubs the
+    // entry and queues the backfill, and the <img> onError self-heal
+    // covers the one render that saw the dead URL.
+    void queueBackgroundFetch(async () => {
+      try {
+        const res = await fetch(url)
+        if (res.ok) {
+          await putBlob(tp, await res.blob())
+        } else {
+          memoryCache.delete(tp)
+          persistToSession()
+          void backfillThumb(supabase, path)
+        }
+      } catch { /* offline — leave the cached URL alone */ }
+    })
+    return url
   }
 
   void backfillThumb(supabase, path)
   return getSignedPhotoUrl(supabase, path)
 }
+
+// Background work is throttled so a screenful of pins can't stampede the
+// connection that map tiles and visible images need. Backfills (full-size
+// download + re-encode + upload) additionally wait for an idle window.
+const FETCH_CONCURRENCY = 3
+let activeFetches = 0
+const fetchQueue: (() => Promise<void>)[] = []
+
+function queueBackgroundFetch(work: () => Promise<void>) {
+  fetchQueue.push(work)
+  drainFetchQueue()
+}
+
+function drainFetchQueue() {
+  while (activeFetches < FETCH_CONCURRENCY && fetchQueue.length > 0) {
+    const work = fetchQueue.shift()!
+    activeFetches++
+    void work().finally(() => { activeFetches--; drainFetchQueue() })
+  }
+}
+
+let backfillChain: Promise<void> = Promise.resolve()
+const BACKFILL_IDLE_DELAY_MS = 4000
 
 /**
  * Self-heal for a broken <img>: drop every cached form of the photo
@@ -176,6 +200,14 @@ export async function recoverImageUrl(supabase: Supabase, path: string): Promise
 async function backfillThumb(supabase: Supabase, path: string) {
   if (backfillAttempted.has(path) || typeof window === 'undefined') return
   backfillAttempted.add(path)
+  // Strictly one backfill at a time, each after an idle delay — a launch
+  // with many un-thumbed photos must never stampede the connection.
+  backfillChain = backfillChain
+    .then(() => new Promise(r => setTimeout(r, BACKFILL_IDLE_DELAY_MS)))
+    .then(() => doBackfillThumb(supabase, path))
+}
+
+async function doBackfillThumb(supabase: Supabase, path: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user || !path.startsWith(`${user.id}/`)) return // storage RLS: own folder only
