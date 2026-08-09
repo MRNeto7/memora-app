@@ -179,6 +179,10 @@ export default function PersistentMapShell() {
             strictBounds: true,
           }}
           mapId='4b5d4b2acae16b2a1f55f13f'
+          // Pre-tile canvas colour — the cloud map style dates from the teal
+          // era, so without this the map flashes fullscreen green on launch
+          // like a second splash screen
+          backgroundColor={'#F6F7F8'}
           disableDefaultUI={true}
           gestureHandling="greedy"
           style={{ width: '100%', height: '100%' }}
