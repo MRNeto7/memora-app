@@ -346,25 +346,6 @@ function EditPhotoThumb({ path }: { path: string }) {
   return <img src={url} className="w-full h-full object-cover rounded-xl" style={{ display: 'block' }} />
 }
 
-// ── Star display ──
-function StarRow({ value, max = 5 }: { value: number; max?: number }) {
-  return (
-    <div style={{ display: 'flex', gap: 2, lineHeight: 1 }}>
-      {Array.from({ length: max }, (_, i) => {
-        const fill = Math.min(Math.max(value - i, 0), 1) * 100
-        return (
-          <div key={i} style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
-            {/* Grey base */}
-            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: 'var(--stone-500)' }}>★</span>
-            {/* Gold fill — clip with overflow hidden */}
-            <span style={{ position: 'absolute', inset: 0, fontSize: 16, lineHeight: '16px', color: 'var(--gold-500)', overflow: 'hidden', width: `${fill}%`, whiteSpace: 'nowrap' }}>★</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
 // ── Rich memory detail view ──
 interface VenueDetails { website: string | null; phone: string | null; openNow: boolean | null; rating: number | null; totalRatings: number | null; priceLevel: number | null }
 
@@ -619,9 +600,12 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
         {/* Rating — overall is out of 10; stars show it on a 5-star scale */}
         {shown.rating && (
           <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
-            <div className="flex items-center gap-1.5 flex-1">
-              <StarRow value={shown.rating / 2} max={5} />
-              <span className="text-sm font-semibold" style={{ color: 'var(--gold-500)' }}>{shown.rating}/10</span>
+            {/* Single ★ + number, same language as the Places cards — a
+                5-star row under a /10 score read as two different scales */}
+            <div className="flex items-baseline gap-1.5 flex-1">
+              <Icon name="star" size={15} color="var(--gold-500)" fill="var(--gold-500)" style={{ alignSelf: 'center' }} />
+              <span className="text-lg font-semibold" style={{ color: 'var(--teal-600)' }}>{shown.rating}</span>
+              <span className="text-xs" style={{ color: 'var(--slate)' }}>/ 10</span>
             </div>
             {venueDetails?.rating && (
               <span className="text-xs" style={{ color: 'var(--slate)' }}>Google {venueDetails.rating}★</span>
