@@ -6,17 +6,19 @@ interface RatingSlidersProps {
   ratings: DetailRatings
   onChange: (ratings: DetailRatings) => void
   title?: string
+  // Home-cooked meals rate food only — no service or ambiance to judge
+  fields?: (keyof DetailRatings)[]
 }
 
 // The one rating input for the whole app: three categories out of 10,
 // tap the current value to clear it, overall average shown underneath.
-export default function RatingSliders({ ratings, onChange, title = 'Rate your experience' }: RatingSlidersProps) {
+export default function RatingSliders({ ratings, onChange, title = 'Rate your experience', fields }: RatingSlidersProps) {
   const overall = calcOverall(ratings)
 
   return (
     <div>
       <p className="text-xs font-semibold mb-3" style={{ color: 'var(--teal-600)' }}>{title}</p>
-      {([['food', 'Food & drink'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).map(([key, label]) => (
+      {([['food', 'Food & drink'], ['service', 'Service'], ['ambiance', 'Ambiance']] as const).filter(([key]) => !fields || fields.includes(key)).map(([key, label]) => (
         <div key={key} className="flex items-center gap-3 mb-2.5">
           <span className="text-xs w-20 flex-shrink-0" style={{ color: 'var(--slate)' }}>{label}</span>
           <div className="flex gap-1 flex-1">

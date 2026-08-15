@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getSignedPhotoUrl } from '@/lib/storage'
+import { getThumbUrl } from '@/lib/storage'
 import PlacePhoto from '@/components/ui/PlacePhoto'
+import Portal from '@/components/ui/Portal'
+import Lightbox from '@/components/media/Lightbox'
 import { toast } from '@/lib/toast'
 import Icon from '@/components/ui/Icon'
 
@@ -42,6 +44,10 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
   const [loading, setLoading] = useState(true)
   const [wishlistPublic, setWishlistPublic] = useState(false)
   const [addingToWishlist, setAddingToWishlist] = useState<string | null>(null)
+  const [viewing, setViewing] = useState<PublicMemory | null>(null)
+  // Venues I've already been to (my memories) or already want (my wishlist) —
+  // no point offering "Add to my wishlist" for those
+  const [myVenueIds, setMyVenueIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function load() {
@@ -64,6 +70,15 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           .eq('user_id', friend.friend_id)
         if (wish) setWishlist(wish)
       }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const [{ data: mine }, { data: myWish }] = await Promise.all([
+          supabase.from('memories').select('venue_id').eq('user_id', user.id),
+          supabase.from('wishlists').select('venue_id').eq('user_id', user.id),
+        ])
+        setMyVenueIds(new Set([...(mine ?? []), ...(myWish ?? [])].map(r => r.venue_id).filter((v): v is string => Boolean(v))))
+      }
       setLoading(false)
     }
     load()
@@ -78,7 +93,10 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
     // The venue row already exists — it came from the venues join
     const { error } = await supabase.from('wishlists').insert({ user_id: user.id, venue_id: venue.id, priority: 2 })
     if (error) toast('Could not add to wishlist', 'error')
-    else toast(`${venue.name} added to your wishlist`)
+    else {
+      toast(`${venue.name} added to your wishlist`)
+      setMyVenueIds(prev => new Set(prev).add(venue.id))
+    }
     setAddingToWishlist(null)
   }
 
@@ -126,7 +144,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
             <div className="flex flex-col gap-3">
               {memories.map(mem => (
                 <div key={mem.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.66)', backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)', border: '0.5px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 12px rgba(16,20,22,0.06)' }}>
-                  <div className="flex">
+                  <button onClick={() => setViewing(mem)} className="flex w-full text-left">
                     <div style={{ width: 76, height: 76, flexShrink: 0, margin: 6, borderRadius: 12, overflow: 'hidden', background: 'var(--stone-400)' }}>
                       {mem.memory_photos.length > 0
                         ? <SignedThumb storagePath={mem.memory_photos[0].storage_path} />
@@ -141,8 +159,8 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
                       {mem.dish_name && <p className="text-xs italic mb-0.5" style={{ color: 'var(--slate)' }}>{mem.dish_name}</p>}
                       <p className="text-xs" style={{ color: 'var(--slate-light)' }}>{new Date(mem.visited_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
-                  </div>
-                  {mem.venue && (
+                  </button>
+                  {mem.venue && !myVenueIds.has(mem.venue.id) && (
                     <button
                       onClick={() => addToMyWishlist(mem.venue)}
                       disabled={addingToWishlist === mem.venue.id}
@@ -186,7 +204,69 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
           )
         )}
       </div>
+
+      {viewing && <FriendMemorySheet memory={viewing} friendName={friend.display_name ?? friend.memora_id} onClose={() => setViewing(null)} />}
     </div>
+  )
+}
+
+// Read-only look at a friend's shared memory — photos open full-screen
+function FriendMemorySheet({ memory, friendName, onClose }: { memory: PublicMemory; friendName: string; onClose: () => void }) {
+  const [lightboxAt, setLightboxAt] = useState<number | null>(null)
+  const date = new Date(memory.visited_at)
+
+  return (
+    <Portal>
+      <div className="backdrop-enter fixed z-[80]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
+      <div className="fixed z-[90] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
+        <div className="sheet-enter glass-modal relative w-full rounded-3xl overflow-hidden flex flex-col pointer-events-auto" style={{ maxHeight: '82vh', width: 'min(420px, 100%)' }}>
+
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
+            <h2 className="font-semibold text-sm" style={{ color: 'var(--teal-600)' }}>{friendName}&apos;s memory</h2>
+            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <h3 className="text-lg font-semibold leading-tight mb-1" style={{ color: 'var(--teal-600)' }}>{memory.venue?.name ?? 'A memory'}</h3>
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {memory.venue?.address && <p className="text-xs" style={{ color: 'var(--slate)' }}>{memory.venue.address}</p>}
+              <span style={{ color: 'var(--stone-500)', fontSize: 10 }}>·</span>
+              <p className="text-xs" style={{ color: 'var(--slate)' }}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+            </div>
+
+            {memory.memory_photos.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 mb-3">
+                {memory.memory_photos.map((p, i) => (
+                  <button key={p.id} onClick={() => setLightboxAt(i)} className="flex-shrink-0 rounded-xl overflow-hidden" style={{ width: 104, height: 104, background: 'var(--stone-400)' }}>
+                    <SignedThumb storagePath={p.storage_path} />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {memory.rating && (
+              <div className="flex items-baseline gap-1.5 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+                <Icon name="star" size={15} color="var(--gold-500)" fill="var(--gold-500)" style={{ alignSelf: 'center' }} />
+                <span className="text-lg font-semibold" style={{ color: 'var(--teal-600)' }}>{memory.rating}</span>
+                <span className="text-xs" style={{ color: 'var(--slate)' }}>/ 10</span>
+              </div>
+            )}
+
+            {(memory.dish_name || memory.notes) && (
+              <div className="px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+                {memory.dish_name && <p className="text-sm font-semibold mb-1" style={{ color: 'var(--teal-600)' }}>{memory.dish_name}</p>}
+                {memory.notes && <p className="text-sm leading-relaxed" style={{ color: 'var(--slate)' }}>{memory.notes}</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {lightboxAt !== null && (
+        <Lightbox photos={memory.memory_photos} initialIndex={lightboxAt} onClose={() => setLightboxAt(null)} />
+      )}
+    </Portal>
   )
 }
 
@@ -194,7 +274,8 @@ function SignedThumb({ storagePath }: { storagePath: string }) {
   const [url, setUrl] = useState<string | null>(null)
   const supabase = createClient()
   useEffect(() => {
-    getSignedPhotoUrl(supabase, storagePath).then(u => { if (u) setUrl(u) })
+    getThumbUrl(supabase, storagePath).then(u => { if (u) setUrl(u) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storagePath])
   if (!url) return <div className="w-full h-full animate-pulse" style={{ background: 'var(--stone-400)' }} />
   return <img src={url} className="w-full h-full" style={{ objectFit: 'cover' }} />

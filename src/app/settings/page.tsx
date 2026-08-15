@@ -157,9 +157,9 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        {/* Danger zone */}
+        {/* Delete account */}
         <div className="rounded-2xl p-4" style={{ background: '#fff', border: '0.5px solid rgba(163,45,45,0.15)' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--danger)' }}>Danger zone</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--danger)' }}>Delete account</p>
           <p className="text-xs mb-3" style={{ color: 'var(--slate)' }}>Permanently delete your account and all your data including memories, photos, and wishlist.</p>
           {deleteError && <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: 'rgba(163,45,45,0.08)', color: 'var(--danger)' }}>{deleteError}</div>}
           <button onClick={deleteAccount} disabled={deleting} className="w-full py-3 rounded-2xl text-sm font-medium"

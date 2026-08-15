@@ -36,7 +36,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ places: [] })
     }
 
-    const places = data.results.slice(0, 6).map((p: {
+    // type=restaurant only BIASES Text Search — prominent landmarks still
+    // come back for name matches (the London Eye for "eye"), so keep only
+    // results Google itself classifies as food & drink places.
+    const FOOD_TYPES = new Set(['restaurant', 'food', 'cafe', 'bar', 'bakery', 'meal_takeaway', 'meal_delivery', 'night_club', 'food_court'])
+    const places = data.results.filter((p: { types?: string[] }) => p.types?.some(t => FOOD_TYPES.has(t))).slice(0, 6).map((p: {
       place_id: string
       name: string
       formatted_address: string

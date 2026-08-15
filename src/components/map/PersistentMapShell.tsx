@@ -186,11 +186,15 @@ export default function PersistentMapShell() {
     void fetchWishlist()
   }
 
-  async function loadAll() {
+  async function loadAll(retried = false) {
     try {
       await Promise.all([fetchMemories(), fetchWishlist()])
       setLoadError(false)
-    } catch {
+    } catch (e) {
+      // Cold launches often lose the very first fetch while the WebView's
+      // network/session warms up — retry silently before alarming anyone
+      if (!retried) { setTimeout(() => { void loadAll(true) }, 2000); return }
+      console.error('loadAll failed', e)
       setLoadError(true)
     }
   }
@@ -287,7 +291,7 @@ export default function PersistentMapShell() {
         <div className="rise absolute left-4 right-4 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-2xl"
           style={{ top: 'calc(env(safe-area-inset-top, 0px) + 60px)', background: 'rgba(163,45,45,0.95)', backdropFilter: 'blur(12px)' }}>
           <p className="text-xs font-medium text-white">Couldn&apos;t load your memories. Check your connection.</p>
-          <button onClick={loadAll} className="text-xs font-semibold px-3 py-1.5 rounded-xl flex-shrink-0"
+          <button onClick={() => loadAll()} className="text-xs font-semibold px-3 py-1.5 rounded-xl flex-shrink-0"
             style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
             Retry
           </button>

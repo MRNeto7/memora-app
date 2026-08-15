@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getSignedPhotoUrls } from '@/lib/storage'
+import { getSignedPhotoUrls, getThumbUrl } from '@/lib/storage'
 
 interface LightboxPhoto {
   id: string
@@ -18,6 +18,10 @@ interface LightboxProps {
 export default function Lightbox({ photos, initialIndex, onClose }: LightboxProps) {
   const [current, setCurrent] = useState(initialIndex)
   const [urls, setUrls] = useState<Record<string, string>>({})
+  // Thumbs are usually already in the offline cache — they paint instantly
+  // while the full-size image downloads, instead of a long spinner
+  const [thumbs, setThumbs] = useState<Record<string, string>>({})
+  const [fullLoaded, setFullLoaded] = useState<Record<string, boolean>>({})
   const supabase = createClient()
 
   // Load signed URLs for all photos in one batched request
@@ -32,6 +36,11 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
           if (url) next[p.id] = url
         }
         return next
+      })
+    })
+    pending.filter(p => !p.storage_path.match(/\.(mp4|mov|webm|m4v)$/i)).forEach(p => {
+      getThumbUrl(supabase, p.storage_path).then(u => {
+        if (u) setThumbs(prev => (prev[p.id] ? prev : { ...prev, [p.id]: u }))
       })
     })
   }, [photos])
@@ -71,6 +80,20 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
   const url = urls[photo?.id]
   const isVideo = photo?.storage_path.match(/\.(mp4|mov|webm|m4v)$/i)
 
+  // Pre-decode the full-size image off-screen; the visible <img> shows the
+  // thumb until the swap is seamless
+  useEffect(() => {
+    if (!url || isVideo || fullLoaded[photo.id]) return
+    const img = new Image()
+    img.onload = () => setFullLoaded(prev => ({ ...prev, [photo.id]: true }))
+    img.src = url
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, photo?.id])
+
+  const displayUrl = photo && !isVideo
+    ? (fullLoaded[photo.id] ? url : (thumbs[photo.id] ?? url))
+    : url
+
   return (
     <div
       className="backdrop-enter fixed inset-0 z-[100] flex flex-col"
@@ -94,7 +117,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
 
       {/* Media */}
       <div className="flex-1 flex items-center justify-center px-4 relative" style={{ minHeight: 0, marginBottom: 0 }}>
-        {!url ? (
+        {!(isVideo ? url : displayUrl) ? (
           <div className="w-16 h-16 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.1)' }} />
         ) : isVideo ? (
           <video
@@ -105,7 +128,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
           />
         ) : (
           <img
-            src={url}
+            src={displayUrl}
             alt=""
             style={{
               maxWidth: '100%',
@@ -159,7 +182,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
           {/* Thumbnail strip */}
           <div className="flex justify-center gap-2 px-4 overflow-x-auto">
             {photos.map((p, i) => {
-              const thumbUrl = urls[p.id]
+              const thumbUrl = thumbs[p.id] ?? urls[p.id]
               const isVid = p.storage_path.match(/\.(mp4|mov|webm|m4v)$/i)
               return (
                 <button key={p.id} onClick={() => setCurrent(i)}

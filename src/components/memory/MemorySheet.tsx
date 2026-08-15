@@ -58,7 +58,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
   const router = useRouter()
   void debounceRef
 
-  const overall = calcOverall(detailRatings)
+  // Home-cooked keeps only the food rating even if the others were set first
+  const effectiveRatings = homeCooked ? { ...detailRatings, service: 0, ambiance: 0 } : detailRatings
+  const overall = calcOverall(effectiveRatings)
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
@@ -120,9 +122,9 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
       const { data: newMemory, error: me } = await supabase.from('memories').insert({
         user_id: user.id, venue_id: venueId, dish_name: dishName || null, notes: notes || null,
         rating: overall > 0 ? overall : null,
-        rating_food: detailRatings.food || null,
-        rating_service: detailRatings.service || null,
-        rating_ambiance: detailRatings.ambiance || null,
+        rating_food: effectiveRatings.food || null,
+        rating_service: effectiveRatings.service || null,
+        rating_ambiance: effectiveRatings.ambiance || null,
         venue_type: venueType,
         meal_type: mealType,
         is_public: false,
@@ -285,7 +287,7 @@ export default function MemorySheet({ memory, onClose, onUpdate }: MemorySheetPr
                   </label>
                   <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} />
                 </div>
-                <RatingSliders ratings={detailRatings} onChange={setDetailRatings} />
+                <RatingSliders ratings={detailRatings} onChange={setDetailRatings} fields={homeCooked ? ['food'] : undefined} />
               </div>
 
               <div className="mb-4">
@@ -416,14 +418,15 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
   }, [memory.venue?.google_place_id])
 
   function handleSaveEdit() {
-    const overall = calcOverall(editRatings)
+    const effectiveEdit = editVenueType === 'home' ? { ...editRatings, service: 0, ambiance: 0 } : editRatings
+    const overall = calcOverall(effectiveEdit)
     const patch = {
       dish_name: editDish || null,
       notes: editNotes || null,
       rating: overall > 0 ? overall : memory.rating,
-      rating_food: editRatings.food || null,
-      rating_service: editRatings.service || null,
-      rating_ambiance: editRatings.ambiance || null,
+      rating_food: effectiveEdit.food || null,
+      rating_service: effectiveEdit.service || null,
+      rating_ambiance: effectiveEdit.ambiance || null,
       venue_type: editVenueType,
       meal_type: editMealType,
     }
@@ -488,7 +491,7 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
             <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Category</label>
             <CategoryPicker venueType={editVenueType} mealType={editMealType} onVenueType={setEditVenueType} onMealType={setEditMealType} />
           </div>
-          <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" />
+          <RatingSliders ratings={editRatings} onChange={setEditRatings} title="Update ratings" fields={editVenueType === 'home' ? ['food'] : undefined} />
         </div>
 
         {/* Photos — removals staged (undo with ↺), applied on save */}
@@ -614,13 +617,13 @@ function MemoryDetailView({ memory, onUpdate, onClose }: { memory: MemoryWithDet
         )}
 
         {/* Breakdown bars — only categories the user actually rated */}
-        {(shown.rating_food || shown.rating_service || shown.rating_ambiance) && (
+        {(shown.rating_food || (shown.venue_type !== 'home' && (shown.rating_service || shown.rating_ambiance))) && (
           <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--teal-600)' }}>Breakdown</p>
             {([
               ['Food & drink', shown.rating_food],
-              ['Service', shown.rating_service],
-              ['Ambiance', shown.rating_ambiance],
+              ['Service', shown.venue_type === 'home' ? null : shown.rating_service],
+              ['Ambiance', shown.venue_type === 'home' ? null : shown.rating_ambiance],
             ] as const).filter(([, val]) => val).map(([label, val]) => (
               <div key={label} className="flex items-center gap-2 mb-1.5">
                 <span className="text-xs w-20 flex-shrink-0" style={{ color: 'var(--slate)' }}>{label}</span>
