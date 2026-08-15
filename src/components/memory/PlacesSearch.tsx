@@ -40,7 +40,9 @@ export default function PlacesSearch({ value, onChange, onSelect, selectedPlace 
     if (!ready || !inputRef.current || autocompleteRef.current) return
 
     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['establishment'],
+      // Food & drink only (max 5 types) — 'establishment' surfaced tourist
+      // attractions like the London Eye in a restaurant search
+      types: ['restaurant', 'cafe', 'bar', 'bakery', 'meal_takeaway'],
       fields: ['place_id', 'name', 'formatted_address', 'geometry', 'rating', 'types'],
     })
 
