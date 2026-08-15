@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedPhotoUrls, getThumbUrl } from '@/lib/storage'
+import Portal from '@/components/ui/Portal'
 
 interface LightboxPhoto {
   id: string
@@ -94,7 +95,11 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
     ? (fullLoaded[photo.id] ? url : (thumbs[photo.id] ?? url))
     : url
 
+  // Portal to <body>: sheets use transform/backdrop-filter, which turn an
+  // ancestor into the containing block for position:fixed — rendered inline,
+  // the lightbox gets clipped to the sheet's rounded box instead of the screen
   return (
+    <Portal>
     <div
       className="backdrop-enter fixed inset-0 z-[100]"
       style={{ background: '#000', overflow: 'hidden' }}
@@ -211,5 +216,6 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
         </div>
       )}
     </div>
+    </Portal>
   )
 }
