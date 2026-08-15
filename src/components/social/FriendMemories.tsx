@@ -21,6 +21,10 @@ interface PublicMemory {
   dish_name: string | null
   notes: string | null
   rating: number | null
+  rating_food: number | null
+  rating_service: number | null
+  rating_ambiance: number | null
+  venue_type: string | null
   visited_at: string
   // Only the ~1km fuzzed coords are fetched for another user's memories — never the exact venue location
   public_lat: number | null
@@ -57,7 +61,7 @@ export default function FriendMemories({ friend, onBack }: { friend: FriendProfi
 
       const { data: mems } = await supabase
         .from('memories')
-        .select('id, dish_name, notes, rating, visited_at, public_lat, public_lng, venue:venues(id, name, address, google_place_id), memory_photos(id, storage_path)')
+        .select('id, dish_name, notes, rating, rating_food, rating_service, rating_ambiance, venue_type, visited_at, public_lat, public_lng, venue:venues(id, name, address, google_place_id), memory_photos(id, storage_path)')
         .eq('user_id', friend.friend_id)
         .eq('is_public', true)
         .order('visited_at', { ascending: false })
@@ -250,6 +254,28 @@ function FriendMemorySheet({ memory, friendName, onClose }: { memory: PublicMemo
                 <Icon name="star" size={15} color="var(--gold-500)" fill="var(--gold-500)" style={{ alignSelf: 'center' }} />
                 <span className="text-lg font-semibold" style={{ color: 'var(--teal-600)' }}>{memory.rating}</span>
                 <span className="text-xs" style={{ color: 'var(--slate)' }}>/ 10</span>
+              </div>
+            )}
+
+            {/* Their score breakdown — same bars as your own memories */}
+            {(memory.rating_food || (memory.venue_type !== 'home' && (memory.rating_service || memory.rating_ambiance))) && (
+              <div className="mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'var(--stone-200)' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--teal-600)' }}>Their breakdown</p>
+                {([
+                  ['Food & drink', memory.rating_food],
+                  ['Service', memory.venue_type === 'home' ? null : memory.rating_service],
+                  ['Ambiance', memory.venue_type === 'home' ? null : memory.rating_ambiance],
+                ] as const).filter(([, val]) => val).map(([label, val]) => (
+                  <div key={label} className="flex items-center gap-2 mb-1.5">
+                    <span className="text-xs w-20 flex-shrink-0" style={{ color: 'var(--slate)' }}>{label}</span>
+                    <div className="flex gap-0.5 flex-1">
+                      {Array.from({ length: 10 }, (_, i) => (
+                        <div key={i} className="flex-1 rounded-sm" style={{ height: 5, background: i < val! ? 'var(--gold-500)' : 'var(--stone-500)', opacity: i < val! ? 1 : 0.4 }} />
+                      ))}
+                    </div>
+                    <span className="text-xs font-medium w-4 text-right" style={{ color: 'var(--gold-500)' }}>{val}</span>
+                  </div>
+                ))}
               </div>
             )}
 
