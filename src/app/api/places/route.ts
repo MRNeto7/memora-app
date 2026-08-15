@@ -8,7 +8,9 @@ export async function GET(req: NextRequest) {
 
   if (!query || query.length < 2) return NextResponse.json({ places: [] })
 
-  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  // Server-side calls send no referrer, so the referrer-locked browser key
+  // is rejected — use the server key like /api/venue-details does
+  const key = process.env.GOOGLE_MAPS_SERVER_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
   if (!key) {
     console.error('Google Maps API key missing')
