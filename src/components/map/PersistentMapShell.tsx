@@ -122,20 +122,28 @@ export default function PersistentMapShell() {
   }
 
   // Explore venues are curated data without a Google place link. At add
-  // time, resolve the real place through our places API (one lookup, cached
-  // on the venue row forever) so the wishlist entry gets photos and venue
-  // details like any other. Falls back to the curated facts if no
-  // confident match.
+  // time, resolve the real place (one lookup, cached on the venue row
+  // forever) so the wishlist entry gets photos and venue details like any
+  // other. Resolution runs CLIENT-SIDE via the Maps JS SDK — the Google key
+  // is HTTP-referrer restricted, so server-side lookups get REQUEST_DENIED
+  // (same reason PlacePhoto is client-side). Falls back to the curated
+  // facts if no confident match.
   async function resolveExplorePlace(v: ExploreVenue): Promise<{ placeId: string; address: string; lat: number; lng: number } | null> {
     try {
-      const res = await fetch(`/api/places?q=${encodeURIComponent(v.name)}&lat=${v.lat}&lng=${v.lng}`)
-      const data = await res.json()
-      const c = (data.places ?? [])[0]
-      if (!c?.placeId) return null
+      const g = window.google
+      if (!g?.maps?.places) return null
+      const svc = new g.maps.places.PlacesService(document.createElement('div'))
+      const result = await new Promise<google.maps.places.PlaceResult | null>(resolve => {
+        svc.textSearch(
+          { query: v.name, location: new g.maps.LatLng(v.lat, v.lng), radius: 10000 },
+          (results, status) => resolve(status === g.maps.places.PlacesServiceStatus.OK && results?.[0] ? results[0] : null)
+        )
+      })
+      if (!result?.place_id || !result.geometry?.location) return null
+      const lat = result.geometry.location.lat(), lng = result.geometry.location.lng()
       // Trust the match only if it's near the curated coords (~2km)
-      const dLat = Math.abs(c.lat - v.lat), dLng = Math.abs(c.lng - v.lng)
-      if (dLat > 0.02 || dLng > 0.03) return null
-      return { placeId: c.placeId, address: c.address, lat: c.lat, lng: c.lng }
+      if (Math.abs(lat - v.lat) > 0.02 || Math.abs(lng - v.lng) > 0.03) return null
+      return { placeId: result.place_id, address: result.formatted_address ?? v.address ?? '', lat, lng }
     } catch { return null }
   }
 
