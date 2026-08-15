@@ -3,6 +3,7 @@
 import { toast } from '@/lib/toast'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Portal from '@/components/ui/Portal'
 import PlacesSearch from '@/components/memory/PlacesSearch'
 
 interface PlaceSuggestion {
@@ -73,12 +74,15 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
 
   const canSave = !!(selectedPlace || locationQuery.trim())
 
+  // Portal to <body>: rendered inline, the page's enter animation makes the
+  // page the containing block for position:fixed, so the sheet anchored to
+  // the top of the scrolled LIST, not the screen
   return (
-    <>
-      <div className="fixed z-20" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
+    <Portal>
+      <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.45)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
 
       {/* Sheet — flex column with fixed footer */}
-      <div className="fixed z-30 flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
+      <div className="fixed z-[70] flex items-start justify-center pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
       <div className="relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
@@ -162,6 +166,6 @@ export default function AddToWishlistButton({ onClose, onSaved }: AddToWishlistB
         </div>
       </div>
     </div>
-    </>
+    </Portal>
   )
 }
