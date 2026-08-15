@@ -96,27 +96,12 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
 
   return (
     <div
-      className="backdrop-enter fixed inset-0 z-[100] flex flex-col"
-      style={{ background: '#000', overflow: 'hidden', paddingBottom: 'var(--safe-bottom)' }}
+      className="backdrop-enter fixed inset-0 z-[100]"
+      style={{ background: '#000', overflow: 'hidden' }}
     >
-      {/* Top bar — pushed below the notch, or the close button can't be tapped */}
-      <div className="flex items-center justify-between px-4 pb-2 flex-shrink-0"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', background: 'linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)' }}>
-        <button onClick={onClose}
-          className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 18 }}>
-          ✕
-        </button>
-        {photos.length > 1 && (
-          <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
-            {current + 1} / {photos.length}
-          </span>
-        )}
-        <div style={{ width: 36 }} />
-      </div>
-
-      {/* Media */}
-      <div className="flex-1 flex items-center justify-center px-4 relative" style={{ minHeight: 0, marginBottom: 0 }}>
+      {/* Media — fills the whole screen like the iOS Photos app; the bars
+          float above it as overlays instead of stealing layout rows */}
+      <div className="absolute inset-0 flex items-center justify-center">
         {!(isVideo ? url : displayUrl) ? (
           <div className="w-16 h-16 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.1)' }} />
         ) : isVideo ? (
@@ -124,19 +109,16 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
             src={url}
             controls
             playsInline
-            style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 8, display: 'block' }}
+            style={{ maxWidth: '100%', maxHeight: '100%', display: 'block' }}
           />
         ) : (
           <img
             src={displayUrl}
             alt=""
             style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              width: 'auto',
-              height: 'auto',
+              width: '100%',
+              height: '100%',
               objectFit: 'contain',
-              borderRadius: 8,
               userSelect: 'none',
               display: 'block',
             }}
@@ -163,9 +145,25 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
         )}
       </div>
 
-      {/* Bottom dots + thumbnails */}
+      {/* Floating top bar — below the notch, or the close button can't be tapped */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pb-8"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', background: 'linear-gradient(to bottom, rgba(0,0,0,0.55), transparent)' }}>
+        <button onClick={onClose}
+          className="w-9 h-9 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(30,30,30,0.6)', color: '#fff', fontSize: 18 }}>
+          ✕
+        </button>
+        {photos.length > 1 && (
+          <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            {current + 1} / {photos.length}
+          </span>
+        )}
+        <div style={{ width: 36 }} />
+      </div>
+
+      {/* Floating bottom dots + thumbnails */}
       {photos.length > 1 && (
-        <div className="flex-shrink-0 pt-3" style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 8px))', background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}>
+        <div className="absolute left-0 right-0 bottom-0 pt-8" style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 8px))', background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }}>
           {/* Dot indicators */}
           <div className="flex justify-center gap-1.5 mb-3">
             {photos.map((_, i) => (
