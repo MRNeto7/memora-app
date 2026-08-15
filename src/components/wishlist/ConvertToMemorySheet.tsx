@@ -114,25 +114,23 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
   return (
     <Portal>
       <div className="backdrop-enter fixed z-[60]" style={{ top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(16,20,22,0.4)', backdropFilter: 'blur(8px) saturate(1.2)', WebkitBackdropFilter: 'blur(8px) saturate(1.2)' }} onClick={onClose} />
-      <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none" style={{ padding: '12px 16px 88px' }}>
+      {/* Same frame as every other sheet: anchored below the notch, never behind it */}
+      <div className="fixed inset-0 z-[70] flex items-start justify-center pointer-events-none" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)', paddingLeft: 16, paddingRight: 16, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
       <div className="sheet-enter relative w-full bg-white rounded-3xl overflow-hidden flex flex-col pointer-events-auto"
         style={{ maxHeight: '100%', width: 'min(420px, 100%)' }}>
 
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ background: 'var(--stone-400)' }} />
-        </div>
-
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: '0.5px solid rgba(16,20,22,0.08)' }}>
           <div>
             <p className="text-xs mb-0.5" style={{ color: 'var(--slate)' }}>Saving memory at</p>
             <h2 className="font-semibold text-base" style={{ color: 'var(--teal-600)' }}>{venue.name}</h2>
           </div>
-          
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(16,20,22,0.08)', color: 'var(--slate)', fontSize: 14 }}>✕</button>
         </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        {/* Scrollable body — vertical only; the photo strip scrolls itself */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4">
 
           {/* Venue mini card */}
           <div className="flex gap-3 items-center rounded-2xl overflow-hidden mb-4" style={{ background: 'var(--stone-200)' }}>
