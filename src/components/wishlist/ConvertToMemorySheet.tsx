@@ -185,7 +185,7 @@ export default function ConvertToMemorySheet({ venue, wishlistId, onClose, onSav
           <div className="rounded-2xl p-4 mb-4" style={{ background: 'var(--stone-200)' }}>
             <div className="mb-4">
               <label className="text-xs font-medium block mb-2" style={{ color: 'var(--slate)' }}>Category</label>
-              <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} compact />
+              <CategoryPicker venueType={venueType} mealType={mealType} onVenueType={setVenueType} onMealType={setMealType} compact excludeHome />
             </div>
             <RatingSliders ratings={ratings} onChange={setRatings} />
           </div>

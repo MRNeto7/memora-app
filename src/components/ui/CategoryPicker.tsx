@@ -8,17 +8,20 @@ interface CategoryPickerProps {
   onVenueType: (v: VenueType | null) => void
   onMealType: (m: MealType | null) => void
   compact?: boolean
+  // Wishlist conversions are real venues by definition — no Home-cooked chip
+  excludeHome?: boolean
 }
 
 // Two chip rows — tap to select, tap again to clear. Both optional.
-export default function CategoryPicker({ venueType, mealType, onVenueType, onMealType, compact }: CategoryPickerProps) {
+export default function CategoryPicker({ venueType, mealType, onVenueType, onMealType, compact, excludeHome }: CategoryPickerProps) {
   const chipPad = compact ? '5px 10px' : '7px 12px'
   const fontSize = compact ? 11 : 12
+  const venueTypes = excludeHome ? VENUE_TYPES.filter(t => t.value !== 'home') : VENUE_TYPES
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-        {VENUE_TYPES.map(t => {
+        {venueTypes.map(t => {
           const active = venueType === t.value
           return (
             <button
